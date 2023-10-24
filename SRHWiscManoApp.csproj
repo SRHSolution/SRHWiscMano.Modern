@@ -17,8 +17,4 @@
     <PackageReference Include="System.Reactive" Version="6.0.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\SRHWiscMano.Core\SRHWiscMano.Core.csproj" />
-  </ItemGroup>
-
 </Project>
