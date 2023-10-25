@@ -22,12 +22,9 @@ namespace SRHWiscMano.Core.Services
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("configuration.json", optional: true, reloadOnChange: true);
 
-            // _configuration = builder.Build().GetSection("sdsd").GetSection("").
-            // _configuration.GetSection("").
-            // _configuration.GetSection("Settings").
-            //
-            // builder..GetSection(nameof(TransientFaultHandlingOptions))
-            //     .Bind(options);
+            AppSettings settings = new AppSettings();
+            builder.Build().GetSection("Settings").Bind(settings);
+
 
         }
 
