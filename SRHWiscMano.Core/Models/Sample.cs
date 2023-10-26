@@ -2,17 +2,16 @@
 
 namespace SRHWiscMano.Core.Models
 {
-    public class Sample
+
+    public class Sample : ITimeSeries
     {
-        private readonly IReadOnlyList<double> impedances;
         private readonly Instant time;
         private readonly IReadOnlyList<double> values;
 
-        public Sample(Instant time, IReadOnlyList<double> values, IReadOnlyList<double> impedances)
+        public Sample(Instant time, IReadOnlyList<double> values)
         {
             this.time = time;
             this.values = values;
-            this.impedances = impedances;
         }
 
         public Instant Time => time;
@@ -21,6 +20,6 @@ namespace SRHWiscMano.Core.Models
 
         public IReadOnlyList<double> Values => values;
 
-        public IReadOnlyList<double> Impedances => impedances;
+        public int DataSize => Values.Count;
     }
 }

@@ -4,6 +4,14 @@ using Range = SRHWiscMano.Core.Helpers.Range;
 
 namespace SRHWiscMano.Core.Models
 {
+    /// <summary>
+    /// Sample 시간을 통합하여 Duration과 Instant로 변환하여 관리한다.
+    /// Tick 은 100 ns의 값을 갖는다.  사용되는 센서데이터는 10msec 이며, 각 시간 단위별로 값의 크기는 아래와 같다
+    /// - 10 ms
+    /// - 10,000 us
+    /// - 10,000,000 ns
+    /// - 100,000 Tick
+    /// </summary>
     public static class SampleTime
     {
         public static readonly Instant Epoch = new Instant();

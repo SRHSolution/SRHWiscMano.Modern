@@ -1,5 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using NodaTime;
+using SRHWiscMano.Core.Models;
+using SRHWiscMano.Core.Services;
 using SRHWiscMano.Core.ViewModels;
 
 namespace SRHWiscMano.Core
@@ -11,6 +13,7 @@ namespace SRHWiscMano.Core
             // services.AddSingleton<IClock, SystemClock>(sp => SystemClock.Instance);
             services.AddTransient<IExamViewModel, ExamViewModel>();
             services.AddTransient<ISnapshotViewModel, SnapshotViewModel>();
+            services.AddTransient<IImportService<IExamData>, ExamDataTextReader>();
             // services.AddTransient<ISnapshotLabelsParser, SnapshotLabelsParser>();
             // services.AddTransient<IExaminationDataImporter, ExaminationDataTextReader>();
             // services.AddTransient<IExaminationDataSerializer, ExaminationDataSerializer>();
