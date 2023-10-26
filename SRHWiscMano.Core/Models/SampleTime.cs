@@ -1,4 +1,5 @@
-﻿using NodaTime;
+﻿using System.Runtime.CompilerServices;
+using NodaTime;
 using SRHWiscMano.Core.Helpers;
 using Range = SRHWiscMano.Core.Helpers.Range;
 
@@ -11,11 +12,15 @@ namespace SRHWiscMano.Core.Models
     /// - 10,000 us
     /// - 10,000,000 ns
     /// - 100,000 Tick
+    /// Interval : 1970-01-01T00:00:00Z
+    /// Duration : 0:00:10:17.86
     /// </summary>
     public static class SampleTime
     {
         public static readonly Instant Epoch = new Instant();
         public static readonly Interval EmptyInterval = new Interval(Epoch, Epoch);
+
+        
 
         public static Instant InstantFromMilliseconds(long milliseconds)
         {
