@@ -7,7 +7,7 @@ using SRHWiscMano.Core.Helpers;
 
 namespace SRHWiscMano.Test
 {
-    internal class TestModelBase
+    public class TestModelBase
     {
         public static string DirTestData = VisualStudioProvider.GetPathInSolution("TestData");
         public static string DirOutput = VisualStudioProvider.GetPathInSolution("TestData/Output");
