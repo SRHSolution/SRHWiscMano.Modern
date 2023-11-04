@@ -1,4 +1,6 @@
-﻿namespace SRHWiscMano.Core.Helpers
+﻿using System.IO;
+
+namespace SRHWiscMano.Core.Helpers
 {
     public static class VisualStudioProvider
     {

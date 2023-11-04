@@ -6,6 +6,7 @@
                  xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
                  xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
                  xmlns:app="clr-namespace:SRHWiscMano.App"
+                 xmlns:view="clr-namespace:SRHWiscMano.App.Views"
                  Title="Wisconsin Mano Modern App by SRHSolution"
                  Width="1024"
                  Height="768"
@@ -83,14 +84,14 @@
                 <ScrollViewer Margin="2"
                               HorizontalScrollBarVisibility="Auto"
                               VerticalScrollBarVisibility="Auto">
-                    <!-- <exampleViews:ButtonsExample DataContext="{Binding}" /> -->
+                    <view:ViewerView></view:ViewerView>
                 </ScrollViewer>
             </TabItem>
             <TabItem Header="Snapshots">
                 <ScrollViewer Margin="2"
                               HorizontalScrollBarVisibility="Auto"
                               VerticalScrollBarVisibility="Auto">
-                    <!-- <exampleViews:ButtonsExample DataContext="{Binding}" /> -->
+                    <view:Snapshots/>
                 </ScrollViewer>
             </TabItem>
             <TabItem Header="Details" >

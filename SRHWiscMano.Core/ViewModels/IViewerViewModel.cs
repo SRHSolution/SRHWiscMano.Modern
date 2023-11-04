@@ -17,10 +17,12 @@ namespace SRHWiscMano.Core.ViewModels
         IExamData ExamDataSource { get; }
         PlotModel DataPlotModel { get; }
 
-        double ZoomPercentage { get; }
+        double ZoomPercentage { get; set; }
+        string ZoomLevel { get; set; }
 
-        RelayCommand<double> ZoomInCommand { get; }
-        RelayCommand<double> ZoomOutCommand { get; }
+        RelayCommand<object> ZoomInCommand { get; }
+        RelayCommand<string> ZoomOutCommand { get; set; }
+        RelayCommand<double> ZoomDoubleCommand { get; set; }
 
         RelayCommand PrevSnapshotCommand { get; }
         RelayCommand NextSnapshotCommand { get; }
