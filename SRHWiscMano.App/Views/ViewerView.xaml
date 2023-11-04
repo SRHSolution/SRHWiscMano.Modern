@@ -32,7 +32,7 @@
                     Style="{StaticResource MahApps.Styles.Button.Circle}">
                 <b:Interaction.Triggers>
                     <b:EventTrigger EventName="Click">
-                        <b:InvokeCommandAction Command="{Binding ZoomDoubleCommand}" CommandParameter="{Binding Source='-2.0', Converter={StaticResource StringToDoubleConverter}}">
+                        <b:InvokeCommandAction Command="{Binding DoubleCommand}" CommandParameter="{Binding Source='-2.0', Converter={StaticResource StringToDoubleConverter}}">
                         </b:InvokeCommandAction>
                     </b:EventTrigger>
                 </b:Interaction.Triggers>
@@ -46,7 +46,7 @@
                     Height="32 "
                     Margin="2"
                     Foreground="{DynamicResource MahApps.Brushes.Accent}"
-                    Style="{StaticResource MahApps.Styles.Button.Circle}" Command="{Binding ZoomOutCommand}" CommandParameter="2.0">
+                    Style="{StaticResource MahApps.Styles.Button.Circle}" Command="{Binding StringCommand}" CommandParameter="{Binding ZoomLevel}">
                 <Button.ContentTemplate>
                     <DataTemplate>
                         <iconPacks:PackIconRemixIcon Kind="ZoomOutLine" />
@@ -57,8 +57,8 @@
                     Height="32 "
                     Margin="2"
                     Foreground="{DynamicResource MahApps.Brushes.Accent}"
-                    Style="{StaticResource MahApps.Styles.Button.Circle}" Command="{Binding ZoomInCommand}"
-                    CommandParameter="1.0">
+                    Style="{StaticResource MahApps.Styles.Button.Circle}" Command="{Binding ObjectCommand}"
+                    CommandParameter="{Binding Text, ElementName=zoomlevel, Converter={StaticResource StringToDoubleConverter}}">
                 <Button.ContentTemplate>
                     <DataTemplate>
                         <iconPacks:PackIconRemixIcon Kind="ZoomInLine" />
@@ -74,7 +74,7 @@
                     Height="32 "
                     Margin="2"
                     Foreground="{DynamicResource MahApps.Brushes.Accent}"
-                    Style="{StaticResource MahApps.Styles.Button.Circle}">
+                    Style="{StaticResource MahApps.Styles.Button.Circle}" Command="{Binding StringCommand}" CommandParameter="-5.0">
                 <Button.ContentTemplate>
                     <DataTemplate>
                         <iconPacks:PackIconUnicons Kind="Capture" />

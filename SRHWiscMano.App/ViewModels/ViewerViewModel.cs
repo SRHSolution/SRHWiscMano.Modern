@@ -24,9 +24,9 @@ namespace SRHWiscMano.App.ViewModels
         public IExamData ExamDataSource { get; private set; }
         public PlotModel DataPlotModel { get; private set; }
         public double ZoomPercentage { get; set; } = 0.5;
-        public RelayCommand<object> ZoomInCommand { get; private set; }
-        public RelayCommand<string> ZoomOutCommand { get; set; }
-        public RelayCommand<double> ZoomDoubleCommand { get; set; }
+        public RelayCommand<object> ObjectCommand { get; private set; }
+        public RelayCommand<string> StringCommand { get; set; }
+        public RelayCommand<double> DoubleCommand { get; set; }
         public RelayCommand PrevSnapshotCommand { get; private set; }
         public RelayCommand NextSnapshotCommand { get; private set;}
         
@@ -34,7 +34,7 @@ namespace SRHWiscMano.App.ViewModels
 
         [ObservableProperty] private string selectedPalette;
 
-        [ObservableProperty] private string zoomLevel;
+        [ObservableProperty] private string zoomLevel = "10.0";
 
         public ViewerViewModel(ILoggerFactory loggerFactory, IImportService<IExamData> importer)
         {
@@ -42,9 +42,9 @@ namespace SRHWiscMano.App.ViewModels
             logger = loggerFactory.CreateLogger<ViewerViewModel>();
 
             Palettes = PaletteUtils.GetPredefinedPalettes();
-            ZoomInCommand = new RelayCommand<object>(OnZoomIn);
-            ZoomOutCommand = new RelayCommand<string>(OnZoomOut);
-            ZoomDoubleCommand = new RelayCommand<double>(OnZoomDouble);
+            ObjectCommand = new RelayCommand<object>(OnZoomIn);
+            StringCommand = new RelayCommand<string>(OnZoomOut);
+            DoubleCommand = new RelayCommand<double>(OnZoomDouble);
         }
 
         private void OnZoomDouble(double obj)

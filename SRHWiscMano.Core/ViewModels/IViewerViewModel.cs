@@ -20,9 +20,9 @@ namespace SRHWiscMano.Core.ViewModels
         double ZoomPercentage { get; set; }
         string ZoomLevel { get; set; }
 
-        RelayCommand<object> ZoomInCommand { get; }
-        RelayCommand<string> ZoomOutCommand { get; set; }
-        RelayCommand<double> ZoomDoubleCommand { get; set; }
+        RelayCommand<object> ObjectCommand { get; }
+        RelayCommand<string> StringCommand { get; set; }
+        RelayCommand<double> DoubleCommand { get; set; }
 
         RelayCommand PrevSnapshotCommand { get; }
         RelayCommand NextSnapshotCommand { get; }
