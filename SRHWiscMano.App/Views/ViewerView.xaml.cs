@@ -18,9 +18,9 @@ namespace SRHWiscMano.App.Views
     /// <summary>
     /// Interaction logic for ManoDataView.xaml
     /// </summary>
-    public partial class ManoDataView : UserControl
+    public partial class ViewerView : UserControl
     {
-        public ManoDataView()
+        public ViewerView()
         {
             InitializeComponent();
         }
