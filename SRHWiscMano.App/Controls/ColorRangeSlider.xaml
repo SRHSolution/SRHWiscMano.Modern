@@ -1,0 +1,22 @@
+﻿<UserControl x:Class="SRHWiscMano.App.Controls.ColorRangeSlider"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:oxy="http://oxyplot.org/wpf">
+    <StackPanel>
+        <!-- Color Bar -->
+        <Rectangle Height="20" Width="200" Margin="5">
+            <Rectangle.Fill>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                    <GradientStop Color="{Binding LowColor}" Offset="0"/>
+                    <GradientStop Color="{Binding HighColor}" Offset="1"/>
+                </LinearGradientBrush>
+            </Rectangle.Fill>
+        </Rectangle>
+
+        <!-- Range Slider -->
+        <Slider Minimum="{Binding Minimum}" Maximum="{Binding Maximum}" 
+                Value="{Binding Value, Mode=TwoWay}" 
+                TickFrequency="{Binding TickFrequency}"
+                IsSnapToTickEnabled="True"/>
+    </StackPanel>
+</UserControl>

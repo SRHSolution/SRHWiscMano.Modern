@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:SRHWiscMano.App.Views"
+             xmlns:control="clr-namespace:SRHWiscMano.App.Controls"
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
              xmlns:oxyWpf="clr-namespace:OxyPlot.Wpf;assembly=OxyPlot.Wpf"
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
@@ -90,7 +91,7 @@
             </Grid.ColumnDefinitions>
             <Grid Column="0" Margin="2">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" MaxHeight="30"/>
                     <RowDefinition Height="20" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
@@ -151,6 +152,8 @@
                         <TextBlock Text="low" Margin="0,-2,0,0" Foreground="{DynamicResource MahApps.Brushes.Accent2}" TextAlignment="Center"/>
                     </StackPanel>
                     <Grid Grid.Column="1">
+                        <!-- <control:ColorRangeSlider DataContext="{Binding Source={StaticResource Locator}, Path=ColorRangeSlideViewModel}"/> -->
+
                         <mah:RangeSlider Margin="10,10, 0, 10"
                                          mah:SliderHelper.EnableMouseWheel="MouseHover"
                                          AutoToolTipPlacement="BottomRight"

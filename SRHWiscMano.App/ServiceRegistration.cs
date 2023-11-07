@@ -9,7 +9,8 @@ namespace SRHWiscMano.App
         public static void ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton<IViewerViewModel, ViewerViewModel>();
-
+            services.AddTransient<ColorRangeSliderViewModel>();
+            
             // services.AddSingleton<I>
             // services.AddTransient<IResultsCalculator, ResultsCalculator>();
         }

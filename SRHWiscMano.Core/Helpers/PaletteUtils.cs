@@ -56,5 +56,7 @@ namespace SRHWiscMano.Core.Helpers
 
             return palettes;
         }
+
+        
     }
 }
