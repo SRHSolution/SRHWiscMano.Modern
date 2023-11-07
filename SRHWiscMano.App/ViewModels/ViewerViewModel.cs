@@ -22,17 +22,28 @@ namespace SRHWiscMano.App.ViewModels
         private readonly ILoggerService logger;
 
         public IExamData ExamDataSource { get; private set; }
-        public PlotModel DataPlotModel { get; private set; }
+        
+        [ObservableProperty] private double minSensorData;
+
+        [ObservableProperty] private double maxSensorData;
+        public PlotModel MainPlotModel { get; private set; }
+        public PlotController MainPlotController { get; }
+        public PlotModel OverviewPlotModel { get; }
+        public PlotController OverviewPlotController { get; }
         public double ZoomPercentage { get; set; } = 0.5;
         public RelayCommand<object> ObjectCommand { get; private set; }
         public RelayCommand<string> StringCommand { get; set; }
         public RelayCommand<double> DoubleCommand { get; set; }
+        public RelayCommand FitToScreenCommand { get; }
+        public RelayCommand ZoomInCommand { get; }
+        public RelayCommand ZoomOutCommand { get; }
         public RelayCommand PrevSnapshotCommand { get; private set; }
         public RelayCommand NextSnapshotCommand { get; private set;}
-        
-        private Dictionary<string, OxyPalette> Palettes { get; set; }
+        public Dictionary<string, OxyPalette> Palettes { get; private set; }
 
-        [ObservableProperty] private string selectedPalette;
+
+
+        [ObservableProperty] private OxyPalette selectedPalette;
 
         [ObservableProperty] private string zoomLevel = "10.0";
 
@@ -45,6 +56,9 @@ namespace SRHWiscMano.App.ViewModels
             ObjectCommand = new RelayCommand<object>(OnZoomIn);
             StringCommand = new RelayCommand<string>(OnZoomOut);
             DoubleCommand = new RelayCommand<double>(OnZoomDouble);
+
+            MaxSensorData = 100;
+            MinSensorData = -10;
         }
 
         private void OnZoomDouble(double obj)

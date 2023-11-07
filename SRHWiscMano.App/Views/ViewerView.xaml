@@ -5,14 +5,17 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:SRHWiscMano.App.Views"
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:oxyWpf="clr-namespace:OxyPlot.Wpf;assembly=OxyPlot.Wpf"
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+             xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
              xmlns:converters="clr-namespace:SRHWiscMano.Core.Converters;assembly=SRHWiscMano.Core"
              xmlns:system="clr-namespace:System;assembly=System.Runtime"
              xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
              mc:Ignorable="d"
-             d:DesignHeight="450" d:DesignWidth="800"
+             d:DesignHeight="660" d:DesignWidth="800"
              DataContext="{Binding Source={StaticResource Locator}, Path=ViewerViewModel}">
     <UserControl.Resources>
+        <Thickness x:Key="ControlMargin">0 5 0 0</Thickness>
         <converters:StringToDoubleConverter x:Key="StringToDoubleConverter" />
     </UserControl.Resources>
     <Grid>
@@ -29,16 +32,12 @@
                     Height="32 "
                     Margin="2"
                     Foreground="{DynamicResource MahApps.Brushes.Accent}"
-                    Style="{StaticResource MahApps.Styles.Button.Circle}">
-                <b:Interaction.Triggers>
-                    <b:EventTrigger EventName="Click">
-                        <b:InvokeCommandAction Command="{Binding DoubleCommand}" CommandParameter="{Binding Source='-2.0', Converter={StaticResource StringToDoubleConverter}}">
-                        </b:InvokeCommandAction>
-                    </b:EventTrigger>
-                </b:Interaction.Triggers>
+                    Style="{StaticResource MahApps.Styles.Button.Circle}"
+                    Command="{Binding FitToScreenCommand}">
+
                 <Button.ContentTemplate>
                     <DataTemplate>
-                        <iconPacks:PackIconRemixIcon Kind="CloseLine" />
+                        <iconPacks:PackIconMaterial Kind="FitToScreen" />
                     </DataTemplate>
                 </Button.ContentTemplate>
             </Button>
@@ -46,7 +45,8 @@
                     Height="32 "
                     Margin="2"
                     Foreground="{DynamicResource MahApps.Brushes.Accent}"
-                    Style="{StaticResource MahApps.Styles.Button.Circle}" Command="{Binding StringCommand}" CommandParameter="{Binding ZoomLevel}">
+                    Style="{StaticResource MahApps.Styles.Button.Circle}" Command="{Binding StringCommand}"
+                    CommandParameter="{Binding ZoomOutCommand}">
                 <Button.ContentTemplate>
                     <DataTemplate>
                         <iconPacks:PackIconRemixIcon Kind="ZoomOutLine" />
@@ -57,8 +57,7 @@
                     Height="32 "
                     Margin="2"
                     Foreground="{DynamicResource MahApps.Brushes.Accent}"
-                    Style="{StaticResource MahApps.Styles.Button.Circle}" Command="{Binding ObjectCommand}"
-                    CommandParameter="{Binding Text, ElementName=zoomlevel, Converter={StaticResource StringToDoubleConverter}}">
+                    Style="{StaticResource MahApps.Styles.Button.Circle}" Command="{Binding ZoomInCommand}">
                 <Button.ContentTemplate>
                     <DataTemplate>
                         <iconPacks:PackIconRemixIcon Kind="ZoomInLine" />
@@ -74,14 +73,108 @@
                     Height="32 "
                     Margin="2"
                     Foreground="{DynamicResource MahApps.Brushes.Accent}"
-                    Style="{StaticResource MahApps.Styles.Button.Circle}" Command="{Binding StringCommand}" CommandParameter="-5.0">
+                    Style="{StaticResource MahApps.Styles.Button.Circle}" Command="{Binding StringCommand}"
+                    CommandParameter="-5.0">
                 <Button.ContentTemplate>
                     <DataTemplate>
-                        <iconPacks:PackIconUnicons Kind="Capture" />
+                        <iconPacks:PackIconIonicons Kind="ListBoxMD" />
                     </DataTemplate>
                 </Button.ContentTemplate>
             </Button>
 
         </StackPanel>
+        <Grid Row="1" VerticalAlignment="Stretch" Margin="0, 20, 0, 0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="100" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid Column="0" Margin="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="20" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <ComboBox
+                    SelectedIndex="0" ItemsSource="{Binding Palettes}" DisplayMemberPath="Key">
+                    <ComboBox.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="Test" />
+                        </ContextMenu>
+                    </ComboBox.ContextMenu>
+                </ComboBox>
+                <Grid Row="2" Margin="0,2,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="36" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" Orientation="Vertical" VerticalAlignment="Center">
+                        <Button Width="32"
+                                Height="32 "
+                                Margin="2"
+                                Foreground="{DynamicResource MahApps.Brushes.Accent}"
+                                Style="{StaticResource MahApps.Styles.Button.Circle}" Command="{Binding StringCommand}"
+                                CommandParameter="{Binding ZoomOutCommand}">
+                            <Button.ContentTemplate>
+                                <DataTemplate>
+                                    <iconPacks:PackIconJamIcons Kind="Brightness" RotationAngle="45"/>
+                                </DataTemplate>
+                            </Button.ContentTemplate>
+                        </Button>
+                        <TextBlock Text="high" Margin="0,-2,0,0" Foreground="{DynamicResource MahApps.Brushes.Accent2}" TextAlignment="Center"/>
+                        <Border Height="5"/>
+                        <Button Width="32"
+                                Height="32 "
+                                Margin="2"
+                                Foreground="{DynamicResource MahApps.Brushes.Accent}"
+                                Style="{StaticResource MahApps.Styles.Button.Circle}" Command="{Binding StringCommand}"
+                                CommandParameter="{Binding ZoomOutCommand}">
+                            <Button.ContentTemplate>
+                                <DataTemplate>
+                                    <iconPacks:PackIconJamIcons Kind="Brightness" RotationAngle="45"/>
+                                </DataTemplate>
+                            </Button.ContentTemplate>
+                        </Button>
+                        <TextBlock Text="mid" Margin="0,-2,0,0" Foreground="{DynamicResource MahApps.Brushes.Accent2}" TextAlignment="Center"/>
+                        <Border Height="5"/>
+                        <Button Width="32"
+                                Height="32 "
+                                Margin="2"
+                                Foreground="{DynamicResource MahApps.Brushes.Accent}"
+                                Style="{StaticResource MahApps.Styles.Button.Circle}" Command="{Binding StringCommand}"
+                                CommandParameter="{Binding ZoomOutCommand}">
+                            <Button.ContentTemplate>
+                                <DataTemplate>
+                                    <iconPacks:PackIconJamIcons Kind="Brightness" RotationAngle="45"/>
+                                </DataTemplate>
+                            </Button.ContentTemplate>
+                        </Button>
+                        <TextBlock Text="low" Margin="0,-2,0,0" Foreground="{DynamicResource MahApps.Brushes.Accent2}" TextAlignment="Center"/>
+                    </StackPanel>
+                    <Grid Grid.Column="1">
+                        <mah:RangeSlider Margin="10,10, 0, 10"
+                                         mah:SliderHelper.EnableMouseWheel="MouseHover"
+                                         AutoToolTipPlacement="BottomRight"
+                                         LargeChange="10"
+                                         LowerValue="50"
+                                         Maximum="{Binding MaxSensorData}"
+                                         Minimum="{Binding MinSensorData}"
+                                         Orientation="Vertical"
+                                         SmallChange="1"
+                                         TickPlacement="TopLeft"
+                                         Ticks="20 25 30 50 70 75 80"
+                                         UpperValue="50" />
+                    </Grid>
+                    
+                </Grid>
+            </Grid>
+            <ScrollViewer Grid.Column="1">
+                <oxyWpf:PlotView Model="{Binding MainPlotModel}" Controller="{Binding MainPlotController}" />
+            </ScrollViewer>
+        </Grid>
+
+
+        <ScrollViewer Grid.Row="3">
+            <oxyWpf:PlotView Model="{Binding OverviewPlotModel}" Controller="{Binding OverviewPlotController}" />
+        </ScrollViewer>
     </Grid>
 </UserControl>

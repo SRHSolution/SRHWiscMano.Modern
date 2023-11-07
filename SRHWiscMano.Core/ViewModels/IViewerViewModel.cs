@@ -15,7 +15,22 @@ namespace SRHWiscMano.Core.ViewModels
     public interface IViewerViewModel
     {
         IExamData ExamDataSource { get; }
-        PlotModel DataPlotModel { get; }
+        double MinSensorData { get; }
+        double MaxSensorData { get; }
+
+        /// <summary>
+        /// Main Plot Model
+        /// </summary>
+        PlotModel MainPlotModel { get; }
+
+        /// <summary>
+        /// Main Plot Controller
+        /// </summary>
+        PlotController MainPlotController { get; }
+
+        PlotModel OverviewPlotModel { get; }
+        PlotController OverviewPlotController { get; }
+
 
         double ZoomPercentage { get; set; }
         string ZoomLevel { get; set; }
@@ -24,11 +39,15 @@ namespace SRHWiscMano.Core.ViewModels
         RelayCommand<string> StringCommand { get; set; }
         RelayCommand<double> DoubleCommand { get; set; }
 
+        RelayCommand FitToScreenCommand { get; }
+        RelayCommand ZoomInCommand { get; }
+        RelayCommand ZoomOutCommand { get; }
+
         RelayCommand PrevSnapshotCommand { get; }
         RelayCommand NextSnapshotCommand { get; }
+        Dictionary<string, OxyPalette> Palettes { get; }
 
-
-        string SelectedPalette { get; }
+        OxyPalette SelectedPalette { get; }
 
         
     }
