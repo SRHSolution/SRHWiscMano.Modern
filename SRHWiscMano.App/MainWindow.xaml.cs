@@ -1,4 +1,5 @@
-﻿using MahApps.Metro.Controls;
+﻿using CommunityToolkit.Mvvm.DependencyInjection;
+using MahApps.Metro.Controls;
 
 namespace SRHWiscMano.App
 {
@@ -11,7 +12,7 @@ namespace SRHWiscMano.App
         public MainWindow()
         {
             InitializeComponent();
-            this.DataContext = new MainWindowViewModel();
+            this.DataContext = Ioc.Default.GetService<MainWindowViewModel>();
         }
 
 

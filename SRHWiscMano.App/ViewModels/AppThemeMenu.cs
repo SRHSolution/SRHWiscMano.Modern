@@ -15,8 +15,8 @@ namespace SRHWiscMano.App.ViewModels
 
         [ObservableProperty] private Brush? colorBrush;
 
-        public RelayCommand<string?> ChangeAccentColorCommand { get; }
         public RelayCommand<string?> ChangeBaseColorCommand { get; }
+        public RelayCommand<string?> ChangeAccentColorCommand { get; }
 
         public AppThemeMenu()
         {

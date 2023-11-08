@@ -3,8 +3,8 @@
     public class Patient : IPatient
     {
         public static readonly Patient Empty = new Patient(null, new int?(), "Unspecified");
-        private readonly int? age;
         private readonly string id;
+        private readonly int? age;
         private readonly string gender;
 
         public Patient(string id, int? age, string gender)

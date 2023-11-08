@@ -24,7 +24,7 @@ namespace SRHWiscMano.Core.ViewModels
 
 
         public string Id => snapshot.Id;
-        public IExamData Data { get; }
+        public ITimeSeriesData Data { get; }
         public string Text { get; }
         public Instant Time { get; }
         public Range<int> SensorRange { get; }

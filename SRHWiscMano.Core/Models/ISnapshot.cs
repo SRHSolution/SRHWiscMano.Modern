@@ -7,7 +7,7 @@ namespace SRHWiscMano.Core.Models
     {
         string Id { get; }
 
-        IExamData Data { get; }
+        ITimeSeriesData Data { get; }
 
         string Text { get; }
 

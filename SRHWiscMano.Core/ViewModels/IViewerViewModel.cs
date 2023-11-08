@@ -14,7 +14,7 @@ namespace SRHWiscMano.Core.ViewModels
 {
     public interface IViewerViewModel
     {
-        IExamData ExamDataSource { get; }
+        ITimeSeriesData TimeSeriesDataSource { get; }
         double MinSensorData { get; }
         double MaxSensorData { get; }
 

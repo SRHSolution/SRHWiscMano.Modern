@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace SRHWiscMano.Core.Models
 {
-    public interface ITimeSeries
+    internal interface ITimeSeries
     {
         Instant Time { get;  }
         IReadOnlyList<double> Values { get; }

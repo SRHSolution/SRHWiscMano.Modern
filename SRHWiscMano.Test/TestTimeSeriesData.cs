@@ -14,7 +14,7 @@ using SRHWiscMano.Core.Services;
 namespace SRHWiscMano.Test
 {
     [TestFixture]
-    internal class TestExamData : TestModelBase
+    internal class TestTimeSeriesData : TestModelBase
     {
         private ServiceProvider provider;
         [OneTimeSetUp]
@@ -27,12 +27,12 @@ namespace SRHWiscMano.Test
 
 
         /// <summary>
-        /// ExamData 을 읽는 기능을 테스트 
+        /// TimeSeriesData 을 읽는 기능을 테스트 
         /// </summary>
         [TestCase("100.txt")]
         public void TestImportExamData(string fileName)
         {
-            var examImporter = provider.GetService<IImportService<IExamData>>();
+            var examImporter = provider.GetService<IImportService<ITimeSeriesData>>();
             var examData = examImporter.ReadFromFile(LoadTestData(fileName));
 
             examData.ShouldNotBeNull();
@@ -43,7 +43,7 @@ namespace SRHWiscMano.Test
         [TestCase("100.txt")]
         public void TestExamDataExtensions(string fileName)
         {
-            var examImporter = provider.GetService<IImportService<IExamData>>();
+            var examImporter = provider.GetService<IImportService<ITimeSeriesData>>();
             var examData = examImporter.ReadFromFile(LoadTestData(fileName));
 
             Console.WriteLine($"Sensor Range : {examData.SensorCount()}");

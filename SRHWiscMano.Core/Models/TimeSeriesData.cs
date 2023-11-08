@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 
 namespace SRHWiscMano.Core.Models
 {
-    internal class ExamData : IExamData
+    internal class TimeSeriesData : ITimeSeriesData
     {
         public IReadOnlyList<Sample> Samples { get; }
         public IReadOnlyList<Note> Notes { get; }
 
-        public ExamData(IList<Sample> samples, IList<Note> notes)
+        public TimeSeriesData(IList<Sample> samples, IList<Note> notes)
         {
             this.Samples = samples.ToImmutableList();
             this.Notes = notes.ToImmutableList();

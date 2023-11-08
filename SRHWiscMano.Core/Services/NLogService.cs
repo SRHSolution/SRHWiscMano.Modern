@@ -15,6 +15,7 @@ namespace SRHWiscMano.Core.Services
         }
     }
 
+
     public class NLogService : ILoggerService
     {
         private readonly Logger _logger;
@@ -26,17 +27,17 @@ namespace SRHWiscMano.Core.Services
 
         public void LogInformation(string message)
         {
-            throw new NotImplementedException();
-        }
+            _logger.Info(message);
+        }   
 
         public void LogWarning(string message)
         {
-            throw new NotImplementedException();
+            _logger.Warn(message);
         }
 
         public void LogError(string message, Exception ex)
         {
-            throw new NotImplementedException();
+            _logger.Error(message, ex);
         }
     }
 }

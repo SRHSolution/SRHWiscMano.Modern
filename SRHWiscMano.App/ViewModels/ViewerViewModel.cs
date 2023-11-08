@@ -8,6 +8,7 @@ using System.Windows.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using OxyPlot;
+using SRHWiscMano.App.Services;
 using SRHWiscMano.App.Views;
 using SRHWiscMano.Core.Helpers;
 using SRHWiscMano.Core.Models;
@@ -18,10 +19,11 @@ namespace SRHWiscMano.App.ViewModels
 {
     public partial class ViewerViewModel : ViewModelBase, IViewerViewModel
     {
-        private readonly IImportService<IExamData> importer;
+        private readonly SharedService sharedService;
+        private readonly IImportService<ITimeSeriesData> importer;
         private readonly ILoggerService logger;
 
-        public IExamData ExamDataSource { get; private set; }
+        public ITimeSeriesData TimeSeriesDataSource { get; private set; }
         
         [ObservableProperty] private double minSensorData;
 
@@ -47,9 +49,12 @@ namespace SRHWiscMano.App.ViewModels
 
         [ObservableProperty] private string zoomLevel = "10.0";
 
-        public ViewerViewModel(ILoggerFactory loggerFactory, IImportService<IExamData> importer)
+        public ViewerViewModel(ILoggerFactory loggerFactory, SharedService sharedService)
         {
             this.importer = importer;
+            this.sharedService = sharedService;
+            sharedService.ExamDataLoaded += SharedService_ExamDataLoaded;
+
             logger = loggerFactory.CreateLogger<ViewerViewModel>();
 
             Palettes = PaletteUtils.GetPredefinedPalettes();
@@ -59,6 +64,11 @@ namespace SRHWiscMano.App.ViewModels
 
             MaxSensorData = 100;
             MinSensorData = -10;
+        }
+
+        private void SharedService_ExamDataLoaded(object? sender, EventArgs e)
+        {
+            logger.LogInformation("ExamData Loaded");
         }
 
         private void OnZoomDouble(double obj)
@@ -84,7 +94,7 @@ namespace SRHWiscMano.App.ViewModels
 
         public void ImportExamData(string filePath)
         {
-             ExamDataSource = importer.ReadFromFile(filePath);
+             TimeSeriesDataSource = importer.ReadFromFile(filePath);
         }
     }
 }

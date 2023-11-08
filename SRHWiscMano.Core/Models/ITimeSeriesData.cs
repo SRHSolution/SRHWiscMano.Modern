@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SRHWiscMano.Core.Models
 {
-    public interface IExamData
+    public interface ITimeSeriesData
     {
         IReadOnlyList<Sample> Samples { get; }
         IReadOnlyList<Note> Notes { get; }

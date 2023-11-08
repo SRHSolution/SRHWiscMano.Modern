@@ -9,17 +9,16 @@ using SRHWiscMano.Core.Models;
 
 namespace SRHWiscMano.Core.Services
 {
-    public class ExamDataTextReader : IImportService<IExamData> 
+    public class TimeSeriesDataTextReader : IImportService<ITimeSeriesData> 
     {
-        public IExamData ReadFromFile(string filePath)
+        public ITimeSeriesData ReadFromFile(string filePath)
         {
             var parseSamples = LoadLines(File.ReadLines(filePath).Skip(1)).ToList();
 
             NoteXmlReader notesLoader = new NoteXmlReader();
             var notes = notesLoader.LoadRelative(filePath);// ?? Array.Empty<Note>();
 
-            return new ExamData( parseSamples, notes.ToList());
-
+            return new TimeSeriesData( parseSamples, notes.ToList());
         }
 
         internal static IEnumerable<Sample> LoadLines(IEnumerable<string> lines)

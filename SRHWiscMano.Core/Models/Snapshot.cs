@@ -12,7 +12,7 @@ namespace SRHWiscMano.Core.Models
     {
         public Snapshot(
             string id,
-            IExamData data,
+            ITimeSeriesData data,
             string text,
             Instant time,
             Range<int> sensorRange,
@@ -39,7 +39,7 @@ namespace SRHWiscMano.Core.Models
         }
 
         public string Id { get; }
-        public IExamData Data { get; }
+        public ITimeSeriesData Data { get; }
         public string Text { get; }
         public Instant Time { get; }
         public Range<int> SensorRange { get; }
