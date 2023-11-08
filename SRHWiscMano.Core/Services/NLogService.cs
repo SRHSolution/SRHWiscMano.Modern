@@ -16,6 +16,11 @@ namespace SRHWiscMano.Core.Services
     }
 
 
+    /// <summary>
+    /// Logger에 등록할 수 있는 Target에 대한 정보, NLog.config 파일에 입력한다.
+    /// https://github.com/NLog/NLog/wiki/Configuration-file#configuration-file-locations
+    /// https://nlog-project.org/config/?tab=targets
+    /// </summary>
     public class NLogService : ILoggerService
     {
         private readonly Logger _logger;
