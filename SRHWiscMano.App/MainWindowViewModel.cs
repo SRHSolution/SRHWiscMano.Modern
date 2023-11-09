@@ -11,6 +11,7 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using ControlzEx.Theming;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Microsoft.Win32;
 using NLog;
 using SRHWiscMano.App.Data;
@@ -26,6 +27,7 @@ namespace SRHWiscMano.App
 {
     public partial class MainWindowViewModel : ViewModelBase
     {
+        private readonly IOptions<AppSettings> settings;
         private readonly IImportService<ITimeSeriesData> importService;
         private readonly SharedService sharedStorageService;
         private readonly ILogger<MainWindowViewModel> logger;
@@ -39,12 +41,15 @@ namespace SRHWiscMano.App
         /// 생성자에서 가능한 Theme 를 로드하므로 ObservableCollection 은 해당이 안된다.
         /// </summary>
         public List<AppThemeMenu> AppThemes { get; set; }
+
         public List<AppThemeMenu> AppAccentThemes { get; set; }
 
         public ObservableCollection<TabItem> Tabs { get; set; } = new ObservableCollection<TabItem>();
 
-        public MainWindowViewModel(IImportService<ITimeSeriesData> importService, SharedService sharedStorageService, ILogger<MainWindowViewModel> logger)
+        public MainWindowViewModel(IOptions<AppSettings> settings, IImportService<ITimeSeriesData> importService,
+            SharedService sharedStorageService, ILogger<MainWindowViewModel> logger)
         {
+            this.settings = settings;
             this.importService = importService;
             this.sharedStorageService = sharedStorageService;
             this.logger = logger;
@@ -54,14 +59,26 @@ namespace SRHWiscMano.App
             this.AppThemes = ThemeManager.Current.Themes
                 .GroupBy(x => x.BaseColorScheme)
                 .Select(x => x.First())
-                .Select(a => new AppThemeMenu { Name = a.BaseColorScheme, BorderColorBrush = a.Resources["MahApps.Brushes.ThemeForeground"] as Brush, ColorBrush = a.Resources["MahApps.Brushes.ThemeBackground"] as Brush })
+                .Select(a =>
+                {
+                    return new AppThemeMenu(settings)
+                    {
+                        Name = a.BaseColorScheme,
+                        BorderColorBrush = a.Resources["MahApps.Brushes.ThemeForeground"] as Brush,
+                        ColorBrush = a.Resources["MahApps.Brushes.ThemeBackground"] as Brush
+                    };
+                })
                 .ToList();
 
             // create accent color menu items for the demo
             this.AppAccentThemes = ThemeManager.Current.Themes
                 .GroupBy(x => x.ColorScheme)
                 .OrderBy(a => a.Key)
-                .Select(a => new AppThemeMenu { Name = a.Key, ColorBrush = a.First().ShowcaseBrush })
+                .Select(a =>
+                {
+                    return new AppThemeMenu(settings) 
+                        { Name = a.Key, ColorBrush = a.First().ShowcaseBrush };
+                })
                 .ToList();
 
             WeakReferenceMessenger.Default.Register<TabIndexChangeMessage>(this, OnTabIndexChange);
@@ -114,7 +131,6 @@ namespace SRHWiscMano.App
 
                 logger.LogTrace("Exam data : {filename}", Path.GetFileName(filename));
                 sharedStorageService.SetExamData(examData);
-
             }
         }
 
