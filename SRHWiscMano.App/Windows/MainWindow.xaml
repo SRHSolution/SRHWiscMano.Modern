@@ -90,28 +90,28 @@
                       ItemContainerStyle="{StaticResource AppThemeAccentItemStyle}"
                       ItemsSource="{Binding AppAccentThemes, Mode=OneWay}" />
         </Menu>
-        <mah:MetroAnimatedSingleRowTabControl x:Name="MainTabControl" Grid.Row="1" SelectedIndex="{Binding SelectedTabIndex, Mode=TwoWay}" mah:HeaderedControlHelper.HeaderFontFamily="Noto Sans" mah:HeaderedControlHelper.HeaderFontSize="20" mah:TabControlHelper.Underlined="SelectedTabItem" ItemsSource="{Binding Tabs}">
-            <!-- <TabItem Header="Viewers" > -->
-            <!--     <ScrollViewer Margin="2" -->
-            <!--                   HorizontalScrollBarVisibility="Auto" -->
-            <!--                   VerticalScrollBarVisibility="Auto"> -->
-            <!--         <view:ViewerView/> -->
-            <!--     </ScrollViewer> -->
-            <!-- </TabItem> -->
-            <!-- <TabItem Header="Snapshots"> -->
-            <!--     <ScrollViewer Margin="2" -->
-            <!--                   HorizontalScrollBarVisibility="Auto" -->
-            <!--                   VerticalScrollBarVisibility="Auto"> -->
-            <!--         <view:Snapshots/> -->
-            <!--     </ScrollViewer> -->
-            <!-- </TabItem> -->
-            <!-- <TabItem Header="Details" > -->
-            <!--     <ScrollViewer Margin="2" -->
-            <!--                   HorizontalScrollBarVisibility="Auto" -->
-            <!--                   VerticalScrollBarVisibility="Auto"> -->
-            <!--         ~1~ <exampleViews:ButtonsExample DataContext="{Binding}" /> @1@ -->
-            <!--     </ScrollViewer> -->
-            <!-- </TabItem> -->
+        <mah:MetroAnimatedSingleRowTabControl x:Name="MainTabControl" Grid.Row="1" SelectedIndex="{Binding SelectedTabIndex, Mode=TwoWay}" mah:HeaderedControlHelper.HeaderFontFamily="Noto Sans" mah:HeaderedControlHelper.HeaderFontSize="20" mah:TabControlHelper.Underlined="SelectedTabItem">
+            <TabItem Header="Viewers" >
+                <ScrollViewer Margin="2"
+                              HorizontalScrollBarVisibility="Auto"
+                              VerticalScrollBarVisibility="Auto">
+                    <view:ViewerView/>
+                </ScrollViewer>
+            </TabItem>
+            <TabItem Header="Snapshots">
+                <ScrollViewer Margin="2"
+                              HorizontalScrollBarVisibility="Auto"
+                              VerticalScrollBarVisibility="Auto">
+                    <view:Snapshots/>
+                </ScrollViewer>
+            </TabItem>
+            <TabItem Header="Details" >
+                <ScrollViewer Margin="2"
+                              HorizontalScrollBarVisibility="Auto"
+                              VerticalScrollBarVisibility="Auto">
+                    <!-- <exampleViews:ButtonsExample DataContext="{Binding}" /> -->
+                </ScrollViewer>
+            </TabItem>
         </mah:MetroAnimatedSingleRowTabControl>
 
 
