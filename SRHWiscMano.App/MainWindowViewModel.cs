@@ -4,12 +4,14 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
 using ControlzEx.Theming;
 using Microsoft.Win32;
 using NLog;
 using SRHWiscMano.App.Services;
 using SRHWiscMano.App.ViewModels;
+using SRHWiscMano.App.Windows;
 using SRHWiscMano.Core.Models;
 using SRHWiscMano.Core.Services;
 using SRHWiscMano.Core.ViewModels;
@@ -81,6 +83,13 @@ namespace SRHWiscMano.App
 
                 sharedStorageService.SetExamData(examData);
             }
+        }
+
+        [RelayCommand]
+        private void ShowLogger()
+        {
+            var logger = Ioc.Default.GetRequiredService<LoggerWindow>();
+            logger.Show();
         }
     }
 }

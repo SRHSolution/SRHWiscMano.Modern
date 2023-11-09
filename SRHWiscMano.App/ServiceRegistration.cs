@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using SRHWiscMano.App.Services;
 using SRHWiscMano.App.ViewModels;
+using SRHWiscMano.App.Windows;
 using SRHWiscMano.Core.ViewModels;
 
 namespace SRHWiscMano.App
@@ -13,6 +14,7 @@ namespace SRHWiscMano.App
             services.AddSingleton<IViewerViewModel, ViewerViewModel>();
             services.AddTransient<ColorRangeSliderViewModel>();
             services.AddSingleton<MainWindowViewModel>();
+            services.AddSingleton<LoggerWindow>();
             
             // services.AddSingleton<I>
             // services.AddTransient<IResultsCalculator, ResultsCalculator>();
