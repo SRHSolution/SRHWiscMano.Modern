@@ -31,7 +31,6 @@ namespace SRHWiscMano.App
                 .AddJsonFile(configPath, optional: true, reloadOnChange: true)
                 .Build();
 
-
             config.GetSection("AppSettings")["FilePath"] = configPath;
 
             services.Configure<AppSettings>(config.GetSection("AppSettings"));    // requires Microsoft.Extensions.ConfigurationExtensions, IOptions<AppSettings> 를 등록한다.
