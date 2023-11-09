@@ -11,8 +11,6 @@ namespace SRHWiscMano.Core
     {
         public static void ConfigureServices(IServiceCollection services)
         {
-            services.AddTransient<ILoggerFactory, NLogLoggerFactory>();
-
             // services.AddSingleton<IClock, SystemClock>(sp => SystemClock.Instance);
             services.AddTransient<IExamViewModel, ExamViewModel>();
             // services.AddTransient<ISnapshotViewModel, SnapshotViewModel>();

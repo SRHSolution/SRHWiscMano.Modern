@@ -29,6 +29,7 @@ namespace SRHWiscMano.App
             {
                 // loggingBuilder.ClearProviders();
                 // loggingBuilder.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Trace);
+                // loggingBuilder.AddNLog(config);
                 loggingBuilder.AddNLog();
             });
         }
