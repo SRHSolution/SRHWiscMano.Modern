@@ -35,16 +35,13 @@ namespace SRHWiscMano.Core.ViewModels
         double ZoomPercentage { get; set; }
         string ZoomLevel { get; set; }
 
-        RelayCommand<object> ObjectCommand { get; }
-        RelayCommand<string> StringCommand { get; set; }
-        RelayCommand<double> DoubleCommand { get; set; }
+        IRelayCommand FitToScreenCommand { get; }
+        IRelayCommand<double> ZoomInCommand { get; }
+        IRelayCommand<double> ZoomOutCommand { get; }
+        IRelayCommand NavigateToSnapshotCommand { get; }
 
-        RelayCommand FitToScreenCommand { get; }
-        RelayCommand ZoomInCommand { get; }
-        RelayCommand ZoomOutCommand { get; }
-
-        RelayCommand PrevSnapshotCommand { get; }
-        RelayCommand NextSnapshotCommand { get; }
+        IRelayCommand PrevSnapshotCommand { get; }
+        IRelayCommand NextSnapshotCommand { get; }
         Dictionary<string, OxyPalette> Palettes { get; }
 
         OxyPalette SelectedPalette { get; }

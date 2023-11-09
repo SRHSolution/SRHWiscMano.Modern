@@ -46,8 +46,13 @@
                     Height="32 "
                     Margin="2"
                     Foreground="{DynamicResource MahApps.Brushes.Accent}"
-                    Style="{StaticResource MahApps.Styles.Button.Circle}" Command="{Binding StringCommand}"
-                    CommandParameter="{Binding ZoomOutCommand}">
+                    Style="{StaticResource MahApps.Styles.Button.Circle}">
+                <b:Interaction.Triggers>
+                    <b:EventTrigger EventName="Click">
+                        <b:InvokeCommandAction Command="{Binding ZoomOutCommand}" 
+                                               CommandParameter="{Binding Source='-2.0', Converter={StaticResource StringToDoubleConverter}}"/>
+                    </b:EventTrigger>
+                </b:Interaction.Triggers>
                 <Button.ContentTemplate>
                     <DataTemplate>
                         <iconPacks:PackIconRemixIcon Kind="ZoomOutLine" />
@@ -58,7 +63,13 @@
                     Height="32 "
                     Margin="2"
                     Foreground="{DynamicResource MahApps.Brushes.Accent}"
-                    Style="{StaticResource MahApps.Styles.Button.Circle}" Command="{Binding ZoomInCommand}">
+                    Style="{StaticResource MahApps.Styles.Button.Circle}">
+                <b:Interaction.Triggers>
+                    <b:EventTrigger EventName="Click">
+                        <b:InvokeCommandAction Command="{Binding ZoomInCommand}" 
+                                               CommandParameter="{Binding Source='2.0', Converter={StaticResource StringToDoubleConverter}}"/>
+                    </b:EventTrigger>
+                </b:Interaction.Triggers>
                 <Button.ContentTemplate>
                     <DataTemplate>
                         <iconPacks:PackIconRemixIcon Kind="ZoomInLine" />
@@ -74,8 +85,7 @@
                     Height="32 "
                     Margin="2"
                     Foreground="{DynamicResource MahApps.Brushes.Accent}"
-                    Style="{StaticResource MahApps.Styles.Button.Circle}" Command="{Binding StringCommand}"
-                    CommandParameter="-5.0">
+                    Style="{StaticResource MahApps.Styles.Button.Circle}" Command="{Binding NavigateToSnapshotCommand}">
                 <Button.ContentTemplate>
                     <DataTemplate>
                         <iconPacks:PackIconIonicons Kind="ListBoxMD" />

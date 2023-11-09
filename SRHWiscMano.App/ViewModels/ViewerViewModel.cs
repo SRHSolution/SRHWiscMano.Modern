@@ -7,7 +7,10 @@ using System.Threading.Tasks;
 using System.Windows.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using Microsoft.Extensions.Logging;
 using OxyPlot;
+using SRHWiscMano.App.Data;
 using SRHWiscMano.App.Services;
 using SRHWiscMano.App.Views;
 using SRHWiscMano.Core.Helpers;
@@ -19,9 +22,8 @@ namespace SRHWiscMano.App.ViewModels
 {
     public partial class ViewerViewModel : ViewModelBase, IViewerViewModel
     {
+        private readonly ILogger<ViewerViewModel> logger;
         private readonly SharedService sharedService;
-        private readonly IImportService<ITimeSeriesData> importer;
-        private readonly ILoggerService logger;
 
         public ITimeSeriesData TimeSeriesDataSource { get; private set; }
         
@@ -33,34 +35,32 @@ namespace SRHWiscMano.App.ViewModels
         public PlotModel OverviewPlotModel { get; }
         public PlotController OverviewPlotController { get; }
         public double ZoomPercentage { get; set; } = 0.5;
-        public RelayCommand<object> ObjectCommand { get; private set; }
-        public RelayCommand<string> StringCommand { get; set; }
-        public RelayCommand<double> DoubleCommand { get; set; }
-        public RelayCommand FitToScreenCommand { get; }
-        public RelayCommand ZoomInCommand { get; }
-        public RelayCommand ZoomOutCommand { get; }
-        public RelayCommand PrevSnapshotCommand { get; private set; }
-        public RelayCommand NextSnapshotCommand { get; private set;}
-        public Dictionary<string, OxyPalette> Palettes { get; private set; }
 
+        public IRelayCommand FitToScreenCommand { get; }
+
+        public IRelayCommand<double> ZoomInCommand { get; }
+        public IRelayCommand<double> ZoomOutCommand { get; }
+        public IRelayCommand PrevSnapshotCommand { get; private set; }
+        public IRelayCommand NextSnapshotCommand { get; private set;}
+        
+        public Dictionary<string, OxyPalette> Palettes { get; private set; }
 
 
         [ObservableProperty] private OxyPalette selectedPalette;
 
         [ObservableProperty] private string zoomLevel = "10.0";
+        
 
-        public ViewerViewModel(ILoggerFactory loggerFactory, SharedService sharedService)
+        public ViewerViewModel(ILogger<ViewerViewModel> logger, SharedService sharedService)
         {
-            this.importer = importer;
+            this.logger = logger;
             this.sharedService = sharedService;
             sharedService.ExamDataLoaded += SharedService_ExamDataLoaded;
 
-            logger = loggerFactory.CreateLogger<ViewerViewModel>();
 
             Palettes = PaletteUtils.GetPredefinedPalettes();
-            ObjectCommand = new RelayCommand<object>(OnZoomIn);
-            StringCommand = new RelayCommand<string>(OnZoomOut);
-            DoubleCommand = new RelayCommand<double>(OnZoomDouble);
+            ZoomInCommand = new RelayCommand<double>(OnZoomIn);
+            ZoomOutCommand = new RelayCommand<double>(OnZoomOut);
 
             MaxSensorData = 100;
             MinSensorData = -10;
@@ -71,30 +71,21 @@ namespace SRHWiscMano.App.ViewModels
             logger.LogInformation("ExamData Loaded");
         }
 
-        private void OnZoomDouble(double obj)
+        private void OnZoomOut(double zoomVal)
         {
-
+            logger.LogTrace($"Zoom : {zoomVal}");
         }
 
-        private void OnZoomOut(string? obj)
+        private void OnZoomIn(double zoomVal)
         {
-            // logger.LogInformation($"Got {obj}");
+            logger.LogTrace($"Zoom : {zoomVal}");
         }
 
-        private void OnZoomIn(object? obj)
-        {
-            ;
-        }
 
         [RelayCommand]
-        private void SelectedPaletteChanged(SelectionChangedEventArgs arg)
+        private void NavigateToSnapshot()
         {
-            
-        }
-
-        public void ImportExamData(string filePath)
-        {
-             TimeSeriesDataSource = importer.ReadFromFile(filePath);
+            WeakReferenceMessenger.Default.Send(new TabIndexChangeMessage(1));
         }
     }
 }

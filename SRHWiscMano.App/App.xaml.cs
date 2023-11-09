@@ -1,7 +1,13 @@
 ﻿using System;
+using System.Text;
 using System.Windows;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
+using NLog;
+using NLog.Config;
+using NLog.Targets;
+using SRHWiscMano.App.Controls;
+using SRHWiscMano.App.Windows;
 
 namespace SRHWiscMano.App
 {
@@ -26,9 +32,16 @@ namespace SRHWiscMano.App
 
             Ioc.Default.ConfigureServices(ServiceProvider);
 
-            // var ss = ServiceProvider.GetService<IViewerPage>();
-            // var ss2 = ServiceProvider.GetService<IViewerPage>();
-            // ViewModelLocator.Initialize(ServiceProvider);
+            // Logging 메시지를 back단에서 계속 받기 위해서 Instance를 미리 생성함
+            Ioc.Default.GetRequiredService<LoggerWindow>();
+
+            LogManager.GetCurrentClassLogger().Info("Application Started");
+        }
+
+
+        protected override void OnExit(ExitEventArgs exitEventArgs)
+        {
+            LogManager.Shutdown();
         }
     }
 }

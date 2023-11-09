@@ -3,6 +3,7 @@ using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using ControlzEx.Theming;
+using NLog;
 using SRHWiscMano.Core.ViewModels;
 
 namespace SRHWiscMano.App.ViewModels
@@ -18,6 +19,9 @@ namespace SRHWiscMano.App.ViewModels
         public RelayCommand<string?> ChangeBaseColorCommand { get; }
         public RelayCommand<string?> ChangeAccentColorCommand { get; }
 
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+
+
         public AppThemeMenu()
         {
             ChangeAccentColorCommand = new RelayCommand<string?>(DoChangeAccentTheme);
@@ -29,6 +33,7 @@ namespace SRHWiscMano.App.ViewModels
             if (name is not null)
             {
                 ThemeManager.Current.ChangeThemeBaseColor(Application.Current, name);
+                Logger.Trace(name);
             }
         }
 
@@ -37,6 +42,7 @@ namespace SRHWiscMano.App.ViewModels
             if (name is not null)
             {
                 ThemeManager.Current.ChangeThemeColorScheme(Application.Current, name);
+                Logger.Trace(name);
             }
         }
     }

@@ -7,6 +7,7 @@
                  xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
                  xmlns:app="clr-namespace:SRHWiscMano.App"
                  xmlns:view="clr-namespace:SRHWiscMano.App.Views"
+                 xmlns:viewModels="clr-namespace:SRHWiscMano.App.ViewModels"
                  Title="Wisconsin Mano Modern App by SRHSolution"
                  Width="1024"
                  Height="768"
@@ -23,7 +24,7 @@
                  NonActiveGlowColor="#CDFF0000"
                  ShowIconOnTitleBar="True"
                  WindowStartupLocation="CenterScreen"
-                 mc:Ignorable="d" ResizeMode="CanResizeWithGrip">
+                 mc:Ignorable="d" ResizeMode="CanResizeWithGrip" Closing="MetroWindow_Closing">
     <Window.Resources>
         <ResourceDictionary>
             <Ellipse x:Key="AppThemeMenuIcon"
@@ -37,7 +38,7 @@
             <Style x:Key="AppThemeMenuItemStyle"
                    BasedOn="{StaticResource MahApps.Styles.MenuItem}"
                    TargetType="{x:Type MenuItem}">
-                <Setter Property="Command" Value="{Binding ChangeBaseColorCommand}" />
+                <Setter Property="Command" Value="{Binding ChangeBaseColorCommand }" />
                 <Setter Property="CommandParameter" Value="{Binding Name, Mode=OneWay}" />
                 <Setter Property="Header" Value="{Binding Name, Mode=OneWay}" />
                 <Setter Property="Icon" Value="{StaticResource AppThemeMenuIcon}" />
@@ -58,7 +59,13 @@
 
     <mah:MetroWindow.RightWindowCommands>
         <mah:WindowCommands>
-
+            <Button Command="{Binding ShowLoggerCommand}" ToolTip="MahApps.Metro on GitHub">
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <iconPacks:PackIconRadixIcons Kind="ActivityLog" />
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>
         </mah:WindowCommands>
     </mah:MetroWindow.RightWindowCommands>
     <Grid>
@@ -83,28 +90,28 @@
                       ItemContainerStyle="{StaticResource AppThemeAccentItemStyle}"
                       ItemsSource="{Binding AppAccentThemes, Mode=OneWay}" />
         </Menu>
-        <mah:MetroAnimatedSingleRowTabControl x:Name="MainTabControl" Grid.Row="1" SelectedIndex="{Binding SelectedTabIndex, Mode=TwoWay}" mah:HeaderedControlHelper.HeaderFontFamily="Noto Sans" mah:HeaderedControlHelper.HeaderFontSize="20" mah:TabControlHelper.Underlined="SelectedTabItem">
-            <TabItem Header="Viewers" >
-                <ScrollViewer Margin="2"
-                              HorizontalScrollBarVisibility="Auto"
-                              VerticalScrollBarVisibility="Auto">
-                    <view:ViewerView></view:ViewerView>
-                </ScrollViewer>
-            </TabItem>
-            <TabItem Header="Snapshots">
-                <ScrollViewer Margin="2"
-                              HorizontalScrollBarVisibility="Auto"
-                              VerticalScrollBarVisibility="Auto">
-                    <view:Snapshots/>
-                </ScrollViewer>
-            </TabItem>
-            <TabItem Header="Details" >
-                <ScrollViewer Margin="2"
-                              HorizontalScrollBarVisibility="Auto"
-                              VerticalScrollBarVisibility="Auto">
-                    <!-- <exampleViews:ButtonsExample DataContext="{Binding}" /> -->
-                </ScrollViewer>
-            </TabItem>
+        <mah:MetroAnimatedSingleRowTabControl x:Name="MainTabControl" Grid.Row="1" SelectedIndex="{Binding SelectedTabIndex, Mode=TwoWay}" mah:HeaderedControlHelper.HeaderFontFamily="Noto Sans" mah:HeaderedControlHelper.HeaderFontSize="20" mah:TabControlHelper.Underlined="SelectedTabItem" ItemsSource="{Binding Tabs}">
+            <!-- <TabItem Header="Viewers" > -->
+            <!--     <ScrollViewer Margin="2" -->
+            <!--                   HorizontalScrollBarVisibility="Auto" -->
+            <!--                   VerticalScrollBarVisibility="Auto"> -->
+            <!--         <view:ViewerView/> -->
+            <!--     </ScrollViewer> -->
+            <!-- </TabItem> -->
+            <!-- <TabItem Header="Snapshots"> -->
+            <!--     <ScrollViewer Margin="2" -->
+            <!--                   HorizontalScrollBarVisibility="Auto" -->
+            <!--                   VerticalScrollBarVisibility="Auto"> -->
+            <!--         <view:Snapshots/> -->
+            <!--     </ScrollViewer> -->
+            <!-- </TabItem> -->
+            <!-- <TabItem Header="Details" > -->
+            <!--     <ScrollViewer Margin="2" -->
+            <!--                   HorizontalScrollBarVisibility="Auto" -->
+            <!--                   VerticalScrollBarVisibility="Auto"> -->
+            <!--         ~1~ <exampleViews:ButtonsExample DataContext="{Binding}" /> @1@ -->
+            <!--     </ScrollViewer> -->
+            <!-- </TabItem> -->
         </mah:MetroAnimatedSingleRowTabControl>
 
 
