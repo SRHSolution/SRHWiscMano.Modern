@@ -30,7 +30,6 @@ namespace SRHWiscMano.App.Windows
         {
             InitializeComponent();
 
-
             wpfLogger = LogManager.Configuration?.FindTargetByName<WpfLoggerTarget>("wpfLogger");
             if (wpfLogger != null)
             {

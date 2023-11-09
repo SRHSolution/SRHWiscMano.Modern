@@ -7,6 +7,7 @@
                  xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
                  xmlns:app="clr-namespace:SRHWiscMano.App"
                  xmlns:view="clr-namespace:SRHWiscMano.App.Views"
+                 xmlns:viewModels="clr-namespace:SRHWiscMano.App.ViewModels"
                  Title="Wisconsin Mano Modern App by SRHSolution"
                  Width="1024"
                  Height="768"
@@ -37,7 +38,7 @@
             <Style x:Key="AppThemeMenuItemStyle"
                    BasedOn="{StaticResource MahApps.Styles.MenuItem}"
                    TargetType="{x:Type MenuItem}">
-                <Setter Property="Command" Value="{Binding ChangeBaseColorCommand}" />
+                <Setter Property="Command" Value="{Binding ChangeBaseColorCommand }" />
                 <Setter Property="CommandParameter" Value="{Binding Name, Mode=OneWay}" />
                 <Setter Property="Header" Value="{Binding Name, Mode=OneWay}" />
                 <Setter Property="Icon" Value="{StaticResource AppThemeMenuIcon}" />

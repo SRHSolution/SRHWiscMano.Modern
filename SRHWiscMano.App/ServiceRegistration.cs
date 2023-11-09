@@ -1,4 +1,7 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using NLog.Extensions.Logging;
 using SRHWiscMano.App.Services;
 using SRHWiscMano.App.ViewModels;
 using SRHWiscMano.App.Windows;
@@ -15,9 +18,19 @@ namespace SRHWiscMano.App
             services.AddTransient<ColorRangeSliderViewModel>();
             services.AddSingleton<MainWindowViewModel>();
             services.AddSingleton<LoggerWindow>();
-            
-            // services.AddSingleton<I>
-            // services.AddTransient<IResultsCalculator, ResultsCalculator>();
+
+            // appsettings.json 파일을 로드한다.
+            // var config = new ConfigurationBuilder()
+            //     .SetBasePath(System.IO.Directory.GetCurrentDirectory())
+            //     .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+            //     .Build();
+
+            services.AddLogging(loggingBuilder =>
+            {
+                // loggingBuilder.ClearProviders();
+                // loggingBuilder.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Trace);
+                loggingBuilder.AddNLog();
+            });
         }
 
     }

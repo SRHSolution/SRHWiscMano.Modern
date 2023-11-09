@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -7,6 +8,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
 using ControlzEx.Theming;
+using Microsoft.Extensions.Logging;
 using Microsoft.Win32;
 using NLog;
 using SRHWiscMano.App.Services;
@@ -22,13 +24,12 @@ namespace SRHWiscMano.App
     {
         private readonly IImportService<ITimeSeriesData> importService;
         private readonly SharedService sharedStorageService;
+        private readonly ILogger<MainWindowViewModel> logger;
 
         /// <summary>
         /// Tab Index로 Tab 화면을 제어한다
         /// </summary>
         [ObservableProperty] private int selectedTabIndex;
-
-        private readonly ILoggerService logger;
 
         /// <summary>
         /// 생성자에서 가능한 Theme 를 로드하므로 ObservableCollection 은 해당이 안된다.
@@ -37,12 +38,12 @@ namespace SRHWiscMano.App
         public List<AppThemeMenu> AppAccentThemes { get; set; }
 
 
-        public MainWindowViewModel(ILoggerFactory loggerFactory, IImportService<ITimeSeriesData> importService, SharedService sharedStorageService)
+        public MainWindowViewModel(IImportService<ITimeSeriesData> importService, SharedService sharedStorageService, ILogger<MainWindowViewModel> logger)
         {
             this.importService = importService;
             this.sharedStorageService = sharedStorageService;
+            this.logger = logger;
 
-            logger = loggerFactory.CreateLogger<ViewerViewModel>();
 
             // ControlEx의 ThemeManager로부터 Theme를 불러온다.
             this.AppThemes = ThemeManager.Current.Themes
@@ -64,12 +65,12 @@ namespace SRHWiscMano.App
         [RelayCommand]
         private void OpenFile()
         {
-            OpenFileDialog ofd = new OpenFileDialog();// Create OpenFileDialog 
-            OpenFileDialog openFileDialog = new OpenFileDialog();
-
-            // Set filter for file extension and default file extension 
-            openFileDialog.DefaultExt = ".txt";
-            openFileDialog.Filter = "Text documents (.txt)|*.txt";
+            OpenFileDialog openFileDialog = new OpenFileDialog
+            {
+                // Set filter for file extension and default file extension 
+                DefaultExt = ".txt",
+                Filter = "Text documents (.txt)|*.txt"
+            };
 
             // Display OpenFileDialog by calling ShowDialog method 
             bool? result = openFileDialog.ShowDialog();
@@ -81,15 +82,19 @@ namespace SRHWiscMano.App
                 string filename = openFileDialog.FileName;
                 var examData = importService.ReadFromFile(filename);
 
+                logger.LogTrace("Exam data : {filename}", Path.GetFileName(filename));
                 sharedStorageService.SetExamData(examData);
+
             }
         }
 
+        /// <summary>
+        /// Logger single instance 를 불러와서 윈도우 창을 출력한다
+        /// </summary>
         [RelayCommand]
         private void ShowLogger()
         {
-            var logger = Ioc.Default.GetRequiredService<LoggerWindow>();
-            logger.Show();
+            Ioc.Default.GetRequiredService<LoggerWindow>().Show();
         }
     }
 }
