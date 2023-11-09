@@ -85,8 +85,7 @@
                     Height="32 "
                     Margin="2"
                     Foreground="{DynamicResource MahApps.Brushes.Accent}"
-                    Style="{StaticResource MahApps.Styles.Button.Circle}" Command="{Binding StringCommand}"
-                    CommandParameter="-5.0">
+                    Style="{StaticResource MahApps.Styles.Button.Circle}" Command="{Binding NavigateToSnapshotCommand}">
                 <Button.ContentTemplate>
                     <DataTemplate>
                         <iconPacks:PackIconIonicons Kind="ListBoxMD" />

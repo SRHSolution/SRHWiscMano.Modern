@@ -7,8 +7,10 @@ using System.Threading.Tasks;
 using System.Windows.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.Logging;
 using OxyPlot;
+using SRHWiscMano.App.Data;
 using SRHWiscMano.App.Services;
 using SRHWiscMano.App.Views;
 using SRHWiscMano.Core.Helpers;
@@ -34,18 +36,20 @@ namespace SRHWiscMano.App.ViewModels
         public PlotController OverviewPlotController { get; }
         public double ZoomPercentage { get; set; } = 0.5;
 
-        public RelayCommand FitToScreenCommand { get; }
-        public RelayCommand<double> ZoomInCommand { get; }
-        public RelayCommand<double> ZoomOutCommand { get; }
-        public RelayCommand PrevSnapshotCommand { get; private set; }
-        public RelayCommand NextSnapshotCommand { get; private set;}
+        public IRelayCommand FitToScreenCommand { get; }
+
+        public IRelayCommand<double> ZoomInCommand { get; }
+        public IRelayCommand<double> ZoomOutCommand { get; }
+        public IRelayCommand PrevSnapshotCommand { get; private set; }
+        public IRelayCommand NextSnapshotCommand { get; private set;}
+        
         public Dictionary<string, OxyPalette> Palettes { get; private set; }
 
 
         [ObservableProperty] private OxyPalette selectedPalette;
 
         [ObservableProperty] private string zoomLevel = "10.0";
-        private RelayCommand<object> zoomInCommand;
+        
 
         public ViewerViewModel(ILogger<ViewerViewModel> logger, SharedService sharedService)
         {
@@ -77,10 +81,11 @@ namespace SRHWiscMano.App.ViewModels
             logger.LogTrace($"Zoom : {zoomVal}");
         }
 
+
         [RelayCommand]
-        private void SelectedPaletteChanged(SelectionChangedEventArgs arg)
+        private void NavigateToSnapshot()
         {
-            
+            WeakReferenceMessenger.Default.Send(new TabIndexChangeMessage(1));
         }
     }
 }

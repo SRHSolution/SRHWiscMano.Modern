@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Windows;
@@ -7,12 +8,15 @@ using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using ControlzEx.Theming;
 using Microsoft.Extensions.Logging;
 using Microsoft.Win32;
 using NLog;
+using SRHWiscMano.App.Data;
 using SRHWiscMano.App.Services;
 using SRHWiscMano.App.ViewModels;
+using SRHWiscMano.App.Views;
 using SRHWiscMano.App.Windows;
 using SRHWiscMano.Core.Models;
 using SRHWiscMano.Core.Services;
@@ -37,6 +41,7 @@ namespace SRHWiscMano.App
         public List<AppThemeMenu> AppThemes { get; set; }
         public List<AppThemeMenu> AppAccentThemes { get; set; }
 
+        public ObservableCollection<TabItem> Tabs { get; set; } = new ObservableCollection<TabItem>();
 
         public MainWindowViewModel(IImportService<ITimeSeriesData> importService, SharedService sharedStorageService, ILogger<MainWindowViewModel> logger)
         {
@@ -59,6 +64,31 @@ namespace SRHWiscMano.App
                 .Select(a => new AppThemeMenu { Name = a.Key, ColorBrush = a.First().ShowcaseBrush })
                 .ToList();
 
+            WeakReferenceMessenger.Default.Register<TabIndexChangeMessage>(this, OnTabIndexChange);
+
+            // Tabs.Add(new TabItem()
+            // {
+            //     Header = "Title1",
+            //     Content = new ViewerView()
+            // });
+            //
+            // Tabs.Add(new TabItem()
+            // {
+            //     Header = "Title2",
+            //     Content = new Snapshots()
+            // });
+            //
+            // Tabs.Add(new TabItem()
+            // {
+            //     Header = "Title3",
+            //     Content = new ViewerView()
+            // });
+        }
+
+        private void OnTabIndexChange(object recipient, TabIndexChangeMessage message)
+        {
+            var index = message.Value;
+            SelectedTabIndex = index;
         }
 
 
