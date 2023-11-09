@@ -9,6 +9,7 @@ using ControlzEx.Theming;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using NLog;
 using NLog.Config;
 using NLog.Targets;
@@ -64,9 +65,13 @@ namespace SRHWiscMano.App
         protected override void OnExit(ExitEventArgs exitEventArgs)
         {
             var settings = Ioc.Default.GetRequiredService<IOptions<AppSettings>>();
-            var json = JsonConvert.SerializeObject(new {AppSettings = settings.Value}, Formatting.Indented);
-            var filepath = Path.Combine(Directory.GetCurrentDirectory(), "configuration.json");
-            File.WriteAllText(filepath, json);
+            var configFilePath = settings.Value.FilePath;
+
+            // config 파일에 다른 section 이 있는 것을 감안하여 AppSettings Section만 업데이트 하도록 한다.
+            var jsonConfig = JObject.Parse(File.ReadAllText(configFilePath));
+            jsonConfig["AppSettings"] = JObject.Parse(JsonConvert.SerializeObject(settings.Value, Formatting.Indented));
+            File.WriteAllText(configFilePath, jsonConfig.ToString(Formatting.Indented));
+
             LogManager.Shutdown();
         }
     }
