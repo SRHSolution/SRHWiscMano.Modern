@@ -1,11 +1,10 @@
 ﻿using System;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
-using SRHWiscMano.App.ViewModels;
 using SRHWiscMano.App.Views;
 using SRHWiscMano.Core.ViewModels;
 
-namespace SRHWiscMano.App
+namespace SRHWiscMano.App.ViewModels
 {
     public class ViewModelLocator
     {
