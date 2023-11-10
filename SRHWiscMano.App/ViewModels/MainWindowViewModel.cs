@@ -15,6 +15,7 @@ using Microsoft.Win32;
 using SRHWiscMano.App.Data;
 using SRHWiscMano.App.Services;
 using SRHWiscMano.App.Windows;
+using SRHWiscMano.Core.Helpers;
 using SRHWiscMano.Core.Models;
 using SRHWiscMano.Core.Services;
 using SRHWiscMano.Core.ViewModels;
@@ -55,6 +56,9 @@ namespace SRHWiscMano.App.ViewModels
             this.sharedStorageService = sharedStorageService;
             this.logger = logger;
 
+
+            settings.Value.RecentFiles?.ForEach(rf => RecentFiles.Add(new RecentFile(rf)));
+
             // ControlEx의 ThemeManager로부터 Theme를 불러온다.
             this.AppThemes = ThemeManager.Current.Themes
                 .GroupBy(x => x.BaseColorScheme)
@@ -80,6 +84,8 @@ namespace SRHWiscMano.App.ViewModels
                         { Name = a.Key, ColorBrush = a.First().ShowcaseBrush };
                 })
                 .ToList();
+
+
 
             WeakReferenceMessenger.Default.Register<TabIndexChangeMessage>(this, OnTabIndexChange);
 
@@ -164,7 +170,7 @@ namespace SRHWiscMano.App.ViewModels
         /// <param name="filePath"></param>
         private void AddToRecentFiles(string filePath)
         {
-            var fndItem = RecentFiles.FirstOrDefault(sf => sf.FilePath == filePath, null);
+            var fndItem = RecentFiles.FirstOrDefault(rf => rf.FilePath == filePath, null);
             if (fndItem != null)
             {
                 RecentFiles.Remove(fndItem);
@@ -177,6 +183,8 @@ namespace SRHWiscMano.App.ViewModels
             {
                 RecentFiles.RemoveAt(RecentFiles.Count - 1);
             }
+
+            settings.Value.RecentFiles = RecentFiles.Select(sf => sf.FilePath).ToList();
 
             logger.LogTrace($"Added recent file : {RecentFiles[0].FileName}");
         }

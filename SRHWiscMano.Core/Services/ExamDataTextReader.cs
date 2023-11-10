@@ -13,7 +13,7 @@ namespace SRHWiscMano.Core.Services
                 var parseSamples = LoadLines(File.ReadLines(filePath).Skip(1)).ToList();
 
                 NoteXmlReader notesLoader = new NoteXmlReader();
-                var notes = notesLoader.LoadRelative(filePath); // ?? Array.Empty<Note>();
+                var notes = notesLoader.LoadRelative(filePath) ?? Array.Empty<Note>();
                 var examData = new Examination(parseSamples, notes.ToList());
                 
                 return examData;
