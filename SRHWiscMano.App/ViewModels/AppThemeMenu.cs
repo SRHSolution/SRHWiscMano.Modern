@@ -12,7 +12,8 @@ namespace SRHWiscMano.App.ViewModels
 {
     public partial class AppThemeMenu : ViewModelBase
     {
-        private readonly AppSettings settings;
+        private readonly AppSettings? settings;
+
         [ObservableProperty] private string? name;
 
         [ObservableProperty] private Brush? borderColorBrush;
@@ -41,7 +42,8 @@ namespace SRHWiscMano.App.ViewModels
             if (name is not null)
             {
                 ThemeManager.Current.ChangeThemeBaseColor(Application.Current, name);
-                settings.BaseTheme = name;
+                if (settings != null)
+                    settings.BaseTheme = name;
                 Logger.Trace(name);
             }
         }
@@ -51,7 +53,8 @@ namespace SRHWiscMano.App.ViewModels
             if (name is not null)
             {
                 ThemeManager.Current.ChangeThemeColorScheme(Application.Current, name);
-                settings.AccentTheme = name!;
+                if (settings != null)
+                    settings.AccentTheme = name!;
                 Logger.Trace(name);
             }
         }

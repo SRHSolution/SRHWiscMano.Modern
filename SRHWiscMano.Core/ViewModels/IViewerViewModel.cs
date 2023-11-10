@@ -1,20 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.Input;
 using OxyPlot;
 using SRHWiscMano.Core.Models;
-using SRHWiscMano.Core.Services;
 
 namespace SRHWiscMano.Core.ViewModels
 {
     public interface IViewerViewModel
     {
-        ITimeSeriesData TimeSeriesDataSource { get; }
+        IExamination ExamData { get; }
+
+        ObservableCollection<Note> Notes { get; }
+
         double MinSensorData { get; }
         double MaxSensorData { get; }
 
@@ -33,7 +29,6 @@ namespace SRHWiscMano.Core.ViewModels
 
 
         double ZoomPercentage { get; set; }
-        string ZoomLevel { get; set; }
 
         IRelayCommand FitToScreenCommand { get; }
         IRelayCommand<double> ZoomInCommand { get; }
@@ -45,6 +40,8 @@ namespace SRHWiscMano.Core.ViewModels
         Dictionary<string, OxyPalette> Palettes { get; }
 
         OxyPalette SelectedPalette { get; }
+
+        string SelectedPaletteKey { get; }
 
         
     }

@@ -1,5 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using NodaTime;
+﻿using NodaTime;
 using SRHWiscMano.Core.Helpers;
 using Range = SRHWiscMano.Core.Helpers.Range;
 

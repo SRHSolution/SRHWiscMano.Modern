@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using SRHWiscMano.Core.Models;
 using SRHWiscMano.Core.Services;
 using SRHWiscMano.Core.ViewModels;
@@ -11,7 +12,8 @@ namespace SRHWiscMano.App.Services
 {
     public class SharedService
     {
-        public ITimeSeriesData? ExamData { get; private set; }
+        private readonly ILogger<SharedService> logger;
+        public IExamination? ExamData { get; private set; }
 
         public IExamMetaData? ExamMetaData { get; private set; }
 
@@ -19,8 +21,15 @@ namespace SRHWiscMano.App.Services
         public event EventHandler? ExamDataLoaded;
         public event EventHandler? ExamMetaDataLoaded;
 
-        public void SetExamData(ITimeSeriesData data)
+        public SharedService(ILogger<SharedService> logger)
         {
+            this.logger = logger;
+        }
+
+        public void SetExamData(IExamination data)
+        {
+            logger.LogInformation("New ExamData is registered");
+
             this.ExamData = data;
             ExamDataLoaded?.Invoke(this, EventArgs.Empty);
         }

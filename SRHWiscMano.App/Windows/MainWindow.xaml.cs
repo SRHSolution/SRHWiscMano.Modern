@@ -13,7 +13,7 @@ namespace SRHWiscMano.App
         public MainWindow()
         {
             InitializeComponent();
-            this.DataContext = Ioc.Default.GetService<MainWindowViewModel>();
+            this.DataContext = Ioc.Default.GetService<ViewModels.MainWindowViewModel>();
         }
 
         private void MetroWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)

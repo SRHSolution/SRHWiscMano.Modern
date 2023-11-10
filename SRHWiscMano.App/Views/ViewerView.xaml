@@ -34,7 +34,7 @@
                     Margin="2"
                     Foreground="{DynamicResource MahApps.Brushes.Accent}"
                     Style="{StaticResource MahApps.Styles.Button.Circle}"
-                    Command="{Binding FitToScreenCommand}">
+                    Command="{Binding FitToScreenCommand}" ToolTip="Fit to screen heatmap">
 
                 <Button.ContentTemplate>
                     <DataTemplate>
@@ -46,11 +46,11 @@
                     Height="32 "
                     Margin="2"
                     Foreground="{DynamicResource MahApps.Brushes.Accent}"
-                    Style="{StaticResource MahApps.Styles.Button.Circle}">
+                    Style="{StaticResource MahApps.Styles.Button.Circle}" ToolTip="Zoom out heatmap">
                 <b:Interaction.Triggers>
                     <b:EventTrigger EventName="Click">
                         <b:InvokeCommandAction Command="{Binding ZoomOutCommand}" 
-                                               CommandParameter="{Binding Source='-2.0', Converter={StaticResource StringToDoubleConverter}}"/>
+                                               CommandParameter="{Binding Source='1.25', Converter={StaticResource StringToDoubleConverter}}"/>
                     </b:EventTrigger>
                 </b:Interaction.Triggers>
                 <Button.ContentTemplate>
@@ -63,11 +63,11 @@
                     Height="32 "
                     Margin="2"
                     Foreground="{DynamicResource MahApps.Brushes.Accent}"
-                    Style="{StaticResource MahApps.Styles.Button.Circle}">
+                    Style="{StaticResource MahApps.Styles.Button.Circle}" ToolTip="Zoom in heatmap">
                 <b:Interaction.Triggers>
                     <b:EventTrigger EventName="Click">
                         <b:InvokeCommandAction Command="{Binding ZoomInCommand}" 
-                                               CommandParameter="{Binding Source='2.0', Converter={StaticResource StringToDoubleConverter}}"/>
+                                               CommandParameter="{Binding Source='1.25', Converter={StaticResource StringToDoubleConverter}}"/>
                     </b:EventTrigger>
                 </b:Interaction.Triggers>
                 <Button.ContentTemplate>
@@ -77,15 +77,15 @@
                 </Button.ContentTemplate>
             </Button>
             <!-- Zoom Level Text Box -->
-            <TextBox x:Name="zoomlevel" Text="{Binding ZoomPercentage, StringFormat='{}{0}'}" Width="50" Margin="5"
-                     HorizontalAlignment="Center" VerticalContentAlignment="Center" />
-
-            <!-- Snapshot Button -->
+            <TextBox x:Name="zoomlevel" Text="{Binding ZoomPercentage, StringFormat='{}{0}%'}" Width="50" Margin="5"
+                     HorizontalAlignment="Right" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+            
             <Button Width="32"
                     Height="32 "
                     Margin="2"
                     Foreground="{DynamicResource MahApps.Brushes.Accent}"
-                    Style="{StaticResource MahApps.Styles.Button.Circle}" Command="{Binding NavigateToSnapshotCommand}">
+                    Style="{StaticResource MahApps.Styles.Button.Circle}" ToolTip="Navigate to snapshot view"
+                    Command="{Binding NavigateToSnapshotCommand}">
                 <Button.ContentTemplate>
                     <DataTemplate>
                         <iconPacks:PackIconIonicons Kind="ListBoxMD" />
@@ -96,7 +96,7 @@
         </StackPanel>
         <Grid Row="1" VerticalAlignment="Stretch" Margin="0, 20, 0, 0">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="100" />
+                <ColumnDefinition Width="125" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             <Grid Column="0" Margin="2">
@@ -106,12 +106,7 @@
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
                 <ComboBox
-                    SelectedIndex="0" ItemsSource="{Binding Palettes}" DisplayMemberPath="Key">
-                    <ComboBox.ContextMenu>
-                        <ContextMenu>
-                            <MenuItem Header="Test" />
-                        </ContextMenu>
-                    </ComboBox.ContextMenu>
+                    SelectedItem="{Binding SelectedPaletteKey, Mode=TwoWay}" ItemsSource="{Binding Palettes.Keys}">
                 </ComboBox>
                 <Grid Row="2" Margin="0,2,0,0">
                     <Grid.ColumnDefinitions>
@@ -123,8 +118,8 @@
                                 Height="32 "
                                 Margin="2"
                                 Foreground="{DynamicResource MahApps.Brushes.Accent}"
-                                Style="{StaticResource MahApps.Styles.Button.Circle}" Command="{Binding StringCommand}"
-                                CommandParameter="{Binding ZoomOutCommand}">
+                                Style="{StaticResource MahApps.Styles.Button.Circle}" Command="{Binding FavoritePaletteCommand}"
+                                CommandParameter="Hue64">
                             <Button.ContentTemplate>
                                 <DataTemplate>
                                     <iconPacks:PackIconJamIcons Kind="Brightness" RotationAngle="45"/>
@@ -137,8 +132,8 @@
                                 Height="32 "
                                 Margin="2"
                                 Foreground="{DynamicResource MahApps.Brushes.Accent}"
-                                Style="{StaticResource MahApps.Styles.Button.Circle}" Command="{Binding StringCommand}"
-                                CommandParameter="{Binding ZoomOutCommand}">
+                                Style="{StaticResource MahApps.Styles.Button.Circle}" Command="{Binding FavoritePaletteCommand}"
+                                CommandParameter="Rainbow">
                             <Button.ContentTemplate>
                                 <DataTemplate>
                                     <iconPacks:PackIconJamIcons Kind="Brightness" RotationAngle="45"/>
@@ -151,8 +146,8 @@
                                 Height="32 "
                                 Margin="2"
                                 Foreground="{DynamicResource MahApps.Brushes.Accent}"
-                                Style="{StaticResource MahApps.Styles.Button.Circle}" Command="{Binding StringCommand}"
-                                CommandParameter="{Binding ZoomOutCommand}">
+                                Style="{StaticResource MahApps.Styles.Button.Circle}" Command="{Binding FavoritePaletteCommand}"
+                                CommandParameter="BlackWhiteRed">
                             <Button.ContentTemplate>
                                 <DataTemplate>
                                     <iconPacks:PackIconJamIcons Kind="Brightness" RotationAngle="45"/>

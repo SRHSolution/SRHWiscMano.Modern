@@ -2,7 +2,6 @@
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -13,22 +12,20 @@ using ControlzEx.Theming;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Win32;
-using NLog;
 using SRHWiscMano.App.Data;
 using SRHWiscMano.App.Services;
-using SRHWiscMano.App.ViewModels;
-using SRHWiscMano.App.Views;
 using SRHWiscMano.App.Windows;
+using SRHWiscMano.Core.Helpers;
 using SRHWiscMano.Core.Models;
 using SRHWiscMano.Core.Services;
 using SRHWiscMano.Core.ViewModels;
 
-namespace SRHWiscMano.App
+namespace SRHWiscMano.App.ViewModels
 {
     public partial class MainWindowViewModel : ViewModelBase
     {
-        private readonly IOptions<AppSettings> settings;
-        private readonly IImportService<ITimeSeriesData> importService;
+        private readonly AppSettings settings;
+        private readonly IImportService<IExamination> importService;
         private readonly SharedService sharedStorageService;
         private readonly ILogger<MainWindowViewModel> logger;
 
@@ -37,6 +34,8 @@ namespace SRHWiscMano.App
         /// </summary>
         [ObservableProperty] private int selectedTabIndex;
 
+        public ObservableCollection<RecentFile> RecentFiles{ get; } = new ObservableCollection<RecentFile>();
+
         /// <summary>
         /// 생성자에서 가능한 Theme 를 로드하므로 ObservableCollection 은 해당이 안된다.
         /// </summary>
@@ -44,16 +43,21 @@ namespace SRHWiscMano.App
 
         public List<AppThemeMenu> AppAccentThemes { get; set; }
 
+        /// <summary>
+        /// 동적으로 Tabs을 제어할 수 있는 것을 테스트 하기 위함.
+        /// </summary>
         public ObservableCollection<TabItem> Tabs { get; set; } = new ObservableCollection<TabItem>();
 
-        public MainWindowViewModel(IOptions<AppSettings> settings, IImportService<ITimeSeriesData> importService,
+        public MainWindowViewModel(IOptions<AppSettings> settings, IImportService<IExamination> importService,
             SharedService sharedStorageService, ILogger<MainWindowViewModel> logger)
         {
-            this.settings = settings;
+            this.settings = settings.Value;
             this.importService = importService;
             this.sharedStorageService = sharedStorageService;
             this.logger = logger;
 
+
+            settings.Value.RecentFiles?.ForEach(rf => RecentFiles.Add(new RecentFile(rf)));
 
             // ControlEx의 ThemeManager로부터 Theme를 불러온다.
             this.AppThemes = ThemeManager.Current.Themes
@@ -80,6 +84,8 @@ namespace SRHWiscMano.App
                         { Name = a.Key, ColorBrush = a.First().ShowcaseBrush };
                 })
                 .ToList();
+
+
 
             WeakReferenceMessenger.Default.Register<TabIndexChangeMessage>(this, OnTabIndexChange);
 
@@ -110,7 +116,7 @@ namespace SRHWiscMano.App
 
 
         [RelayCommand]
-        private void OpenFile()
+        private void OpenFileBrowser()
         {
             OpenFileDialog openFileDialog = new OpenFileDialog
             {
@@ -126,13 +132,63 @@ namespace SRHWiscMano.App
             if (result == true)
             {
                 // Open document 
-                string filename = openFileDialog.FileName;
-                var examData = importService.ReadFromFile(filename);
-
-                logger.LogTrace("Exam data : {filename}", Path.GetFileName(filename));
-                sharedStorageService.SetExamData(examData);
+                string filePath = openFileDialog.FileName;
+                OpenFile(filePath);
             }
         }
+        
+        [RelayCommand]
+        private void OpenRecentFile(string filePath)
+        {
+            OpenFile(filePath);
+        }
+
+        /// <summary>
+        /// 입력된 경로의 파일을 불러온다
+        /// </summary>
+        /// <param name="filePath"></param>
+        private void OpenFile(string filePath)
+        {
+            var examData = importService.ReadFromFile(filePath);
+
+            if (examData == null)
+            {
+                logger.LogWarning("Exam data is not available");
+                return;
+            }
+
+            AddToRecentFiles(filePath);
+
+            logger.LogTrace("Exam data : {filename}", Path.GetFileName(filePath));
+            sharedStorageService.SetExamData(examData);
+        }
+
+
+        /// <summary>
+        /// 최신 파일 목록에 경로를 추가한다.
+        /// </summary>
+        /// <param name="filePath"></param>
+        private void AddToRecentFiles(string filePath)
+        {
+            var fndItem = RecentFiles.FirstOrDefault(rf => rf.FilePath == filePath, null);
+            if (fndItem != null)
+            {
+                RecentFiles.Remove(fndItem);
+            }
+
+            RecentFiles.Insert(0, new RecentFile(filePath));
+
+            // Optional: Limit the number of recent files
+            while (RecentFiles.Count > settings.MaxRecentFileSize)
+            {
+                RecentFiles.RemoveAt(RecentFiles.Count - 1);
+            }
+
+            settings.RecentFiles = RecentFiles.Select(sf => sf.FilePath).ToList();
+
+            logger.LogTrace($"Added recent file : {RecentFiles[0].FileName}");
+        }
+
 
         /// <summary>
         /// Logger single instance 를 불러와서 윈도우 창을 출력한다
