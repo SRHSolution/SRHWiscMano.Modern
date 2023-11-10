@@ -20,10 +20,12 @@ namespace SRHWiscMano.App
         {
             services.AddSingleton<SharedService>();
             services.AddSingleton<IViewerViewModel, ViewerViewModel>();
+            services.AddSingleton<ISettingViewModel, SettingViewModel>();
+            services.AddSingleton<ISnapshotViewViewModel, SnapshotViewViewModel>();
+
             services.AddTransient<ColorRangeSliderViewModel>();
-            services.AddSingleton<ViewModels.MainWindowViewModel>();
+            services.AddSingleton<MainWindowViewModel>();
             services.AddSingleton<LoggerWindow>();
-            services.AddSingleton<SettingViewModel>();
 
             var configPath = Path.Combine(Directory.GetCurrentDirectory(), "configuration.json");
             var config = new ConfigurationBuilder()

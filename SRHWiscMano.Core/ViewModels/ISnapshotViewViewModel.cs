@@ -3,7 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 
 namespace SRHWiscMano.Core.ViewModels
 {
-    interface ISnapshotViewModel
+    public interface ISnapshotViewViewModel
     {
         ObservableCollection<SnapshotViewModel> Snapshots { get; }
 

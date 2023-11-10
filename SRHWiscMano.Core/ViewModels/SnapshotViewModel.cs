@@ -1,4 +1,7 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System.Collections.ObjectModel;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using NodaTime;
 using SRHWiscMano.Core.Helpers;
 using SRHWiscMano.Core.Models;
@@ -33,5 +36,6 @@ namespace SRHWiscMano.Core.ViewModels
         public ISnapshotLabels Labels { get; }
         public IReadOnlyList<IRegion> Regions { get; }
         public RegionsVersion RegionsVersion { get; }
+        public ObservableCollection<SnapshotViewModel> Snapshots { get; }
     }
 }

@@ -9,12 +9,11 @@ namespace SRHWiscMano.App.ViewModels
 {
     public class ViewModelLocator
     {
-        public ViewModelLocator()
-        {
-        }
-
         public IViewerViewModel ViewerViewModel => Ioc.Default.GetRequiredService<IViewerViewModel>();
-        
+
+        public ISnapshotViewViewModel SettingViewModel => Ioc.Default.GetRequiredService<ISnapshotViewViewModel>();
+        public ISettingViewModel SettingViewModel => Ioc.Default.GetRequiredService<ISettingViewModel>();
+
         public ColorRangeSliderViewModel ColorRangeSlideViewModel => Ioc.Default.GetRequiredService<ColorRangeSliderViewModel>();
     }
 }

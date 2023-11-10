@@ -10,7 +10,7 @@ using SRHWiscMano.Core.ViewModels;
 
 namespace SRHWiscMano.App.ViewModels
 {
-    public partial class SettingViewModel : ViewModelBase
+    public partial class SettingViewModel : ViewModelBase, ISettingViewModel
     {
         private readonly ILogger<SettingViewModel> logger;
         private readonly AppSettings settings;
@@ -49,4 +49,6 @@ namespace SRHWiscMano.App.ViewModels
             logger.LogInformation("Reloaded configuration file for AppSettings");
         }
     }
+
+    
 }
