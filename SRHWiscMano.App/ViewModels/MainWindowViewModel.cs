@@ -24,7 +24,7 @@ namespace SRHWiscMano.App.ViewModels
 {
     public partial class MainWindowViewModel : ViewModelBase
     {
-        private readonly IOptions<AppSettings> settings;
+        private readonly AppSettings settings;
         private readonly IImportService<IExamination> importService;
         private readonly SharedService sharedStorageService;
         private readonly ILogger<MainWindowViewModel> logger;
@@ -51,7 +51,7 @@ namespace SRHWiscMano.App.ViewModels
         public MainWindowViewModel(IOptions<AppSettings> settings, IImportService<IExamination> importService,
             SharedService sharedStorageService, ILogger<MainWindowViewModel> logger)
         {
-            this.settings = settings;
+            this.settings = settings.Value;
             this.importService = importService;
             this.sharedStorageService = sharedStorageService;
             this.logger = logger;
@@ -179,12 +179,12 @@ namespace SRHWiscMano.App.ViewModels
             RecentFiles.Insert(0, new RecentFile(filePath));
 
             // Optional: Limit the number of recent files
-            while (RecentFiles.Count > settings.Value.MaxRecentFileSize)
+            while (RecentFiles.Count > settings.MaxRecentFileSize)
             {
                 RecentFiles.RemoveAt(RecentFiles.Count - 1);
             }
 
-            settings.Value.RecentFiles = RecentFiles.Select(sf => sf.FilePath).ToList();
+            settings.RecentFiles = RecentFiles.Select(sf => sf.FilePath).ToList();
 
             logger.LogTrace($"Added recent file : {RecentFiles[0].FileName}");
         }

@@ -37,6 +37,7 @@ namespace SRHWiscMano.App
             SRHWiscMano.Core.ServiceRegistration.ConfigureServices(services);
             SRHWiscMano.App.ServiceRegistration.ConfigureServices(services);
 
+
             ServiceProvider = services.BuildServiceProvider();
 
             Ioc.Default.ConfigureServices(ServiceProvider);
@@ -44,9 +45,6 @@ namespace SRHWiscMano.App
 
             // Logging 메시지를 back단에서 계속 받기 위해서 Instance를 미리 생성함
             Ioc.Default.GetRequiredService<LoggerWindow>();
-
-            
-            var setVM = Ioc.Default.GetRequiredService<SettingViewModel>();
 
             LogManager.GetCurrentClassLogger().Info("Application Started");
 
@@ -64,13 +62,8 @@ namespace SRHWiscMano.App
 
         protected override void OnExit(ExitEventArgs exitEventArgs)
         {
-            var settings = Ioc.Default.GetRequiredService<IOptions<AppSettings>>();
-            var configFilePath = settings.Value.FilePath;
-
-            // config 파일에 다른 section 이 있는 것을 감안하여 AppSettings Section만 업데이트 하도록 한다.
-            var jsonConfig = JObject.Parse(File.ReadAllText(configFilePath));
-            jsonConfig["AppSettings"] = JObject.Parse(JsonConvert.SerializeObject(settings.Value, Formatting.Indented));
-            File.WriteAllText(configFilePath, jsonConfig.ToString(Formatting.Indented));
+            var settingViewModel = Ioc.Default.GetRequiredService<SettingViewModel>();
+            settingViewModel.UpdateSettingsCommand.Execute(null);
 
             LogManager.Shutdown();
         }
