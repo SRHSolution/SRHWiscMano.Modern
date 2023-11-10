@@ -1,18 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
+﻿using System.Collections.Immutable;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace SRHWiscMano.Core.Models
 {
-    internal class TimeSeriesData : ITimeSeriesData
+    public class Examination : IExamination
     {
         public IReadOnlyList<Sample> Samples { get; }
         public IReadOnlyList<Note> Notes { get; }
 
-        public TimeSeriesData(IList<Sample> samples, IList<Note> notes)
+        public Examination(IList<Sample> samples, IList<Note> notes)
         {
             this.Samples = samples.ToImmutableList();
             this.Notes = notes.ToImmutableList();

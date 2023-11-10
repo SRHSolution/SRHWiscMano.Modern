@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -25,8 +26,9 @@ namespace SRHWiscMano.App.ViewModels
         private readonly ILogger<ViewerViewModel> logger;
         private readonly SharedService sharedService;
 
-        public ITimeSeriesData TimeSeriesDataSource { get; private set; }
-        
+        public IExamination ExamData { get; private set; }
+        public ObservableCollection<Note> Notes { get; }
+
         [ObservableProperty] private double minSensorData;
 
         [ObservableProperty] private double maxSensorData;
@@ -38,8 +40,8 @@ namespace SRHWiscMano.App.ViewModels
 
         public IRelayCommand FitToScreenCommand { get; }
 
-        public IRelayCommand<double> ZoomInCommand { get; }
-        public IRelayCommand<double> ZoomOutCommand { get; }
+        // public IRelayCommand<double> ZoomInCommand { get; }
+        // public IRelayCommand<double> ZoomOutCommand { get; }
         public IRelayCommand PrevSnapshotCommand { get; private set; }
         public IRelayCommand NextSnapshotCommand { get; private set;}
         
@@ -59,8 +61,8 @@ namespace SRHWiscMano.App.ViewModels
 
 
             Palettes = PaletteUtils.GetPredefinedPalettes();
-            ZoomInCommand = new RelayCommand<double>(OnZoomIn);
-            ZoomOutCommand = new RelayCommand<double>(OnZoomOut);
+            // ZoomInCommand = new RelayCommand<double>(OnZoomIn);
+            // ZoomOutCommand = new RelayCommand<double>(OnZoomOut);
 
             MaxSensorData = 100;
             MinSensorData = -10;
@@ -68,20 +70,25 @@ namespace SRHWiscMano.App.ViewModels
 
         private void SharedService_ExamDataLoaded(object? sender, EventArgs e)
         {
-            logger.LogInformation("ExamData Loaded");
+            // logger.LogInformation("ExamData Loaded");
         }
 
-        private void OnZoomOut(double zoomVal)
+        [RelayCommand]
+        private void ZoomOut(double zoomVal)
         {
             logger.LogTrace($"Zoom : {zoomVal}");
         }
 
-        private void OnZoomIn(double zoomVal)
+        [RelayCommand]
+        private void ZoomIn(double zoomVal)
         {
             logger.LogTrace($"Zoom : {zoomVal}");
         }
 
 
+        /// <summary>
+        /// Snapshot Page로 이동을 요청한다.
+        /// </summary>
         [RelayCommand]
         private void NavigateToSnapshot()
         {

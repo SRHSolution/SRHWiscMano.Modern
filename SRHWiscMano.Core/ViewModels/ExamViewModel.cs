@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using SRHWiscMano.Core.Models;
+using SRHWiscMano.Core.Services;
 
 namespace SRHWiscMano.Core.ViewModels
 {
@@ -11,5 +8,7 @@ namespace SRHWiscMano.Core.ViewModels
     /// </summary>
     public partial class ExamViewModel : ViewModelBase, IExamViewModel
     {
+        public IExamination ExamData { get; }
+        public IExamMetaData ExamMetaData { get; }
     }
 }

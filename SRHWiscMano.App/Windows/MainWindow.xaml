@@ -16,7 +16,7 @@
                  ShowMaxRestoreButton="True"
                  ShowCloseButton="True"
                  ShowMinButton="True"
-                 d:DataContext="{d:DesignInstance app:MainWindowViewModel}"
+                 d:DataContext="{d:DesignInstance viewModels:MainWindowViewModel}"
                  d:DesignHeight="600"
                  d:DesignWidth="800"
                  mah:DialogParticipation.Register="{Binding}"
@@ -35,10 +35,25 @@
                      Stroke="{Binding BorderColorBrush, Mode=OneWay}"
                      StrokeThickness="1" />
 
+            <Style x:Key="RecentFileMenuItemStyle" TargetType="{x:Type MenuItem}">
+                <Setter Property="Padding" Value="4,2"/>
+                <Setter Property="Margin" Value="0"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type MenuItem}">
+                            <Border x:Name="Border" Padding="0" Margin="0" Background="{TemplateBinding Background}">
+                                <ContentPresenter ContentSource="Header" Margin="{TemplateBinding Margin}" />
+                            </Border>
+                            <!-- Include additional template parts like visuals for checkmarks or submenus if needed -->
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
             <Style x:Key="AppThemeMenuItemStyle"
                    BasedOn="{StaticResource MahApps.Styles.MenuItem}"
                    TargetType="{x:Type MenuItem}">
-                <Setter Property="Command" Value="{Binding ChangeBaseColorCommand }" />
+                <Setter Property="Command" Value="{Binding ChangeBaseColorCommand}"/>
                 <Setter Property="CommandParameter" Value="{Binding Name, Mode=OneWay}" />
                 <Setter Property="Header" Value="{Binding Name, Mode=OneWay}" />
                 <Setter Property="Icon" Value="{StaticResource AppThemeMenuIcon}" />
@@ -81,8 +96,20 @@
               VerticalAlignment="Stretch">
             <MenuItem Header="File"
                       ItemContainerStyle="{StaticResource AppThemeMenuItemStyle}">
-                <MenuItem Header="Open" Command="{Binding OpenFileCommand}"/>
-            </MenuItem>
+                <MenuItem Header="Open" Command="{Binding OpenFileBrowserCommand}"/>
+                <MenuItem Header="Recent Files"  
+                          ItemsSource="{Binding RecentFiles, Mode=OneWay}">
+                    <MenuItem.ItemContainerStyle>
+                        <Style BasedOn="{StaticResource RecentFileMenuItemStyle}" TargetType="MenuItem"/>
+                    </MenuItem.ItemContainerStyle>
+                    <MenuItem.ItemTemplate>
+                        <DataTemplate>
+                            <!-- Menu에 연결되어 있는 DataContext 즉 Window의 DataContext인 MainWindowViewModel에 있는 Command를 수행하도록 한다 -->
+                            <MenuItem Header="{Binding FileName}" Command="{Binding DataContext.OpenRecentFileCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" CommandParameter="{Binding FilePath}" />
+                        </DataTemplate>
+                    </MenuItem.ItemTemplate>
+                </MenuItem>
+                </MenuItem>
             <MenuItem Header="Theme"
                       ItemContainerStyle="{StaticResource AppThemeMenuItemStyle}"
                       ItemsSource="{Binding AppThemes, Mode=OneWay}" />

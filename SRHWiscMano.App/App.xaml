@@ -5,7 +5,7 @@
              StartupUri="/Windows/MainWindow.xaml">
     <Application.Resources>
         <ResourceDictionary>
-            <viewModels:ViewModelLocator x:Key="Locator" xmlns:local="clr-namespace:SRHWiscMano.App"/>
+            <viewModels:ViewModelLocator x:Key="Locator" xmlns:local="clr-namespace:SRHWiscMano.App" />
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />

@@ -1,24 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.IO;
 using SRHWiscMano.Core.Helpers;
 using SRHWiscMano.Core.Models;
 
 namespace SRHWiscMano.Core.Services
 {
-    public class TimeSeriesDataTextReader : IImportService<ITimeSeriesData> 
+    public class ExamDataTextReader : IImportService<IExamination> 
     {
-        public ITimeSeriesData ReadFromFile(string filePath)
+        public IExamination? ReadFromFile(string filePath)
         {
-            var parseSamples = LoadLines(File.ReadLines(filePath).Skip(1)).ToList();
+            try
+            {
+                var parseSamples = LoadLines(File.ReadLines(filePath).Skip(1)).ToList();
 
-            NoteXmlReader notesLoader = new NoteXmlReader();
-            var notes = notesLoader.LoadRelative(filePath);// ?? Array.Empty<Note>();
-
-            return new TimeSeriesData( parseSamples, notes.ToList());
+                NoteXmlReader notesLoader = new NoteXmlReader();
+                var notes = notesLoader.LoadRelative(filePath); // ?? Array.Empty<Note>();
+                var examData = new Examination(parseSamples, notes.ToList());
+                
+                return examData;
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         internal static IEnumerable<Sample> LoadLines(IEnumerable<string> lines)

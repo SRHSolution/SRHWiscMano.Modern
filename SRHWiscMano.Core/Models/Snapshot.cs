@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using NodaTime;
+﻿using NodaTime;
 using SRHWiscMano.Core.Helpers;
 
 namespace SRHWiscMano.Core.Models
@@ -12,7 +7,7 @@ namespace SRHWiscMano.Core.Models
     {
         public Snapshot(
             string id,
-            ITimeSeriesData data,
+            IExamination data,
             string text,
             Instant time,
             Range<int> sensorRange,
@@ -39,7 +34,7 @@ namespace SRHWiscMano.Core.Models
         }
 
         public string Id { get; }
-        public ITimeSeriesData Data { get; }
+        public IExamination Data { get; }
         public string Text { get; }
         public Instant Time { get; }
         public Range<int> SensorRange { get; }

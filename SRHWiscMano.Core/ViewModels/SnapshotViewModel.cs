@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using NodaTime;
 using SRHWiscMano.Core.Helpers;
 using SRHWiscMano.Core.Models;
@@ -15,6 +10,7 @@ namespace SRHWiscMano.Core.ViewModels
     /// </summary>
     public partial class SnapshotViewModel : ViewModelBase, ISnapshot
     {
+
         private readonly ISnapshot snapshot;
         
         public SnapshotViewModel(ISnapshot snapshot)
@@ -24,14 +20,16 @@ namespace SRHWiscMano.Core.ViewModels
 
 
         public string Id => snapshot.Id;
-        public ITimeSeriesData Data { get; }
+        public IExamination Data { get; }
         public string Text { get; }
         public Instant Time { get; }
         public Range<int> SensorRange { get; }
         public int? VPUpperBound { get; }
         public int? UesLowerBound { get; }
-        public bool IsSelected { get; }
+        
+        [ObservableProperty] private bool isSelected;
         public bool NormalEligible { get; }
+
         public ISnapshotLabels Labels { get; }
         public IReadOnlyList<IRegion> Regions { get; }
         public RegionsVersion RegionsVersion { get; }

@@ -37,7 +37,6 @@ namespace SRHWiscMano.App
             SRHWiscMano.Core.ServiceRegistration.ConfigureServices(services);
             SRHWiscMano.App.ServiceRegistration.ConfigureServices(services);
 
-            // ConfigureServices(services);
             ServiceProvider = services.BuildServiceProvider();
 
             Ioc.Default.ConfigureServices(ServiceProvider);

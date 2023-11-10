@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.ComponentModel;
+using SRHWiscMano.Core.ViewModels;
 
 namespace SRHWiscMano.App.ViewModels
 {
@@ -10,7 +12,7 @@ namespace SRHWiscMano.App.ViewModels
     using System.ComponentModel;
     using System.Windows.Media;
 
-    public class ColorRangeSliderViewModel : INotifyPropertyChanged
+    public partial class ColorRangeSliderViewModel : ViewModelBase
     {
         private OxyColor _lowColor = OxyColors.Red;
         private OxyColor _highColor = OxyColors.Blue;
@@ -19,37 +21,14 @@ namespace SRHWiscMano.App.ViewModels
         private double _value = 50;
         private double _tickFrequency = 10;
 
-        public event PropertyChangedEventHandler PropertyChanged;
-
         // Convert OxyColor to System.Windows.Media.Color
         public Color LowColor => OxyColorToMediaColor(_lowColor);
+    
         public Color HighColor => OxyColorToMediaColor(_highColor);
 
-        public double Minimum
-        {
-            get => _minimum;
-            set
-            {
-                if (_minimum != value)
-                {
-                    _minimum = value;
-                    OnPropertyChanged(nameof(Minimum));
-                }
-            }
-        }
+        [ObservableProperty] private double minimum;
 
-        public double Maximum
-        {
-            get => _maximum;
-            set
-            {
-                if (_maximum != value)
-                {
-                    _maximum = value;
-                    OnPropertyChanged(nameof(Maximum));
-                }
-            }
-        }
+        [ObservableProperty] private double maximum;
 
         public double Value
         {
@@ -59,24 +38,13 @@ namespace SRHWiscMano.App.ViewModels
                 if (_value != value)
                 {
                     _value = value;
-                    OnPropertyChanged(nameof(Value));
+                    SetProperty(ref _value, value);
                     UpdateColors();
                 }
             }
         }
 
-        public double TickFrequency
-        {
-            get => _tickFrequency;
-            set
-            {
-                if (_tickFrequency != value)
-                {
-                    _tickFrequency = value;
-                    OnPropertyChanged(nameof(TickFrequency));
-                }
-            }
-        }
+        [ObservableProperty] private double tickFrequency;
 
         public ColorRangeSliderViewModel()
         {
@@ -97,11 +65,5 @@ namespace SRHWiscMano.App.ViewModels
         {
             return Color.FromArgb(oxyColor.A, oxyColor.R, oxyColor.G, oxyColor.B);
         }
-
-        protected virtual void OnPropertyChanged(string propertyName)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
     }
-
 }
