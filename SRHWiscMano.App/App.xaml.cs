@@ -41,6 +41,7 @@ namespace SRHWiscMano.App
 
             Ioc.Default.ConfigureServices(ServiceProvider);
 
+
             // Logging 메시지를 back단에서 계속 받기 위해서 Instance를 미리 생성함
             Ioc.Default.GetRequiredService<LoggerWindow>();
 

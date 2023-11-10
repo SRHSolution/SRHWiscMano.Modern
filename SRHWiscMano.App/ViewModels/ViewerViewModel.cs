@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Printing;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
@@ -36,12 +37,9 @@ namespace SRHWiscMano.App.ViewModels
         public PlotController MainPlotController { get; }
         public PlotModel OverviewPlotModel { get; }
         public PlotController OverviewPlotController { get; }
-        public double ZoomPercentage { get; set; } = 0.5;
+        [ObservableProperty] private double zoomPercentage = 100;
 
         public IRelayCommand FitToScreenCommand { get; }
-
-        // public IRelayCommand<double> ZoomInCommand { get; }
-        // public IRelayCommand<double> ZoomOutCommand { get; }
         public IRelayCommand PrevSnapshotCommand { get; private set; }
         public IRelayCommand NextSnapshotCommand { get; private set;}
         
@@ -49,8 +47,8 @@ namespace SRHWiscMano.App.ViewModels
 
 
         [ObservableProperty] private OxyPalette selectedPalette;
-
-        [ObservableProperty] private string zoomLevel = "10.0";
+        
+        [ObservableProperty] private string selectedPaletteKey;
         
 
         public ViewerViewModel(ILogger<ViewerViewModel> logger, SharedService sharedService)
@@ -59,10 +57,7 @@ namespace SRHWiscMano.App.ViewModels
             this.sharedService = sharedService;
             sharedService.ExamDataLoaded += SharedService_ExamDataLoaded;
 
-
             Palettes = PaletteUtils.GetPredefinedPalettes();
-            // ZoomInCommand = new RelayCommand<double>(OnZoomIn);
-            // ZoomOutCommand = new RelayCommand<double>(OnZoomOut);
 
             MaxSensorData = 100;
             MinSensorData = -10;
@@ -70,21 +65,32 @@ namespace SRHWiscMano.App.ViewModels
 
         private void SharedService_ExamDataLoaded(object? sender, EventArgs e)
         {
-            // logger.LogInformation("ExamData Loaded");
+
         }
 
         [RelayCommand]
         private void ZoomOut(double zoomVal)
         {
             logger.LogTrace($"Zoom : {zoomVal}");
+            ZoomPercentage = (int)(ZoomPercentage / zoomVal);
         }
 
         [RelayCommand]
         private void ZoomIn(double zoomVal)
         {
             logger.LogTrace($"Zoom : {zoomVal}");
+            ZoomPercentage = (int)(ZoomPercentage*zoomVal);
         }
 
+        [RelayCommand]
+        private void FavoritePalette(string paletteName)
+        {
+            if (Palettes.ContainsKey(paletteName))
+            {
+                SelectedPalette = Palettes[paletteName];
+                SelectedPaletteKey = paletteName;
+            }
+        }
 
         /// <summary>
         /// Snapshot Page로 이동을 요청한다.

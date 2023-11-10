@@ -29,7 +29,6 @@ namespace SRHWiscMano.Core.ViewModels
 
 
         double ZoomPercentage { get; set; }
-        string ZoomLevel { get; set; }
 
         IRelayCommand FitToScreenCommand { get; }
         IRelayCommand<double> ZoomInCommand { get; }
@@ -41,6 +40,8 @@ namespace SRHWiscMano.Core.ViewModels
         Dictionary<string, OxyPalette> Palettes { get; }
 
         OxyPalette SelectedPalette { get; }
+
+        string SelectedPaletteKey { get; }
 
         
     }
