@@ -6,16 +6,16 @@ using SRHWiscMano.Core.ViewModels;
 namespace SRHWiscMano.App.ViewModels
 {
     /// <summary>
-    /// Snapshot 들을 모두 표시하는 View의 ViewModel
+    /// TimeFrame 들을 모두 표시하는 View의 ViewModel
     /// </summary>
-    public partial class SnapshotViewViewModel : ViewModelBase, ISnapshotViewViewModel
+    public partial class ExplorerViewModel : ViewModelBase, IExplorerViewModel
     {
-        public ObservableCollection<SnapshotViewModel> Snapshots { get; }
+        public ObservableCollection<TimeFrameViewModel> TimeFrames { get; }
 
         [RelayCommand]
         private void SelectAll()
         {
-            Snapshots.ToList().ForEach(sn => sn.IsSelected = true);
+            TimeFrames.ToList().ForEach(sn => sn.IsSelected = true);
         }
 
         [RelayCommand]

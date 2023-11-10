@@ -11,7 +11,7 @@ namespace SRHWiscMano.App.ViewModels
     {
         public IViewerViewModel ViewerViewModel => Ioc.Default.GetRequiredService<IViewerViewModel>();
 
-        public ISnapshotViewViewModel SnapshotViewViewModel => Ioc.Default.GetRequiredService<ISnapshotViewViewModel>();
+        public IExplorerViewModel ExplorerViewModel => Ioc.Default.GetRequiredService<IExplorerViewModel>();
         public ISettingViewModel SettingViewModel => Ioc.Default.GetRequiredService<ISettingViewModel>();
 
         public ColorRangeSliderViewModel ColorRangeSlideViewModel => Ioc.Default.GetRequiredService<ColorRangeSliderViewModel>();

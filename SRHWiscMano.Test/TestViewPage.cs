@@ -1,5 +1,4 @@
-﻿using System.Windows;
-using System.Windows.Threading;
+﻿using System.Windows.Threading;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using MahApps.Metro.Controls;
 using Microsoft.Extensions.DependencyInjection;

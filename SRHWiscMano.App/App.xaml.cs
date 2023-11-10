@@ -62,7 +62,7 @@ namespace SRHWiscMano.App
 
         protected override void OnExit(ExitEventArgs exitEventArgs)
         {
-            var settingViewModel = Ioc.Default.GetRequiredService<SettingViewModel>();
+            var settingViewModel = Ioc.Default.GetRequiredService<ISettingViewModel>();
             settingViewModel.UpdateSettingsCommand.Execute(null);
 
             LogManager.Shutdown();

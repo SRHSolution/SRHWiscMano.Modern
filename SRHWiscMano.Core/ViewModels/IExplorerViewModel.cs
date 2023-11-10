@@ -3,9 +3,9 @@ using CommunityToolkit.Mvvm.Input;
 
 namespace SRHWiscMano.Core.ViewModels
 {
-    public interface ISnapshotViewViewModel
+    public interface IExplorerViewModel
     {
-        ObservableCollection<SnapshotViewModel> Snapshots { get; }
+        ObservableCollection<TimeFrameViewModel> TimeFrames { get; }
 
         IRelayCommand SelectAllCommand { get; }
         IRelayCommand UnselectAllCommand { get; }

@@ -6,7 +6,7 @@ namespace SRHWiscMano.Core.Models
     public class Region : IRegion
     {
         public Region(
-            ISnapshot window,
+            ITimeFrame window,
             Interval timeRange,
             Range<int> sensorRange,
             RegionType type,
@@ -20,7 +20,7 @@ namespace SRHWiscMano.Core.Models
         }
 
         public Region(
-            ISnapshot window,
+            ITimeFrame window,
             Interval timeRange,
             Range<int> sensorRange,
             RegionType type,
@@ -31,7 +31,7 @@ namespace SRHWiscMano.Core.Models
             FocalPoint = focalPoint;
         }
 
-        public ISnapshot Window { get; set; }
+        public ITimeFrame Window { get; set; }
 
         public Interval TimeRange { get; set; }
 

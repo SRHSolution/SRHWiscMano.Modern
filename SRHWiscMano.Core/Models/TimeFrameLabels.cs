@@ -1,12 +1,12 @@
 ﻿namespace SRHWiscMano.Core.Models
 {
-    public class SnapshotLabels : ISnapshotLabels
+    public class TimeFrameLabels : ITimeFrameLabels
     {
         private readonly string strategy;
         private readonly string texture;
         private readonly string volume;
 
-        public SnapshotLabels(string volume, string texture, string strategy)
+        public TimeFrameLabels(string volume, string texture, string strategy)
         {
             this.volume = volume;
             this.texture = texture;
@@ -19,9 +19,9 @@
 
         public string Strategy => strategy;
 
-        public static SnapshotLabels Empty()
+        public static TimeFrameLabels Empty()
         {
-            return new SnapshotLabels(null, null, null);
+            return new TimeFrameLabels(null, null, null);
         }
     }
 }

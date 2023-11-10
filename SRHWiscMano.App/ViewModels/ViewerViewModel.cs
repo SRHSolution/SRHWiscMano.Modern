@@ -40,8 +40,8 @@ namespace SRHWiscMano.App.ViewModels
         [ObservableProperty] private double zoomPercentage = 100;
 
         public IRelayCommand FitToScreenCommand { get; }
-        public IRelayCommand PrevSnapshotCommand { get; private set; }
-        public IRelayCommand NextSnapshotCommand { get; private set;}
+        public IRelayCommand PrevTimeFrameCommand { get; private set; }
+        public IRelayCommand NextTimeFrameCommand { get; private set;}
         
         public Dictionary<string, OxyPalette> Palettes { get; private set; }
 
@@ -93,10 +93,10 @@ namespace SRHWiscMano.App.ViewModels
         }
 
         /// <summary>
-        /// Snapshot Page로 이동을 요청한다.
+        /// Explorer Page로 이동을 요청한다.
         /// </summary>
         [RelayCommand]
-        private void NavigateToSnapshot()
+        private void NavigateToExplorer()
         {
             WeakReferenceMessenger.Default.Send(new TabIndexChangeMessage(1));
         }

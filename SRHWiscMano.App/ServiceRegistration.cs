@@ -21,7 +21,7 @@ namespace SRHWiscMano.App
             services.AddSingleton<SharedService>();
             services.AddSingleton<IViewerViewModel, ViewerViewModel>();
             services.AddSingleton<ISettingViewModel, SettingViewModel>();
-            services.AddSingleton<ISnapshotViewViewModel, SnapshotViewViewModel>();
+            services.AddSingleton<IExplorerViewModel, ExplorerViewModel>();
 
             services.AddTransient<ColorRangeSliderViewModel>();
             services.AddSingleton<MainWindowViewModel>();

@@ -33,10 +33,10 @@ namespace SRHWiscMano.Core.ViewModels
         IRelayCommand FitToScreenCommand { get; }
         IRelayCommand<double> ZoomInCommand { get; }
         IRelayCommand<double> ZoomOutCommand { get; }
-        IRelayCommand NavigateToSnapshotCommand { get; }
+        IRelayCommand NavigateToExplorerCommand { get; }
 
-        IRelayCommand PrevSnapshotCommand { get; }
-        IRelayCommand NextSnapshotCommand { get; }
+        IRelayCommand PrevTimeFrameCommand { get; }
+        IRelayCommand NextTimeFrameCommand { get; }
         Dictionary<string, OxyPalette> Palettes { get; }
 
         OxyPalette SelectedPalette { get; }

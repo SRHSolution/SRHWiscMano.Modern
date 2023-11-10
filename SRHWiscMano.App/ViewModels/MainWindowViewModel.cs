@@ -98,7 +98,7 @@ namespace SRHWiscMano.App.ViewModels
             // Tabs.Add(new TabItem()
             // {
             //     Header = "Title2",
-            //     Content = new Snapshots()
+            //     Content = new ExplorerView()
             // });
             //
             // Tabs.Add(new TabItem()

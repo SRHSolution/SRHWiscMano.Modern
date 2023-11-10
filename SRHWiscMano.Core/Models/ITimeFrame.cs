@@ -3,7 +3,7 @@ using SRHWiscMano.Core.Helpers;
 
 namespace SRHWiscMano.Core.Models
 {
-    public interface ISnapshot
+    public interface ITimeFrame
     {
         string Id { get; }
 
@@ -23,7 +23,7 @@ namespace SRHWiscMano.Core.Models
 
         bool NormalEligible { get; }
 
-        ISnapshotLabels Labels { get; }
+        ITimeFrameLabels Labels { get; }
 
         IReadOnlyList<IRegion> Regions { get; }
 

@@ -84,8 +84,8 @@
                     Height="32 "
                     Margin="2"
                     Foreground="{DynamicResource MahApps.Brushes.Accent}"
-                    Style="{StaticResource MahApps.Styles.Button.Circle}" ToolTip="Navigate to snapshot view"
-                    Command="{Binding NavigateToSnapshotCommand}">
+                    Style="{StaticResource MahApps.Styles.Button.Circle}" ToolTip="Navigate to explorer view"
+                    Command="{Binding NavigateToExplorerCommand}">
                 <Button.ContentTemplate>
                     <DataTemplate>
                         <iconPacks:PackIconIonicons Kind="ListBoxMD" />
