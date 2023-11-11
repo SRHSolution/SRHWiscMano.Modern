@@ -2,21 +2,16 @@
 {
     public class Patient : IPatient
     {
-        public static readonly Patient Empty = new Patient(null, new int?(), "Unspecified");
-        private readonly string id;
-        private readonly int? age;
-        private readonly string gender;
+        public static readonly Patient Empty = new(string.Empty, new int?(), "Unspecified");
+        public string Id { get; }
+        public int? Age { get; }
+        public string Gender { get; }
 
         public Patient(string id, int? age, string gender)
         {
-            this.id = id;
-            this.age = age;
-            this.gender = gender;
+            this.Id = id;
+            this.Age = age;
+            this.Gender = gender;
         }
-
-        public string Id => id;
-
-        public int? Age => age;
-        public string Gender => gender;
     }
 }

@@ -1,8 +1,7 @@
 ﻿using NodaTime;
-using SRHWiscMano.Core.Helpers;
 using Range = SRHWiscMano.Core.Helpers.Range;
 
-namespace SRHWiscMano.Core.Models
+namespace SRHWiscMano.Core.Helpers
 {
     /// <summary>
     /// Sample 시간을 통합하여 Duration과 Instant로 변환하여 관리한다.
@@ -14,17 +13,10 @@ namespace SRHWiscMano.Core.Models
     /// Interval : 1970-01-01T00:00:00Z
     /// Duration : 0:00:10:17.86
     /// </summary>
-    public static class SampleTime
+    public static class InstantExtensions
     {
         public static readonly Instant Epoch = new Instant();
         public static readonly Interval EmptyInterval = new Interval(Epoch, Epoch);
-
-        
-
-        public static Instant InstantFromMilliseconds(long milliseconds)
-        {
-            return Epoch + Duration.FromMilliseconds(milliseconds);
-        }
 
         public static long ToMillisecondsFromEpoch(this Instant time)
         {

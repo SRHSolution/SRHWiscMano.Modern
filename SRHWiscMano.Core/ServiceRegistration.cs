@@ -12,9 +12,9 @@ namespace SRHWiscMano.Core
             // services.AddSingleton<IClock, SystemClock>(sp => SystemClock.Instance);
             services.AddTransient<IExamViewModel, ExamViewModel>();
             services.AddTransient<IImportService<IExamination>, ExamDataTextReader>();
+            services.AddTransient<NoteXmlReader>();
             // services.AddTransient<ISnapshotViewModel, SnapshotViewModel>();
             // services.AddTransient<ISnapshotLabelsParser, SnapshotLabelsParser>();
-            // services.AddTransient<IExaminationDataImporter, ExaminationDataTextReader>();
             // services.AddTransient<IExaminationDataSerializer, ExaminationDataSerializer>();
             // services.AddTransient<IRegionFinder, RegionFinder>();
             // services.AddTransient<IResultsCalculator, ResultsCalculator>();

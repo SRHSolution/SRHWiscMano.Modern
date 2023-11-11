@@ -1,6 +1,4 @@
-﻿using SRHWiscMano.Core.Models;
-
-namespace SRHWiscMano.Core.Services
+﻿namespace SRHWiscMano.Core.Models
 {
     public interface IExamMetaData
     {

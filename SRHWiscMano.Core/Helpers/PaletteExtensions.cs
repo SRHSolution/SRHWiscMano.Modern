@@ -63,7 +63,7 @@ namespace SRHWiscMano.Core.Helpers
             ScaleTransform scaleTransform = new ScaleTransform(scaleX, scaleY);
 
             // Create a TransformedBitmap to apply the scale transform
-            // Note that this approach may result in lower quality
+            // FrameNote that this approach may result in lower quality
             TransformedBitmap transformedBitmap = new TransformedBitmap(source, scaleTransform);
             transformedBitmap.Freeze(); // Freeze the bitmap for performance benefits
 

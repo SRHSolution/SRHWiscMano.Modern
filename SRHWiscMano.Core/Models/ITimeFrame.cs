@@ -27,7 +27,7 @@ namespace SRHWiscMano.Core.Models
 
         IReadOnlyList<IRegion> Regions { get; }
 
-        RegionsVersion RegionsVersion { get; }
+        RegionsVersionType RegionsVersionType { get; }
     }
 
     

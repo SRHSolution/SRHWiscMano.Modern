@@ -9,7 +9,7 @@ namespace SRHWiscMano.Core.ViewModels
     {
         IExamination ExamData { get; }
 
-        ObservableCollection<Note> Notes { get; }
+        ObservableCollection<FrameNote> Notes { get; }
 
         double MinSensorData { get; }
         double MaxSensorData { get; }

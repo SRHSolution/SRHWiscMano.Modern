@@ -13,7 +13,7 @@ namespace SRHWiscMano.Core.Services
                 var parseSamples = LoadLines(File.ReadLines(filePath).Skip(1)).ToList();
 
                 NoteXmlReader notesLoader = new NoteXmlReader();
-                var notes = notesLoader.LoadRelative(filePath) ?? Array.Empty<Note>();
+                var notes = notesLoader.LoadRelative(filePath) ?? Array.Empty<FrameNote>();
                 var examData = new Examination(parseSamples, notes.ToList());
                 
                 return examData;
@@ -24,12 +24,12 @@ namespace SRHWiscMano.Core.Services
             }
         }
 
-        internal static IEnumerable<Sample> LoadLines(IEnumerable<string> lines)
+        internal static IEnumerable<TimeSample> LoadLines(IEnumerable<string> lines)
         {
             return lines.Select(ParseLine);
         }
 
-        private static Sample ParseLine(string line)
+        private static TimeSample ParseLine(string line)
         {
             string[] source = line.Split('\t');
             long milliseconds = source.Length > 1
@@ -46,7 +46,7 @@ namespace SRHWiscMano.Core.Services
                 }
                 else
                     doubleList.Add(s.AsDoubleOrDefault());
-            return new Sample(SampleTime.InstantFromMilliseconds(milliseconds), values);
+            return new TimeSample(InstantUtils.InstantFromMilliseconds(milliseconds), values);
         }
 
         private static long TryParseTime(string timeField)

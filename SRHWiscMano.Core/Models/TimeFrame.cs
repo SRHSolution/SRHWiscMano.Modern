@@ -17,7 +17,7 @@ namespace SRHWiscMano.Core.Models
             bool normalEligible,
             ITimeFrameLabels labels,
             IReadOnlyList<IRegion> regions,
-            RegionsVersion regionsVersion)
+            RegionsVersionType regionsVersionType)
         {
             Id = id;
             Data = data;
@@ -30,7 +30,7 @@ namespace SRHWiscMano.Core.Models
             NormalEligible = normalEligible;
             Labels = labels;
             Regions = regions;
-            RegionsVersion = regionsVersion;
+            RegionsVersionType = regionsVersionType;
         }
 
         public string Id { get; }
@@ -44,6 +44,6 @@ namespace SRHWiscMano.Core.Models
         public bool NormalEligible { get; }
         public ITimeFrameLabels Labels { get; }
         public IReadOnlyList<IRegion> Regions { get; }
-        public RegionsVersion RegionsVersion { get; }
+        public RegionsVersionType RegionsVersionType { get; }
     }
 }

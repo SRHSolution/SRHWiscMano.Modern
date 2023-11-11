@@ -2,7 +2,7 @@
 {
     public interface IExamination
     {
-        IReadOnlyList<Sample> Samples { get; }
-        IReadOnlyList<Note> Notes { get; }
+        IReadOnlyList<TimeSample> Samples { get; }
+        IReadOnlyList<FrameNote> Notes { get; }
     }
 }

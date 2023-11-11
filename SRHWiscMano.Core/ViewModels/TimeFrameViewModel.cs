@@ -32,7 +32,6 @@ namespace SRHWiscMano.Core.ViewModels
 
         public ITimeFrameLabels Labels { get; }
         public IReadOnlyList<IRegion> Regions { get; }
-        public RegionsVersion RegionsVersion { get; }
-        public ObservableCollection<TimeFrameViewModel> TimeFrames { get; }
+        public RegionsVersionType RegionsVersionType { get; }
     }
 }

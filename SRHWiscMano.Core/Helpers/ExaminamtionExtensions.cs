@@ -1,8 +1,8 @@
 ﻿using NodaTime;
-using SRHWiscMano.Core.Helpers;
+using SRHWiscMano.Core.Models;
 using Range = SRHWiscMano.Core.Helpers.Range;
 
-namespace SRHWiscMano.Core.Models
+namespace SRHWiscMano.Core.Helpers
 {
     public static class ExaminamtionExtensions
     {
@@ -25,12 +25,12 @@ namespace SRHWiscMano.Core.Models
 
         public static Instant StartTime(this IExamination data)
         {
-            return data.Samples.Count <= 0 ? SampleTime.Epoch : data.Samples[0].Time;
+            return data.Samples.Count <= 0 ? InstantExtensions.Epoch : data.Samples[0].Time;
         }
 
         public static Instant EndTime(this IExamination data)
         {
-            return data.Samples.Count <= 0 ? SampleTime.Epoch : data.Samples[data.Samples.Count - 1].Time;
+            return data.Samples.Count <= 0 ? InstantExtensions.Epoch : data.Samples[data.Samples.Count - 1].Time;
         }
 
         public static Interval TotalTime(this IExamination data)

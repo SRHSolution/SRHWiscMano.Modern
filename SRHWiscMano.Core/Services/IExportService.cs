@@ -2,7 +2,7 @@
 {
     interface IExportService
     {
-        void ExportToPdf();
+        void WriteToFile();
 
     }
 }
