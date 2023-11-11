@@ -18,6 +18,7 @@ using SRHWiscMano.App.Data;
 using SRHWiscMano.App.ViewModels;
 using SRHWiscMano.App.Windows;
 using SRHWiscMano.Core.Services;
+using SRHWiscMano.Core.ViewModels;
 
 namespace SRHWiscMano.App
 {

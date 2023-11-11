@@ -12,10 +12,15 @@ namespace SRHWiscMano.App.ViewModels
 {
     public partial class SettingViewModel : ViewModelBase, ISettingViewModel
     {
+        #region Services
+
         private readonly ILogger<SettingViewModel> logger;
         private readonly AppSettings settings;
 
-        public SettingViewModel(IOptions<AppSettings> settings, ILogger<SettingViewModel> logger)
+        #endregion
+
+
+        public SettingViewModel(ILogger<SettingViewModel> logger, IOptions<AppSettings> settings)
         {
             this.logger = logger;
             this.settings = settings.Value;

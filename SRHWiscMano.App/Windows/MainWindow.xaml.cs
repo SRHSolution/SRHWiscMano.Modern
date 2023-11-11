@@ -1,8 +1,8 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
 using MahApps.Metro.Controls;
-using SRHWiscMano.App.Windows;
+using SRHWiscMano.App.ViewModels;
 
-namespace SRHWiscMano.App
+namespace SRHWiscMano.App.Windows
 {
    
     /// <summary>
@@ -13,7 +13,7 @@ namespace SRHWiscMano.App
         public MainWindow()
         {
             InitializeComponent();
-            this.DataContext = Ioc.Default.GetService<ViewModels.MainWindowViewModel>();
+            this.DataContext = Ioc.Default.GetService<MainWindowViewModel>();
         }
 
         private void MetroWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)

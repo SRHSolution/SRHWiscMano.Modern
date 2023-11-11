@@ -24,29 +24,30 @@ namespace SRHWiscMano.App.ViewModels
 {
     public partial class MainWindowViewModel : ViewModelBase
     {
-        private readonly AppSettings settings;
-        private readonly IImportService<IExamination> importService;
-        private readonly SharedService sharedStorageService;
+        #region Services
+
         private readonly ILogger<MainWindowViewModel> logger;
+        private readonly IImportService<IExamination> importService;
+        private readonly AppSettings settings;
+        private readonly SharedService sharedStorageService;
+
+        #endregion
 
         /// <summary>
         /// Tab Index로 Tab 화면을 제어한다
         /// </summary>
         [ObservableProperty] private int selectedTabIndex;
 
+        /// <summary>
+        /// Menu 에서 Open 한 최신 파일정보를 갖는다
+        /// </summary>
         public ObservableCollection<RecentFile> RecentFiles{ get; } = new ObservableCollection<RecentFile>();
 
         /// <summary>
-        /// 생성자에서 가능한 Theme 를 로드하므로 ObservableCollection 은 해당이 안된다.
+        /// 생성자에서 구성한 Theme 를 1회성으로 로드하므로 ObservableCollection 은 해당이 안된다.
         /// </summary>
-        public List<AppThemeMenu> AppThemes { get; set; }
-
-        public List<AppThemeMenu> AppAccentThemes { get; set; }
-
-        /// <summary>
-        /// 동적으로 Tabs을 제어할 수 있는 것을 테스트 하기 위함.
-        /// </summary>
-        public ObservableCollection<TabItem> Tabs { get; set; } = new ObservableCollection<TabItem>();
+        public List<AppThemeMenu> AppThemes { get; private set; }
+        public List<AppThemeMenu> AppAccentThemes { get; private set; }
 
         public MainWindowViewModel(IOptions<AppSettings> settings, IImportService<IExamination> importService,
             SharedService sharedStorageService, ILogger<MainWindowViewModel> logger)
@@ -85,29 +86,15 @@ namespace SRHWiscMano.App.ViewModels
                 })
                 .ToList();
 
-
-
+            // Messenger를 통한 TabIndex를 변경한다.
             WeakReferenceMessenger.Default.Register<TabIndexChangeMessage>(this, OnTabIndexChange);
-
-            // Tabs.Add(new TabItem()
-            // {
-            //     Header = "Title1",
-            //     Content = new ViewerView()
-            // });
-            //
-            // Tabs.Add(new TabItem()
-            // {
-            //     Header = "Title2",
-            //     Content = new ExplorerView()
-            // });
-            //
-            // Tabs.Add(new TabItem()
-            // {
-            //     Header = "Title3",
-            //     Content = new ViewerView()
-            // });
         }
 
+        /// <summary>
+        /// Tab Index 변경 메시지를 수신시 수행한다.
+        /// </summary>
+        /// <param name="recipient"></param>
+        /// <param name="message"></param>
         private void OnTabIndexChange(object recipient, TabIndexChangeMessage message)
         {
             var index = message.Value;

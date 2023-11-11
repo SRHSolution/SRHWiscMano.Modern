@@ -15,6 +15,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using NLog.Targets;
 using SRHWiscMano.App.Controls;
+using Microsoft.Extensions.Options;
 
 namespace SRHWiscMano.App.Windows
 {
