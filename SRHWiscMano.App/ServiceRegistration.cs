@@ -19,12 +19,13 @@ namespace SRHWiscMano.App
         public static void ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton<SharedService>();
+            services.AddSingleton<MainWindowViewModel>();
             services.AddSingleton<IViewerViewModel, ViewerViewModel>();
-            services.AddSingleton<ISettingViewModel, SettingViewModel>();
             services.AddSingleton<IExplorerViewModel, ExplorerViewModel>();
+            services.AddSingleton<IAnalyzerViewModel, AnalyzerViewModel>();
+            services.AddSingleton<ISettingViewModel, SettingViewModel>();
 
             services.AddTransient<ColorRangeSliderViewModel>();
-            services.AddSingleton<MainWindowViewModel>();
             services.AddSingleton<LoggerWindow>();
 
             var configPath = Path.Combine(Directory.GetCurrentDirectory(), "configuration.json");
