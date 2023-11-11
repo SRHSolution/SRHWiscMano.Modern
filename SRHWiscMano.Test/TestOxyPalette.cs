@@ -1,18 +1,8 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Controls;
 using OxyPlot;
-using OxyPlot.SkiaSharp;
 using SRHWiscMano.Core.Helpers;
 using System.Windows.Media.Imaging;
-using System.Windows.Media;
-using SkiaSharp;
-using System.Windows.Media.Media3D;
 
 namespace SRHWiscMano.Test
 {

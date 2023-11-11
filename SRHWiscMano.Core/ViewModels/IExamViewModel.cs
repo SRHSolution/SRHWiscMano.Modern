@@ -1,5 +1,4 @@
 ﻿using SRHWiscMano.Core.Models;
-using SRHWiscMano.Core.Services;
 
 namespace SRHWiscMano.Core.ViewModels
 {

@@ -1,4 +1,4 @@
-﻿<mah:MetroWindow x:Class="SRHWiscMano.App.MainWindow"
+﻿<mah:MetroWindow x:Class="SRHWiscMano.App.Windows.MainWindow"
                  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -91,7 +91,7 @@
         </Grid.RowDefinitions>
 
         <Menu Grid.Row="0"
-              Margin="5"
+              Margin="5,0,5,0"
               HorizontalAlignment="Left"
               VerticalAlignment="Stretch">
             <MenuItem Header="File"
@@ -105,7 +105,7 @@
                     <MenuItem.ItemTemplate>
                         <DataTemplate>
                             <!-- Menu에 연결되어 있는 DataContext 즉 Window의 DataContext인 MainWindowViewModel에 있는 Command를 수행하도록 한다 -->
-                            <MenuItem Header="{Binding FileName}" Command="{Binding DataContext.OpenRecentFileCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" CommandParameter="{Binding FilePath}" />
+                            <MenuItem Header="{Binding FileName}" Command="{Binding DataContext.OpenRecentFileCommand, RelativeSource={RelativeSource AncestorType={x:Type Menu}}}" CommandParameter="{Binding FilePath}" />
                         </DataTemplate>
                     </MenuItem.ItemTemplate>
                 </MenuItem>
@@ -117,24 +117,25 @@
                       ItemContainerStyle="{StaticResource AppThemeAccentItemStyle}"
                       ItemsSource="{Binding AppAccentThemes, Mode=OneWay}" />
         </Menu>
-        <mah:MetroAnimatedSingleRowTabControl x:Name="MainTabControl" Grid.Row="1" SelectedIndex="{Binding SelectedTabIndex, Mode=TwoWay}" mah:HeaderedControlHelper.HeaderFontFamily="Noto Sans" mah:HeaderedControlHelper.HeaderFontSize="20" mah:TabControlHelper.Underlined="SelectedTabItem">
-            <TabItem Header="Viewers" ToolTip="Select ExamData Viewer">
+        <mah:MetroAnimatedSingleRowTabControl x:Name="MainTabControl" Grid.Row="1" SelectedIndex="{Binding SelectedTabIndex, Mode=TwoWay}" mah:HeaderedControlHelper.HeaderFontFamily="Noto Sans" mah:HeaderedControlHelper.HeaderFontSize="20"  mah:TabControlHelper.Underlined="SelectedTabItem" Margin="5,0,5,5">
+            <TabItem Header="Viewer" ToolTip="Select ExamData Viewer">
+                <ScrollViewer 
+                              HorizontalScrollBarVisibility="Auto"
+                              VerticalScrollBarVisibility="Auto" >
+                    <view:ViewerView Margin="5"/>
+                </ScrollViewer>
+            </TabItem>
+            <TabItem Header="Explorer" ToolTip="Select explorer View">
                 <ScrollViewer 
                               HorizontalScrollBarVisibility="Auto"
                               VerticalScrollBarVisibility="Auto">
-                    <view:ViewerView/>
+                    <view:ExplorerView Margin="5"/>
                 </ScrollViewer>
             </TabItem>
-            <TabItem Header="Snapshots" ToolTip="Select Snapshot View">
-                <ScrollViewer 
-                              HorizontalScrollBarVisibility="Auto"
-                              VerticalScrollBarVisibility="Auto">
-                    <view:Snapshots/>
-                </ScrollViewer>
-            </TabItem>
-            <TabItem Header="Details" ToolTip="Select Snapshot Detail View">
+            <TabItem Header="Analyzer" ToolTip="Select analyzer View">
                 <ScrollViewer HorizontalScrollBarVisibility="Auto"
                               VerticalScrollBarVisibility="Auto">
+                    <view:AnalyzerView Margin="5"/>
                     <!-- <exampleViews:ButtonsExample DataContext="{Binding}" /> -->
                 </ScrollViewer>
             </TabItem>

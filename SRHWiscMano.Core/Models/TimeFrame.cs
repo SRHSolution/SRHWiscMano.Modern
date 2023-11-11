@@ -3,9 +3,9 @@ using SRHWiscMano.Core.Helpers;
 
 namespace SRHWiscMano.Core.Models
 {
-    public class Snapshot : ISnapshot
+    public class TimeFrame : ITimeFrame
     {
-        public Snapshot(
+        public TimeFrame(
             string id,
             IExamination data,
             string text,
@@ -15,9 +15,9 @@ namespace SRHWiscMano.Core.Models
             int? uesLowerBound,
             bool isSelected,
             bool normalEligible,
-            ISnapshotLabels labels,
+            ITimeFrameLabels labels,
             IReadOnlyList<IRegion> regions,
-            RegionsVersion regionsVersion)
+            RegionsVersionType regionsVersionType)
         {
             Id = id;
             Data = data;
@@ -30,7 +30,7 @@ namespace SRHWiscMano.Core.Models
             NormalEligible = normalEligible;
             Labels = labels;
             Regions = regions;
-            RegionsVersion = regionsVersion;
+            RegionsVersionType = regionsVersionType;
         }
 
         public string Id { get; }
@@ -42,8 +42,8 @@ namespace SRHWiscMano.Core.Models
         public int? UesLowerBound { get; }
         public bool IsSelected { get; }
         public bool NormalEligible { get; }
-        public ISnapshotLabels Labels { get; }
+        public ITimeFrameLabels Labels { get; }
         public IReadOnlyList<IRegion> Regions { get; }
-        public RegionsVersion RegionsVersion { get; }
+        public RegionsVersionType RegionsVersionType { get; }
     }
 }

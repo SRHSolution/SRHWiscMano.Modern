@@ -24,32 +24,33 @@ namespace SRHWiscMano.App.ViewModels
 {
     public partial class ViewerViewModel : ViewModelBase, IViewerViewModel
     {
+        #region Services
+
         private readonly ILogger<ViewerViewModel> logger;
         private readonly SharedService sharedService;
 
+        #endregion
+
         public IExamination ExamData { get; private set; }
-        public ObservableCollection<Note> Notes { get; }
+        public ObservableCollection<FrameNote> Notes { get; }
 
-        [ObservableProperty] private double minSensorData;
-
-        [ObservableProperty] private double maxSensorData;
         public PlotModel MainPlotModel { get; private set; }
         public PlotController MainPlotController { get; }
         public PlotModel OverviewPlotModel { get; }
         public PlotController OverviewPlotController { get; }
+
+        [ObservableProperty] private double minSensorData;
+        [ObservableProperty] private double maxSensorData;
         [ObservableProperty] private double zoomPercentage = 100;
+        [ObservableProperty] private OxyPalette selectedPalette;
+        [ObservableProperty] private string selectedPaletteKey;
 
         public IRelayCommand FitToScreenCommand { get; }
-        public IRelayCommand PrevSnapshotCommand { get; private set; }
-        public IRelayCommand NextSnapshotCommand { get; private set;}
+        public IRelayCommand PrevTimeFrameCommand { get; private set; }
+        public IRelayCommand NextTimeFrameCommand { get; private set;}
         
         public Dictionary<string, OxyPalette> Palettes { get; private set; }
 
-
-        [ObservableProperty] private OxyPalette selectedPalette;
-        
-        [ObservableProperty] private string selectedPaletteKey;
-        
 
         public ViewerViewModel(ILogger<ViewerViewModel> logger, SharedService sharedService)
         {
@@ -85,19 +86,21 @@ namespace SRHWiscMano.App.ViewModels
         [RelayCommand]
         private void FavoritePalette(string paletteName)
         {
-            if (Palettes.ContainsKey(paletteName))
+            if (Palettes != null && Palettes.ContainsKey(paletteName))
             {
+                logger.LogTrace($"Select favorite palette {paletteName}");
                 SelectedPalette = Palettes[paletteName];
                 SelectedPaletteKey = paletteName;
             }
         }
 
         /// <summary>
-        /// Snapshot Page로 이동을 요청한다.
+        /// Explorer Page로 이동을 요청한다.
         /// </summary>
         [RelayCommand]
-        private void NavigateToSnapshot()
+        private void NavigateToExplorer()
         {
+            logger.LogTrace($"Request navigate to Explorer view");
             WeakReferenceMessenger.Default.Send(new TabIndexChangeMessage(1));
         }
     }

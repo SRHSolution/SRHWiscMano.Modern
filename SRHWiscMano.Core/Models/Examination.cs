@@ -1,14 +1,15 @@
 ﻿using System.Collections.Immutable;
 using System.Text;
+using SRHWiscMano.Core.Helpers;
 
 namespace SRHWiscMano.Core.Models
 {
     public class Examination : IExamination
     {
-        public IReadOnlyList<Sample> Samples { get; }
-        public IReadOnlyList<Note> Notes { get; }
+        public IReadOnlyList<TimeSample> Samples { get; }
+        public IReadOnlyList<FrameNote> Notes { get; }
 
-        public Examination(IList<Sample> samples, IList<Note> notes)
+        public Examination(IList<TimeSample> samples, IList<FrameNote> notes)
         {
             this.Samples = samples.ToImmutableList();
             this.Notes = notes.ToImmutableList();

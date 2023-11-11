@@ -21,13 +21,13 @@
             RegionType.UES
         };
 
-        public static RegionType[] All(RegionsVersion version)
+        public static RegionType[] All(RegionsVersionType versionType)
         {
-            if (version == RegionsVersion.UsesMP)
+            if (versionType == RegionsVersionType.UsesMP)
                 return AllUsingMP;
-            if (version == RegionsVersion.UsesTBAndHP)
+            if (versionType == RegionsVersionType.UsesTBAndHP)
                 return AllUsingTBAndHP;
-            throw new ArgumentException("Invalid regions version", nameof(version));
+            throw new ArgumentException("Invalid regions versionType", nameof(versionType));
         }
     }
 }

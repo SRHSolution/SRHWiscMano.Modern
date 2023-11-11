@@ -1,11 +1,12 @@
 ﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.Input;
+using SRHWiscMano.Core.Models;
 
 namespace SRHWiscMano.Core.ViewModels
 {
-    interface ISnapshotViewModel
+    public interface IExplorerViewModel
     {
-        ObservableCollection<SnapshotViewModel> Snapshots { get; }
+        ObservableCollection<TimeFrameViewModel> TimeFrames { get; }
 
         IRelayCommand SelectAllCommand { get; }
         IRelayCommand UnselectAllCommand { get; }

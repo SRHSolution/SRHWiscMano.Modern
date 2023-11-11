@@ -10,9 +10,17 @@ using SRHWiscMano.Core.ViewModels;
 
 namespace SRHWiscMano.App.ViewModels
 {
+    /// <summary>
+    /// App Theme 메뉴 ViewModel
+    /// </summary>
     public partial class AppThemeMenu : ViewModelBase
     {
+        #region Services
+
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         private readonly AppSettings? settings;
+
+        #endregion
 
         [ObservableProperty] private string? name;
 
@@ -22,8 +30,6 @@ namespace SRHWiscMano.App.ViewModels
 
         public RelayCommand<string?> ChangeBaseColorCommand { get; }
         public RelayCommand<string?> ChangeAccentColorCommand { get; }
-
-        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
 
         public AppThemeMenu(IOptions<AppSettings> settings) : this()

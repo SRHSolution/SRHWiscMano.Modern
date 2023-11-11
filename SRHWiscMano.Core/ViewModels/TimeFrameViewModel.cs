@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System.Collections.ObjectModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using NodaTime;
 using SRHWiscMano.Core.Helpers;
 using SRHWiscMano.Core.Models;
@@ -8,18 +9,17 @@ namespace SRHWiscMano.Core.ViewModels
     /// <summary>
     /// 센서 데이터에서 분석을 위한 Snapshot 을 지정하고 이를 View 표기하기 위한 ViewModel
     /// </summary>
-    public partial class SnapshotViewModel : ViewModelBase, ISnapshot
+    public partial class TimeFrameViewModel : ViewModelBase, ITimeFrame
     {
-
-        private readonly ISnapshot snapshot;
+        private readonly ITimeFrame timeFrame;
         
-        public SnapshotViewModel(ISnapshot snapshot)
+        public TimeFrameViewModel(ITimeFrame timeFrame)
         {
-            this.snapshot = snapshot;
+            this.timeFrame = timeFrame;
         }
 
 
-        public string Id => snapshot.Id;
+        public string Id => timeFrame.Id;
         public IExamination Data { get; }
         public string Text { get; }
         public Instant Time { get; }
@@ -30,8 +30,8 @@ namespace SRHWiscMano.Core.ViewModels
         [ObservableProperty] private bool isSelected;
         public bool NormalEligible { get; }
 
-        public ISnapshotLabels Labels { get; }
+        public ITimeFrameLabels Labels { get; }
         public IReadOnlyList<IRegion> Regions { get; }
-        public RegionsVersion RegionsVersion { get; }
+        public RegionsVersionType RegionsVersionType { get; }
     }
 }

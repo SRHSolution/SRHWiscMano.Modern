@@ -16,11 +16,11 @@ using System.Windows.Shapes;
 namespace SRHWiscMano.App.Views
 {
     /// <summary>
-    /// Interaction logic for Snapshots.xaml
+    /// Interaction logic for ExplorerView.xaml
     /// </summary>
-    public partial class Snapshots : UserControl
+    public partial class ExplorerView : UserControl
     {
-        public Snapshots()
+        public ExplorerView()
         {
             InitializeComponent();
         }

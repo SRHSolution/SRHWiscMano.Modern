@@ -5,7 +5,7 @@ namespace SRHWiscMano.Core.Models
 {
     public interface IRegion
     {
-        ISnapshot Window { get; }
+        ITimeFrame Window { get; }
 
         Interval TimeRange { get; }
 

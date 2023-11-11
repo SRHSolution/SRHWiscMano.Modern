@@ -18,6 +18,7 @@ using SRHWiscMano.App.Data;
 using SRHWiscMano.App.ViewModels;
 using SRHWiscMano.App.Windows;
 using SRHWiscMano.Core.Services;
+using SRHWiscMano.Core.ViewModels;
 
 namespace SRHWiscMano.App
 {
@@ -62,7 +63,7 @@ namespace SRHWiscMano.App
 
         protected override void OnExit(ExitEventArgs exitEventArgs)
         {
-            var settingViewModel = Ioc.Default.GetRequiredService<SettingViewModel>();
+            var settingViewModel = Ioc.Default.GetRequiredService<ISettingViewModel>();
             settingViewModel.UpdateSettingsCommand.Execute(null);
 
             LogManager.Shutdown();

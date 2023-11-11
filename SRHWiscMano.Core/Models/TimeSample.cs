@@ -1,14 +1,15 @@
 ﻿using NodaTime;
+using SRHWiscMano.Core.Helpers;
 
 namespace SRHWiscMano.Core.Models
 {
 
-    public class Sample : ITimeSeries
+    public class TimeSample : ITimeSeries
     {
         private readonly Instant time;
         private readonly IReadOnlyList<double> values;
 
-        public Sample(Instant time, IReadOnlyList<double> values)
+        public TimeSample(Instant time, IReadOnlyList<double> values)
         {
             this.time = time;
             this.values = values;
@@ -16,7 +17,7 @@ namespace SRHWiscMano.Core.Models
 
         public Instant Time => time;
 
-        public double TimeInSeconds => (time - SampleTime.Epoch).ToTimeSpan().TotalSeconds;
+        public double TimeInSeconds => (time - InstantExtensions.Epoch).ToTimeSpan().TotalSeconds;
 
         public IReadOnlyList<double> Values => values;
 

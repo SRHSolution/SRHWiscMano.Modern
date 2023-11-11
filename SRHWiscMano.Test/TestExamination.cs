@@ -1,13 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel.Resources;
-using NodaTime;
-using NodaTime.Text;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
+using SRHWiscMano.Core.Helpers;
 using SRHWiscMano.Core.Models;
 using SRHWiscMano.Core.Services;
 

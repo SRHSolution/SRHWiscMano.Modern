@@ -9,7 +9,7 @@ namespace SRHWiscMano.Core.ViewModels
     {
         IExamination ExamData { get; }
 
-        ObservableCollection<Note> Notes { get; }
+        ObservableCollection<FrameNote> Notes { get; }
 
         double MinSensorData { get; }
         double MaxSensorData { get; }
@@ -33,10 +33,10 @@ namespace SRHWiscMano.Core.ViewModels
         IRelayCommand FitToScreenCommand { get; }
         IRelayCommand<double> ZoomInCommand { get; }
         IRelayCommand<double> ZoomOutCommand { get; }
-        IRelayCommand NavigateToSnapshotCommand { get; }
+        IRelayCommand NavigateToExplorerCommand { get; }
 
-        IRelayCommand PrevSnapshotCommand { get; }
-        IRelayCommand NextSnapshotCommand { get; }
+        IRelayCommand PrevTimeFrameCommand { get; }
+        IRelayCommand NextTimeFrameCommand { get; }
         Dictionary<string, OxyPalette> Palettes { get; }
 
         OxyPalette SelectedPalette { get; }

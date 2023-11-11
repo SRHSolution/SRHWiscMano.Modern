@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using SRHWiscMano.Core.Models;
-using SRHWiscMano.Core.Services;
 using SRHWiscMano.Core.ViewModels;
 
 namespace SRHWiscMano.App.Services

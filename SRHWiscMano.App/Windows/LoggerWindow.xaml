@@ -6,8 +6,11 @@
                  xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
                  xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
                  xmlns:local="clr-namespace:SRHWiscMano.App.Windows"
-                 mc:Ignorable="d"
-                 Title="Logger Window" d:DesignWidth="400" d:DesignHeight="450" Closing="MetroWindow_Closing">
+                 xmlns:viewModels="clr-namespace:SRHWiscMano.App.ViewModels"
+                 Title="Logger Window"  Closing="MetroWindow_Closing" 
+                 mc:Ignorable="d" 
+                 d:DataContext="{d:DesignInstance viewModels:LoggerWindowViewModel}" 
+                 d:DesignWidth="400" d:DesignHeight="450">
     <Grid>
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
             <TextBox x:Name="LogTextBox" IsReadOnly="True" />

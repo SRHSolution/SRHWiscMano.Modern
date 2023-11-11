@@ -1,17 +1,31 @@
-﻿using SRHWiscMano.Core.Models;
+﻿using SRHWiscMano.Core.Helpers;
+using SRHWiscMano.Core.Models;
+using SRHWiscMano.Core.ViewModels;
 using System.IO;
 using System.Xml;
+using Microsoft.Extensions.Logging;
+using NLog;
 
 namespace SRHWiscMano.Core.Services
 {
     public class NoteXmlReader
     {
-        public IEnumerable<Note> LoadRelative(string dataFilePath, string extension = "examination.xml")
+        private Logger logger = LogManager.GetCurrentClassLogger();
+
+        public IEnumerable<FrameNote> LoadRelative(string dataFilePath, string extension = "examination.xml")
         {
-            return LoadFile(Path.ChangeExtension(dataFilePath, extension));
+            var notefilePath = Path.ChangeExtension(dataFilePath, extension);
+            try
+            {
+                return LoadFile(notefilePath);
+            }
+            finally
+            {
+                logger.Debug($"Loaded note file {Path.GetFileName(notefilePath)}");
+            }            
         }
 
-        public IEnumerable<Note> LoadFile(string path)
+        public IEnumerable<FrameNote> LoadFile(string path)
         {
             try
             {
@@ -25,18 +39,18 @@ namespace SRHWiscMano.Core.Services
             }
         }
 
-        internal static IEnumerable<Note> LoadXml(XmlDocument xmlDoc)
+        internal static IEnumerable<FrameNote> LoadXml(XmlDocument xmlDoc)
         {
             long offset = long.Parse(xmlDoc.SelectSingleNode("/examination/startTimeOffset").InnerText);
             return xmlDoc.SelectNodes("/examination/notes/note").Cast<XmlNode>().Select(n => LoadNote(n, offset))
                 .ToList();
         }
 
-        private static Note LoadNote(XmlNode node, long offset)
+        private static FrameNote LoadNote(XmlNode node, long offset)
         {
             long milliseconds = long.Parse(node.SelectSingleNode("time").InnerText) - offset;
             string innerText = node.SelectSingleNode("text").InnerText;
-            return new Note(SampleTime.InstantFromMilliseconds(milliseconds), innerText);
+            return new FrameNote(InstantUtils.InstantFromMilliseconds(milliseconds), innerText);
         }
     }
 }

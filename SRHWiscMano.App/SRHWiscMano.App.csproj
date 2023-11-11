@@ -28,6 +28,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="Views\AnalyzerView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update="configuration.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

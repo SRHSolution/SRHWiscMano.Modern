@@ -78,14 +78,14 @@
             </Button>
             <!-- Zoom Level Text Box -->
             <TextBox x:Name="zoomlevel" Text="{Binding ZoomPercentage, StringFormat='{}{0}%'}" Width="50" Margin="5"
-                     HorizontalAlignment="Right" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"/>
+                     HorizontalAlignment="Right" VerticalContentAlignment="Center" HorizontalContentAlignment="Right" GotFocus="Zoomlevel_OnGotFocus" PreviewMouseLeftButtonDown="Zoomlevel_PreviewMouseLeftButtonDown"/>
             
             <Button Width="32"
                     Height="32 "
                     Margin="2"
                     Foreground="{DynamicResource MahApps.Brushes.Accent}"
-                    Style="{StaticResource MahApps.Styles.Button.Circle}" ToolTip="Navigate to snapshot view"
-                    Command="{Binding NavigateToSnapshotCommand}">
+                    Style="{StaticResource MahApps.Styles.Button.Circle}" ToolTip="Navigate to explorer view"
+                    Command="{Binding NavigateToExplorerCommand}">
                 <Button.ContentTemplate>
                     <DataTemplate>
                         <iconPacks:PackIconIonicons Kind="ListBoxMD" />
