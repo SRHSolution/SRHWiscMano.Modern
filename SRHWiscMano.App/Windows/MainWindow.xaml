@@ -91,7 +91,7 @@
         </Grid.RowDefinitions>
 
         <Menu Grid.Row="0"
-              Margin="5"
+              Margin="5,0,5,0"
               HorizontalAlignment="Left"
               VerticalAlignment="Stretch">
             <MenuItem Header="File"
@@ -117,24 +117,25 @@
                       ItemContainerStyle="{StaticResource AppThemeAccentItemStyle}"
                       ItemsSource="{Binding AppAccentThemes, Mode=OneWay}" />
         </Menu>
-        <mah:MetroAnimatedSingleRowTabControl x:Name="MainTabControl" Grid.Row="1" SelectedIndex="{Binding SelectedTabIndex, Mode=TwoWay}" mah:HeaderedControlHelper.HeaderFontFamily="Noto Sans" mah:HeaderedControlHelper.HeaderFontSize="20" mah:HeaderedControlHelper.HeaderMargin="2,2,10,2" mah:TabControlHelper.Underlined="SelectedTabItem">
-            <TabItem Header="Viewer" ToolTip="Select ExamData Viewer" >
+        <mah:MetroAnimatedSingleRowTabControl x:Name="MainTabControl" Grid.Row="1" SelectedIndex="{Binding SelectedTabIndex, Mode=TwoWay}" mah:HeaderedControlHelper.HeaderFontFamily="Noto Sans" mah:HeaderedControlHelper.HeaderFontSize="20"  mah:TabControlHelper.Underlined="SelectedTabItem" Margin="5,0,5,5">
+            <TabItem Header="Viewer" ToolTip="Select ExamData Viewer">
                 <ScrollViewer 
                               HorizontalScrollBarVisibility="Auto"
-                              VerticalScrollBarVisibility="Auto">
-                    <view:ViewerView/>
+                              VerticalScrollBarVisibility="Auto" >
+                    <view:ViewerView Margin="5"/>
                 </ScrollViewer>
             </TabItem>
             <TabItem Header="Explorer" ToolTip="Select explorer View">
                 <ScrollViewer 
                               HorizontalScrollBarVisibility="Auto"
                               VerticalScrollBarVisibility="Auto">
-                    <view:ExplorerView/>
+                    <view:ExplorerView Margin="5"/>
                 </ScrollViewer>
             </TabItem>
             <TabItem Header="Analyzer" ToolTip="Select analyzer View">
                 <ScrollViewer HorizontalScrollBarVisibility="Auto"
                               VerticalScrollBarVisibility="Auto">
+                    <view:AnalyzerView Margin="5"/>
                     <!-- <exampleViews:ButtonsExample DataContext="{Binding}" /> -->
                 </ScrollViewer>
             </TabItem>
