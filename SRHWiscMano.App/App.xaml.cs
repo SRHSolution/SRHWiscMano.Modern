@@ -27,8 +27,7 @@ namespace SRHWiscMano.App
     /// </summary>
     public partial class App : Application
     {
-        public IServiceProvider ServiceProvider { get; private set; }
-
+        private IServiceProvider? serviceProvider;
 
         protected override void OnStartup(StartupEventArgs e)
         {
@@ -39,9 +38,9 @@ namespace SRHWiscMano.App
             SRHWiscMano.App.ServiceRegistration.ConfigureServices(services);
 
 
-            ServiceProvider = services.BuildServiceProvider();
+            serviceProvider = services.BuildServiceProvider();
 
-            Ioc.Default.ConfigureServices(ServiceProvider);
+            Ioc.Default.ConfigureServices(serviceProvider);
 
 
             // Logging 메시지를 back단에서 계속 받기 위해서 Instance를 미리 생성함

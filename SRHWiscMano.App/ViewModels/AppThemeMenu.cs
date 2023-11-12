@@ -1,7 +1,9 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using ControlzEx.Theming;
 using Microsoft.Extensions.Options;
 using NLog;
@@ -50,6 +52,11 @@ namespace SRHWiscMano.App.ViewModels
                 ThemeManager.Current.ChangeThemeBaseColor(Application.Current, name);
                 if (settings != null)
                     settings.BaseTheme = name;
+
+                var backColor = (Color)Application.Current.Resources["MahApps.Colors.ThemeBackground"];
+                var foreColor = (Color)Application.Current.Resources["MahApps.Colors.ThemeForeground"];
+                WeakReferenceMessenger.Default.Send(
+                    new AppBaseThemeChangedMessage(new Tuple<Color, Color>(backColor, foreColor)));
                 Logger.Trace(name);
             }
         }
@@ -61,6 +68,10 @@ namespace SRHWiscMano.App.ViewModels
                 ThemeManager.Current.ChangeThemeColorScheme(Application.Current, name);
                 if (settings != null)
                     settings.AccentTheme = name!;
+
+                var color = (Color)Application.Current.Resources["MahApps.Colors.Accent"];
+                WeakReferenceMessenger.Default.Send(new AppSchemeColorChangedMessage(color));
+
                 Logger.Trace(name);
             }
         }

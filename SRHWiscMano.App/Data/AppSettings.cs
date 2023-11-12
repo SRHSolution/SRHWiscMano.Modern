@@ -8,7 +8,7 @@ namespace SRHWiscMano.App.Data
 {
     public class AppSettings
     {
-        public string FilePath { get; set; }
+        public string FilePath { get; set; } = string.Empty;
         
         public string BaseTheme { get; set; } = "Light";
         
@@ -16,6 +16,6 @@ namespace SRHWiscMano.App.Data
         
         public int MaxRecentFileSize { get; set; } = 5;
         
-        public List<string> RecentFiles { get; set; }
+        public List<string>? RecentFiles { get; set; }
     }
 }

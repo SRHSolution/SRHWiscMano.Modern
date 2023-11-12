@@ -8,7 +8,7 @@ namespace SRHWiscMano.Test
     [TestFixture, Apartment(ApartmentState.STA)]
     internal class TestViewPage
     {
-        private MetroWindow w = new MetroWindow();
+        private MetroWindow w = new();
 
         [OneTimeSetUp]
         public void SetupViewModel()

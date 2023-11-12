@@ -11,7 +11,7 @@ namespace SRHWiscMano.App.Controls
     [Target("WpfLogger")]
     public class WpfLoggerTarget : TargetWithLayout
     {
-        public Action<string> LogMessageReceived;
+        public Action<string>? LogMessageReceived;
 
         protected override void Write(LogEventInfo logEvent)
         {

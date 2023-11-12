@@ -41,7 +41,7 @@ namespace SRHWiscMano.App.ViewModels
         /// <summary>
         /// Menu 에서 Open 한 최신 파일정보를 갖는다
         /// </summary>
-        public ObservableCollection<RecentFile> RecentFiles{ get; } = new ObservableCollection<RecentFile>();
+        public ObservableCollection<RecentFile> RecentFiles{ get; } = new();
 
         /// <summary>
         /// 생성자에서 구성한 Theme 를 1회성으로 로드하므로 ObservableCollection 은 해당이 안된다.
@@ -157,7 +157,7 @@ namespace SRHWiscMano.App.ViewModels
         /// <param name="filePath"></param>
         private void AddToRecentFiles(string filePath)
         {
-            var fndItem = RecentFiles.FirstOrDefault(rf => rf.FilePath == filePath, null);
+            var fndItem = RecentFiles.FirstOrDefault(rf => rf?.FilePath == filePath, null);
             if (fndItem != null)
             {
                 RecentFiles.Remove(fndItem);
