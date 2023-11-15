@@ -1,0 +1,12 @@
+﻿<Application x:Class="RxUIStudyApp.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:RxUIStudyApp"
+             xmlns:rxUiStudyApp="clr-namespace:RxUIStudyApp"
+             StartupUri="MainWindow.xaml">
+    <Application.Resources>
+        <ResourceDictionary>
+            <rxUiStudyApp:ViewModelLocator x:Key="Locator" xmlns:local="clr-namespace:RxUIStudyApp" />
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>
