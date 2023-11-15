@@ -15,6 +15,8 @@ using Microsoft.Extensions.DependencyInjection;
 using SRHWiscMano.Core.Models;
 using SRHWiscMano.Core.Services;
 using SRHWiscMano.Core.Helpers;
+using MahApps.Metro.Controls;
+using OxyPlot.Annotations;
 
 namespace SRHWiscMano.Test
 {
@@ -92,11 +94,43 @@ namespace SRHWiscMano.Test
         {
             var model = ImportExamination();
             plotView.Model = model;
+
+            plotView.Controller = WheelPanningController();
+
+            // var controller = new PlotController();
+            // controller.UnbindAll();
+            // controller.BindMouseWheel(OxyModifierKeys.Control, PlotCommands.ZoomInAt);
+            window.Loaded += Window_Loaded;
+        }
+
+        
+        public PlotController WheelPanningController()
+        {
             var controller = new PlotController();
             controller.UnbindAll();
-            controller.BindMouseWheel(OxyModifierKeys.Control, PlotCommands.ZoomInAt);
 
-            window.Loaded += Window_Loaded;
+            var handleWheel = new DelegatePlotCommand<OxyMouseWheelEventArgs>(
+                (view, c, e) =>
+                {
+                    
+                    e.Handled = true;
+                    var dx = view.ActualModel.PlotArea.Width * 0.001 * e.Delta;
+                    var dy = view.ActualModel.PlotArea.Height * 0.001 * e.Delta;
+                    view.ActualModel.PanAllAxes(dx, 0);
+                    view.InvalidatePlot(false);
+
+                    // new PanManipulator(v)
+                    // var m = new ZoomStepManipulator(v) { Step = e.Delta * 0.001 * 1, FineControl = e.IsControlDown };
+                    // m.Started(e);
+
+                    // controller.AddMouseManipulator(v, new PanManipulator(v), e);
+                });
+
+            
+            controller.Bind(new OxyMouseWheelGesture(), handleWheel);
+            controller.BindMouseWheel(OxyModifierKeys.Control, PlotCommands.ZoomWheel);
+
+            return controller;
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
