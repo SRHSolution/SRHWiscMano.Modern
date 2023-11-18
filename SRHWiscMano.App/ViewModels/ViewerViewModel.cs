@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media.Media3D;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
@@ -38,20 +39,23 @@ namespace SRHWiscMano.App.ViewModels
         public ObservableCollection<FrameNote> Notes { get; }
 
         [ObservableProperty] private PlotModel mainPlotModel;
-        public PlotController MainPlotController { get; }
-        public PlotModel OverviewPlotModel { get; }
-        public PlotController OverviewPlotController { get; }
+        
+        [ObservableProperty] private PlotController mainPlotController;
+        
+        [ObservableProperty] private PlotModel overviewPlotModel;
+
+        [ObservableProperty] private PlotController overviewPlotController;
 
         [ObservableProperty] private double minSensorData;
         [ObservableProperty] private double maxSensorData;
         [ObservableProperty] private double zoomPercentage = 100;
-        [ObservableProperty] private OxyPalette selectedPalette;
+        [ObservableProperty] private OxyPalette selectedPalette = OxyPalettes.Hue64;
         [ObservableProperty] private string selectedPaletteKey;
 
         public IRelayCommand FitToScreenCommand { get; }
         public IRelayCommand PrevTimeFrameCommand { get; private set; }
-        public IRelayCommand NextTimeFrameCommand { get; private set;}
-        
+        public IRelayCommand NextTimeFrameCommand { get; private set; }
+
         public Dictionary<string, OxyPalette> Palettes { get; }
 
 
@@ -67,7 +71,7 @@ namespace SRHWiscMano.App.ViewModels
             MinSensorData = -10;
 
             MainPlotModel = new PlotModel { Title = "Sensor Data Heatmap" };
-            
+
             WeakReferenceMessenger.Default.Register<AppBaseThemeChangedMessage>(this, ThemeChanged);
         }
 
@@ -88,35 +92,14 @@ namespace SRHWiscMano.App.ViewModels
                 //     MainPlotModel.PlotAreaBorderColor = OxyColors.Gray;
                 // }
             }
-            
         }
 
         private void SharedService_ExamDataLoaded(object? sender, EventArgs e)
         {
-            // int n = 100;
-            // double x0 = -3.1;
-            // double x1 = 3.1;
-            // double y0 = -3;
-            // double y1 = 3;
-            // Func<double, double, double> peaks = (x, y) => 3 * (1 - x) * (1 - x) * Math.Exp(-(x * x) - (y + 1) * (y + 1)) - 10 * (x / 5 - x * x * x - y * y * y * y * y) * Math.Exp(-x * x - y * y) - 1.0 / 3 * Math.Exp(-(x + 1) * (x + 1) - y * y);
-            // var xvalues = ArrayBuilder.CreateVector(x0, x1, 200);
-            // var yvalues = ArrayBuilder.CreateVector(y0, y1, 100);
-            // var peaksData = ArrayBuilder.Evaluate(peaks, xvalues, yvalues);
-            //
-            // var model = new PlotModel { Title = "Peaks" };
-            // model.Axes.Add(new LinearColorAxis { Position = AxisPosition.Right, Palette = OxyPalettes.Rainbow(200) ?? OxyPalettes.Jet(500), HighColor = OxyColors.Gray, LowColor = OxyColors.Black });
-            //
-            // var hms = new HeatMapSeries { X0 = x0, X1 = x1, Y0 = y0, Y1 = y1, Data = peaksData };
-            // model.Series.Add(hms);
-            //
-            // ((IPlotModel)this.MainPlotModel)?.AttachPlotView(null);
-            // MainPlotModel = model;
-            // MainPlotModel.InvalidatePlot(false);
-
             var examData = sharedService.ExamData;
             var sensorCount = examData.SensorCount();
             var frameCount = examData.Samples.Count;
-            
+
             var arrayData = new double[frameCount, sensorCount];
             for (int i = 0; i < frameCount; i++)
             {
@@ -125,7 +108,27 @@ namespace SRHWiscMano.App.ViewModels
                     arrayData[i, j] = examData.Samples[i].Values[j];
                 }
             }
+
             
+            ((IPlotModel)this.MainPlotModel)?.AttachPlotView(null);
+            MainPlotModel = CreateMainPlotModel(examData, arrayData);
+            
+            ((IPlotModel)this.OverviewPlotModel)?.AttachPlotView(null);
+            OverviewPlotModel = CreateOverviewPlotModel(examData, arrayData);
+        }
+
+        /// <summary>
+        /// Main PlotView를 위한 PlotModel을 생성한다.
+        /// </summary>
+        /// <param name="examData"></param>
+        /// <param name="plotData"></param>
+        /// <returns></returns>
+        private PlotModel CreateMainPlotModel(IExamination examData, double[,] plotData)
+        {
+            var sensorCount = examData.SensorCount();
+            var frameCount = examData.Samples.Count;
+            var model = new PlotModel { Title = "Peaks" };
+
             // Create your heatmap series and add to MyModel
             var heatmapSeries = new HeatMapSeries
             {
@@ -133,18 +136,115 @@ namespace SRHWiscMano.App.ViewModels
                 X1 = frameCount - 1, // Assuming 28 sensors
                 Y0 = 0,
                 Y1 = sensorCount - 1,
-                Data = arrayData/* Your 2D data array */,
+                Data = plotData /* Your 2D data array */,
                 Interpolate = true
             };
-
-
-            var model = new PlotModel { Title = "Peaks" };
-            model.Axes.Add(new LinearColorAxis { Position = AxisPosition.Right, Palette = OxyPalettes.Rainbow(200) ?? OxyPalettes.Jet(500), HighColor = OxyColors.Gray, LowColor = OxyColors.Black });
-
             model.Series.Add(heatmapSeries);
-            ((IPlotModel)this.MainPlotModel)?.AttachPlotView(null);
-            MainPlotModel = model;
+
+            model.Axes.Add(new LinearColorAxis
+            {
+                Position = AxisPosition.Right,
+                Palette = SelectedPalette,
+                HighColor = OxyColors.White,
+                LowColor = OxyColors.Black
+            });
+
+            model.Axes.Add(new LinearAxis()
+            {
+                IsPanEnabled = false,
+                IsZoomEnabled = false,
+                Position = AxisPosition.Left,
+                MaximumPadding = 0,
+                MinimumPadding = 0,
+                Minimum = 0,                // 초기 시작값
+                Maximum = sensorCount - 1,  // 초기 최대값
+                AbsoluteMinimum = 0,        // Panning 최소값
+                AbsoluteMaximum = sensorCount - 1,  // Panning 최대값
+                Tag = "Y"
+            });
+
+            // X-Axis
+            model.Axes.Add(new LinearAxis()
+            {
+                // IsZoomEnabled = false,
+                Position = AxisPosition.Bottom,
+                MinimumPadding = 0,
+                Minimum = 0,
+                Maximum = 3000,// - 1,
+                MajorStep = 100,
+                AbsoluteMinimum = 0,
+                AbsoluteMaximum = frameCount - 1,
+                MinorStep = frameCount - 1, // 최대 범위를 입력하여 MinorStep 이 표시되지 않도록 한다
+                Tag = "X"
+            });
+
+            return model;
         }
+
+        /// <summary>
+        /// Overivew PlotView를 위한 PlotModel을 생성한다.
+        /// </summary>
+        /// <param name="examData"></param>
+        /// <param name="plotData"></param>
+        /// <returns></returns>
+        private PlotModel CreateOverviewPlotModel(IExamination examData, double[,] plotData)
+        {
+            var sensorCount = examData.SensorCount();
+            var frameCount = examData.Samples.Count;
+            var model = new PlotModel { Title = "Peaks" };
+
+            // Create your heatmap series and add to MyModel
+            var heatmapSeries = new HeatMapSeries
+            {
+                X0 = 0,
+                X1 = frameCount - 1, // Assuming 28 sensors
+                Y0 = 0,
+                Y1 = sensorCount - 1,
+                Data = plotData /* Your 2D data array */,
+                Interpolate = true
+            };
+            model.Series.Add(heatmapSeries);
+
+            model.Axes.Add(new LinearColorAxis
+            {
+                Position = AxisPosition.Right,
+                Palette = SelectedPalette,
+                HighColor = OxyColors.White,
+                LowColor = OxyColors.Black
+            });
+
+            model.Axes.Add(new LinearAxis()
+            {
+                IsPanEnabled = false,
+                IsZoomEnabled = false,
+                Position = AxisPosition.Left,
+                MaximumPadding = 0,
+                MinimumPadding = 0,
+                Minimum = 0,                // 초기 시작값
+                Maximum = sensorCount - 1,  // 초기 최대값
+                AbsoluteMinimum = 0,        // Panning 최소값
+                AbsoluteMaximum = sensorCount - 1,  // Panning 최대값
+                Tag = "Y"
+            });
+
+            // X-Axis
+            model.Axes.Add(new LinearAxis()
+            {
+                // IsZoomEnabled = false,
+                Position = AxisPosition.Bottom,
+                MinimumPadding = 0,
+                Minimum = 0,
+                Maximum = 3000,// - 1,
+                MajorStep = 100,
+                AbsoluteMinimum = 0,
+                AbsoluteMaximum = frameCount - 1,
+                MinorStep = frameCount - 1, // 최대 범위를 입력하여 MinorStep 이 표시되지 않도록 한다
+                Tag = "X"
+            });
+
+            return model;
+        }
+
 
         [RelayCommand]
         private void ZoomOut(double zoomVal)
@@ -157,7 +257,7 @@ namespace SRHWiscMano.App.ViewModels
         private void ZoomIn(double zoomVal)
         {
             logger.LogTrace($"Zoom : {zoomVal}");
-            ZoomPercentage = (int)(ZoomPercentage*zoomVal);
+            ZoomPercentage = (int)(ZoomPercentage * zoomVal);
         }
 
         [RelayCommand]
