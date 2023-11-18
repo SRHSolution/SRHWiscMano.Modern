@@ -85,12 +85,6 @@ namespace SRHWiscMano.App.ViewModels
                 MainPlotModel.TextColor = OxyColor.FromArgb(foreColor.A, foreColor.R, foreColor.G, foreColor.B);
 
                 MainPlotModel.PlotAreaBorderColor = OxyColors.Gray;
-                // else if(message.Value.Item1 == "Accent")
-                // {
-                //     var color = message.Value.Item2;
-                //     MainPlotModel.TextColor = OxyColor.FromArgb(color.A, color.R, color.G, color.B);
-                //     MainPlotModel.PlotAreaBorderColor = OxyColors.Gray;
-                // }
             }
         }
 
@@ -109,7 +103,13 @@ namespace SRHWiscMano.App.ViewModels
                 }
             }
 
-            
+            // 입력받은 Exam 데이터에서 최소 최대 값을 얻어 RangeSlider의 최소/최대 값을 변경한다
+            MinSensorData = Math.Floor(arrayData.Cast<double>().Min());
+            MaxSensorData = Math.Ceiling(arrayData.Cast<double>().Max());
+
+            logger.LogInformation($"ExamData has min/max : {MinSensorData}/{MaxSensorData}");
+
+            // 기존의 PlotView를 clear 한 후 ExamData에 대한 PlotModel을 생성해서 입력한다.
             ((IPlotModel)this.MainPlotModel)?.AttachPlotView(null);
             MainPlotModel = CreateMainPlotModel(examData, arrayData);
             
