@@ -48,6 +48,8 @@ namespace SRHWiscMano.App.ViewModels
 
         [ObservableProperty] private double minSensorData;
         [ObservableProperty] private double maxSensorData;
+        [ObservableProperty] private double minSensorRange = 0;
+        [ObservableProperty] private double maxSensorRange = 100;
         [ObservableProperty] private double zoomPercentage = 100;
         [ObservableProperty] private OxyPalette selectedPalette = OxyPalettes.Hue64;
         [ObservableProperty] private string selectedPaletteKey;
@@ -71,6 +73,8 @@ namespace SRHWiscMano.App.ViewModels
             MinSensorData = -10;
 
             MainPlotModel = new PlotModel { Title = "Sensor Data Heatmap" };
+
+
 
             WeakReferenceMessenger.Default.Register<AppBaseThemeChangedMessage>(this, ThemeChanged);
         }
@@ -145,8 +149,8 @@ namespace SRHWiscMano.App.ViewModels
             {
                 Position = AxisPosition.Right,
                 Palette = SelectedPalette,
-                HighColor = OxyColors.White,
-                LowColor = OxyColors.Black
+                HighColor = SelectedPalette.Colors.Last(),// OxyColors.White,
+                LowColor = SelectedPalette.Colors.First()
             });
 
             model.Axes.Add(new LinearAxis()
@@ -209,8 +213,8 @@ namespace SRHWiscMano.App.ViewModels
             {
                 Position = AxisPosition.Right,
                 Palette = SelectedPalette,
-                HighColor = OxyColors.White,
-                LowColor = OxyColors.Black
+                HighColor = SelectedPalette.Colors.Last(),// OxyColors.White,
+                LowColor = SelectedPalette.Colors.First()
             });
 
             model.Axes.Add(new LinearAxis()
@@ -267,6 +271,14 @@ namespace SRHWiscMano.App.ViewModels
             {
                 logger.LogTrace($"Select favorite palette {paletteName}");
                 SelectedPalette = Palettes[paletteName];
+
+                var colorAxis = MainPlotModel.Axes.Single(s => s is LinearColorAxis) as LinearColorAxis;
+                colorAxis.Palette = SelectedPalette;
+                colorAxis.AbsoluteMinimum = MinSensorRange; // 최소 limit 값
+                colorAxis.AbsoluteMaximum = MaxSensorRange; // 최대 limit 값
+                MainPlotModel.InvalidatePlot(false);
+
+
                 SelectedPaletteKey = paletteName;
             }
         }

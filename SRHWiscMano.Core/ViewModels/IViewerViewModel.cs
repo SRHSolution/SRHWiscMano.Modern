@@ -14,6 +14,9 @@ namespace SRHWiscMano.Core.ViewModels
         double MinSensorData { get; }
         double MaxSensorData { get; }
 
+        double MinSensorRange { get; }
+        double MaxSensorRange { get; }
+
         /// <summary>
         /// Main Plot Model
         /// </summary>

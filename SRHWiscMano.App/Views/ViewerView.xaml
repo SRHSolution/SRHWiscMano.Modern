@@ -79,7 +79,7 @@
             <!-- Zoom Level Text Box -->
             <TextBox x:Name="zoomlevel" Text="{Binding ZoomPercentage, StringFormat='{}{0}%'}" Width="50" Margin="5"
                      HorizontalAlignment="Right" VerticalContentAlignment="Center" HorizontalContentAlignment="Right" GotFocus="Zoomlevel_OnGotFocus" PreviewMouseLeftButtonDown="Zoomlevel_PreviewMouseLeftButtonDown"/>
-            
+
             <Button Width="32"
                     Height="32 "
                     Margin="2"
@@ -157,22 +157,27 @@
                         <TextBlock Text="low" Margin="0,-2,0,0" Foreground="{DynamicResource MahApps.Brushes.Accent2}" TextAlignment="Center"/>
                     </StackPanel>
                     <Grid Grid.Column="1">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="34*"/>
+                            <RowDefinition Height="79*"/>
+                        </Grid.RowDefinitions>
                         <!-- <control:ColorRangeSlider DataContext="{Binding Source={StaticResource Locator}, Path=ColorRangeSlideViewModel}"/> -->
 
                         <mah:RangeSlider Margin="10,10, 0, 10"
                                          mah:SliderHelper.EnableMouseWheel="MouseHover"
                                          AutoToolTipPlacement="BottomRight"
                                          LargeChange="10"
-                                         LowerValue="50"
+                                         LowerValue="{Binding MinSensorRange}"
+                                         UpperValue="{Binding MaxSensorRange}"
                                          Maximum="{Binding MaxSensorData}"
                                          Minimum="{Binding MinSensorData}"
                                          Orientation="Vertical"
                                          SmallChange="1"
                                          TickPlacement="TopLeft"
                                          Ticks="20 25 30 50 70 75 80"
-                                         UpperValue="50" />
+                                          Grid.RowSpan="2" />
                     </Grid>
-                    
+
                 </Grid>
             </Grid>
             <ScrollViewer Grid.Column="1" >
