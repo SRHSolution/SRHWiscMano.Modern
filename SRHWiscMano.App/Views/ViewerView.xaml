@@ -175,9 +175,18 @@
                                          SmallChange="1"
                                          TickPlacement="TopLeft"
                                          Ticks="20 25 30 50 70 75 80"
-                                          Grid.RowSpan="2" />
+                                          Grid.RowSpan="2" >
+                            <b:Interaction.Triggers>
+                                <b:EventTrigger EventName="UpperThumbDragCompleted">
+                                    <b:InvokeCommandAction Command="{Binding SensorRangeChangedCommand}" />
+                                </b:EventTrigger>
+                                <b:EventTrigger EventName="LowerThumbDragCompleted">
+                                    <b:InvokeCommandAction Command="{Binding SensorRangeChangedCommand}" />
+                                </b:EventTrigger>
+                            </b:Interaction.Triggers>
+                        </mah:RangeSlider>
                     </Grid>
-
+                    
                 </Grid>
             </Grid>
             <ScrollViewer Grid.Column="1" >

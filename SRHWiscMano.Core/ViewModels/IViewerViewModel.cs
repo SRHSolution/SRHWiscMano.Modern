@@ -17,6 +17,8 @@ namespace SRHWiscMano.Core.ViewModels
         double MinSensorRange { get; }
         double MaxSensorRange { get; }
 
+        IRelayCommand SensorRangeChangedCommand { get; }
+
         /// <summary>
         /// Main Plot Model
         /// </summary>

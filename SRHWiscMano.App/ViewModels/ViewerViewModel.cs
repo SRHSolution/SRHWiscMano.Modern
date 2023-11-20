@@ -41,6 +41,7 @@ namespace SRHWiscMano.App.ViewModels
         public IExamination ExamData { get; private set; }
         public ObservableCollection<FrameNote> Notes { get; }
 
+
         [ObservableProperty] private PlotModel mainPlotModel;
         
         [ObservableProperty] private PlotController mainPlotController;
@@ -65,6 +66,7 @@ namespace SRHWiscMano.App.ViewModels
 
         private Color pvBackColor;
         private Color pvForeColor;
+        private IRelayCommand sensorRangeChanged;
 
 
         public ViewerViewModel(ILogger<ViewerViewModel> logger, SharedService sharedService, IOptions<AppSettings> settings)
@@ -104,15 +106,24 @@ namespace SRHWiscMano.App.ViewModels
             var foreColor = pvForeColor;
 
             MainPlotModel.Background = OxyColor.FromArgb(backColor.A, backColor.R, backColor.G, backColor.B);
-            MainPlotModel.TextColor = OxyColor.FromArgb(foreColor.A, foreColor.R, foreColor.G, foreColor.B);
+            // MainPlotModel.TextColor = OxyColor.FromArgb(foreColor.A, foreColor.R, foreColor.G, foreColor.B);
             MainPlotModel.PlotAreaBorderColor = OxyColors.Gray;
+            MainPlotModel.Axes.Where(ax => ax.GetType().Name =="LinearAxis").ForEach(lax=>
+            {
+                lax.TicklineColor = MainPlotModel.TextColor;
+                lax.MinorTicklineColor = MainPlotModel.TextColor;
+            });
             // MainPlotModel.Axes.Where(s=> s as LinearAxis).ForEach(ax => ax.AxislineColor = MainPlotModel.TextColor);
             MainPlotModel.InvalidatePlot(false);
 
             OverviewPlotModel.Background = OxyColor.FromArgb(backColor.A, backColor.R, backColor.G, backColor.B);
-            OverviewPlotModel.TextColor = OxyColor.FromArgb(foreColor.A, foreColor.R, foreColor.G, foreColor.B);
+            // OverviewPlotModel.TextColor = OxyColor.FromArgb(foreColor.A, foreColor.R, foreColor.G, foreColor.B);
             OverviewPlotModel.PlotAreaBorderColor = OxyColors.Gray;
-            // OverviewPlotModel.Axes.Where(s => s is LinearAxis).ForEach(ax => ax.AxislineColor = OverviewPlotModel.TextColor);
+            OverviewPlotModel.Axes.Where(ax => ax.GetType().Name == "LinearAxis").ForEach(lax =>
+            {
+                lax.TicklineColor = MainPlotModel.TextColor;
+                lax.MinorTicklineColor = MainPlotModel.TextColor;
+            });
             OverviewPlotModel.InvalidatePlot(false);
         }
 
@@ -215,8 +226,8 @@ namespace SRHWiscMano.App.ViewModels
                 Position = AxisPosition.Bottom,
                 MinimumPadding = 0,
                 Minimum = 0,
-                Maximum = 3000,// - 1,
-                MajorStep = 100,
+                Maximum = 10000,// - 1,
+                MajorStep = 1000,
                 AbsoluteMinimum = 0,
                 AbsoluteMaximum = xSize - 1,
                 MinorStep = xSize - 1, // 최대 범위를 입력하여 MinorStep 이 표시되지 않도록 한다
@@ -286,16 +297,30 @@ namespace SRHWiscMano.App.ViewModels
             {
                 logger.LogTrace($"Select favorite palette {paletteName}");
                 SelectedPalette = Palettes[paletteName];
-
-                var colorAxis = MainPlotModel.Axes.Single(s => s is LinearColorAxis) as LinearColorAxis;
-                colorAxis.Palette = SelectedPalette;
-                colorAxis.AbsoluteMinimum = MinSensorRange; // 최소 limit 값
-                colorAxis.AbsoluteMaximum = MaxSensorRange; // 최대 limit 값
-                MainPlotModel.InvalidatePlot(false);
-
-
                 SelectedPaletteKey = paletteName;
+                UpdatePaletteChanged();
             }
+        }
+
+        [RelayCommand]
+        private void SensorRangeChanged()
+        {
+            UpdatePaletteChanged();
+        }
+
+        private void UpdatePaletteChanged()
+        {
+            var mainColorAxis = MainPlotModel.Axes.Single(s => s is LinearColorAxis) as LinearColorAxis;
+            mainColorAxis.Palette = SelectedPalette;
+            mainColorAxis.AbsoluteMinimum = MinSensorRange; // 최소 limit 값
+            mainColorAxis.AbsoluteMaximum = MaxSensorRange; // 최대 limit 값
+            MainPlotModel.InvalidatePlot(false);
+
+            var overviewColorAxis = OverviewPlotModel.Axes.Single(s => s is LinearColorAxis) as LinearColorAxis;
+            overviewColorAxis.Palette = SelectedPalette;
+            overviewColorAxis.AbsoluteMinimum = MinSensorRange; // 최소 limit 값
+            overviewColorAxis.AbsoluteMaximum = MaxSensorRange; // 최대 limit 값
+            OverviewPlotModel.InvalidatePlot(false);
         }
 
         /// <summary>
