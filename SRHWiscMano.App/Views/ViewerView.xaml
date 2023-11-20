@@ -181,7 +181,7 @@
                 </Grid>
             </Grid>
             <ScrollViewer Grid.Column="1" >
-                <oxyWpf:PlotView Model="{Binding MainPlotModel}"/>
+                <oxyWpf:PlotView Model="{Binding MainPlotModel}" Margin="0"/>
             </ScrollViewer>
         </Grid>
 

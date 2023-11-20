@@ -8,11 +8,14 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using System.Windows.Media.Media3D;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using MoreLinq.Extensions;
 using OxyPlot;
 using OxyPlot.Axes;
 using OxyPlot.Series;
@@ -60,8 +63,11 @@ namespace SRHWiscMano.App.ViewModels
 
         public Dictionary<string, OxyPalette> Palettes { get; }
 
+        private Color pvBackColor;
+        private Color pvForeColor;
 
-        public ViewerViewModel(ILogger<ViewerViewModel> logger, SharedService sharedService)
+
+        public ViewerViewModel(ILogger<ViewerViewModel> logger, SharedService sharedService, IOptions<AppSettings> settings)
         {
             this.logger = logger;
             this.sharedService = sharedService;
@@ -72,9 +78,12 @@ namespace SRHWiscMano.App.ViewModels
             MaxSensorData = 100;
             MinSensorData = -10;
 
-            MainPlotModel = new PlotModel { Title = "Sensor Data Heatmap" };
+            MainPlotModel = new PlotModel();
+            OverviewPlotModel = new PlotModel();
 
-
+            pvBackColor = settings.Value.BaseBackColor;
+            pvForeColor = settings.Value.BaseForeColor;
+            ApplyTheme();
 
             WeakReferenceMessenger.Default.Register<AppBaseThemeChangedMessage>(this, ThemeChanged);
         }
@@ -83,13 +92,28 @@ namespace SRHWiscMano.App.ViewModels
         {
             if (MainPlotModel != null)
             {
-                var backColor = message.Value.Item1;
-                var foreColor = message.Value.Item2;
-                MainPlotModel.Background = OxyColor.FromArgb(backColor.A, backColor.R, backColor.G, backColor.B);
-                MainPlotModel.TextColor = OxyColor.FromArgb(foreColor.A, foreColor.R, foreColor.G, foreColor.B);
-
-                MainPlotModel.PlotAreaBorderColor = OxyColors.Gray;
+                pvBackColor = message.Value.Item1;
+                pvForeColor = message.Value.Item2;
+                ApplyTheme();
             }
+        }
+
+        private void ApplyTheme()
+        {
+            var backColor = pvBackColor;
+            var foreColor = pvForeColor;
+
+            MainPlotModel.Background = OxyColor.FromArgb(backColor.A, backColor.R, backColor.G, backColor.B);
+            MainPlotModel.TextColor = OxyColor.FromArgb(foreColor.A, foreColor.R, foreColor.G, foreColor.B);
+            MainPlotModel.PlotAreaBorderColor = OxyColors.Gray;
+            // MainPlotModel.Axes.Where(s=> s as LinearAxis).ForEach(ax => ax.AxislineColor = MainPlotModel.TextColor);
+            MainPlotModel.InvalidatePlot(false);
+
+            OverviewPlotModel.Background = OxyColor.FromArgb(backColor.A, backColor.R, backColor.G, backColor.B);
+            OverviewPlotModel.TextColor = OxyColor.FromArgb(foreColor.A, foreColor.R, foreColor.G, foreColor.B);
+            OverviewPlotModel.PlotAreaBorderColor = OxyColors.Gray;
+            // OverviewPlotModel.Axes.Where(s => s is LinearAxis).ForEach(ax => ax.AxislineColor = OverviewPlotModel.TextColor);
+            OverviewPlotModel.InvalidatePlot(false);
         }
 
         private void SharedService_ExamDataLoaded(object? sender, EventArgs e)
@@ -115,19 +139,25 @@ namespace SRHWiscMano.App.ViewModels
 
             // 기존의 PlotView를 clear 한 후 ExamData에 대한 PlotModel을 생성해서 입력한다.
             ((IPlotModel)this.MainPlotModel)?.AttachPlotView(null);
-            MainPlotModel = CreateMainPlotModel(examData, arrayData);
-            
+            var mainModel = CreatePlotModel(examData, arrayData);
+            AddAxesOnMain(mainModel, frameCount, sensorCount);
+            MainPlotModel = mainModel;
+
             ((IPlotModel)this.OverviewPlotModel)?.AttachPlotView(null);
-            OverviewPlotModel = CreateOverviewPlotModel(examData, arrayData);
+            var overviewModel = CreatePlotModel(examData, arrayData);
+            AddAxesOnOverview(overviewModel, frameCount, sensorCount);
+            OverviewPlotModel = overviewModel;
+
+            ApplyTheme();
         }
 
         /// <summary>
-        /// Main PlotView를 위한 PlotModel을 생성한다.
+        /// 공통 데이터를 이용하므로 Main, Overview에 대한 PlotModel을 생성한다.
         /// </summary>
         /// <param name="examData"></param>
         /// <param name="plotData"></param>
         /// <returns></returns>
-        private PlotModel CreateMainPlotModel(IExamination examData, double[,] plotData)
+        private PlotModel CreatePlotModel(IExamination examData, double[,] plotData)
         {
             var sensorCount = examData.SensorCount();
             var frameCount = examData.Samples.Count;
@@ -141,7 +171,7 @@ namespace SRHWiscMano.App.ViewModels
                 Y0 = 0,
                 Y1 = sensorCount - 1,
                 Data = plotData /* Your 2D data array */,
-                Interpolate = true
+                Interpolate = true,
             };
             model.Series.Add(heatmapSeries);
 
@@ -151,72 +181,19 @@ namespace SRHWiscMano.App.ViewModels
                 Palette = SelectedPalette,
                 HighColor = SelectedPalette.Colors.Last(),// OxyColors.White,
                 LowColor = SelectedPalette.Colors.First()
-            });
-
-            model.Axes.Add(new LinearAxis()
-            {
-                IsPanEnabled = false,
-                IsZoomEnabled = false,
-                Position = AxisPosition.Left,
-                MaximumPadding = 0,
-                MinimumPadding = 0,
-                Minimum = 0,                // 초기 시작값
-                Maximum = sensorCount - 1,  // 초기 최대값
-                AbsoluteMinimum = 0,        // Panning 최소값
-                AbsoluteMaximum = sensorCount - 1,  // Panning 최대값
-                Tag = "Y"
-            });
-
-            // X-Axis
-            model.Axes.Add(new LinearAxis()
-            {
-                // IsZoomEnabled = false,
-                Position = AxisPosition.Bottom,
-                MinimumPadding = 0,
-                Minimum = 0,
-                Maximum = 3000,// - 1,
-                MajorStep = 100,
-                AbsoluteMinimum = 0,
-                AbsoluteMaximum = frameCount - 1,
-                MinorStep = frameCount - 1, // 최대 범위를 입력하여 MinorStep 이 표시되지 않도록 한다
-                Tag = "X"
             });
 
             return model;
         }
 
         /// <summary>
-        /// Overivew PlotView를 위한 PlotModel을 생성한다.
+        /// Main PlotViw를 위한 별도의 Axes 설정을 한다.
         /// </summary>
-        /// <param name="examData"></param>
-        /// <param name="plotData"></param>
-        /// <returns></returns>
-        private PlotModel CreateOverviewPlotModel(IExamination examData, double[,] plotData)
+        /// <param name="model"></param>
+        /// <param name="xSize"></param>
+        /// <param name="ySize"></param>
+        private void AddAxesOnMain(PlotModel model, int xSize, int ySize)
         {
-            var sensorCount = examData.SensorCount();
-            var frameCount = examData.Samples.Count;
-            var model = new PlotModel { Title = "Peaks" };
-
-            // Create your heatmap series and add to MyModel
-            var heatmapSeries = new HeatMapSeries
-            {
-                X0 = 0,
-                X1 = frameCount - 1, // Assuming 28 sensors
-                Y0 = 0,
-                Y1 = sensorCount - 1,
-                Data = plotData /* Your 2D data array */,
-                Interpolate = true
-            };
-            model.Series.Add(heatmapSeries);
-
-            model.Axes.Add(new LinearColorAxis
-            {
-                Position = AxisPosition.Right,
-                Palette = SelectedPalette,
-                HighColor = SelectedPalette.Colors.Last(),// OxyColors.White,
-                LowColor = SelectedPalette.Colors.First()
-            });
-
             model.Axes.Add(new LinearAxis()
             {
                 IsPanEnabled = false,
@@ -225,9 +202,9 @@ namespace SRHWiscMano.App.ViewModels
                 MaximumPadding = 0,
                 MinimumPadding = 0,
                 Minimum = 0,                // 초기 시작값
-                Maximum = sensorCount - 1,  // 초기 최대값
+                Maximum = ySize - 1,  // 초기 최대값
                 AbsoluteMinimum = 0,        // Panning 최소값
-                AbsoluteMaximum = sensorCount - 1,  // Panning 최대값
+                AbsoluteMaximum = ySize - 1,  // Panning 최대값
                 Tag = "Y"
             });
 
@@ -241,14 +218,52 @@ namespace SRHWiscMano.App.ViewModels
                 Maximum = 3000,// - 1,
                 MajorStep = 100,
                 AbsoluteMinimum = 0,
-                AbsoluteMaximum = frameCount - 1,
-                MinorStep = frameCount - 1, // 최대 범위를 입력하여 MinorStep 이 표시되지 않도록 한다
+                AbsoluteMaximum = xSize - 1,
+                MinorStep = xSize - 1, // 최대 범위를 입력하여 MinorStep 이 표시되지 않도록 한다
                 Tag = "X"
             });
-
-            return model;
         }
 
+        /// <summary>
+        /// Main PlotViw를 위한 별도의 Axes 설정을 한다.
+        /// </summary>
+        /// <param name="model"></param>
+        /// <param name="xSize"></param>
+        /// <param name="ySize"></param>
+        private void AddAxesOnOverview(PlotModel model, int xSize, int ySize)
+        {
+            model.Axes.Add(new LinearAxis()
+            {
+                IsPanEnabled = false,
+                IsZoomEnabled = false,
+                Position = AxisPosition.Left,
+                MaximumPadding = 0,
+                MinimumPadding = 0,
+                Minimum = 0,                // 초기 시작값
+                Maximum = ySize - 1,  // 초기 최대값
+                AbsoluteMinimum = 0,        // Panning 최소값
+                AbsoluteMaximum = ySize - 1,  // Panning 최대값
+                Tag = "Y"
+            });
+
+            // X-Axis
+            model.Axes.Add(new LinearAxis()
+            {
+                // IsZoomEnabled = false,
+                Position = AxisPosition.Bottom,
+                MinimumPadding = 0,
+                Minimum = 0,
+                Maximum = 3000,// - 1,
+                MajorStep = 100,
+                AbsoluteMinimum = 0,
+                AbsoluteMaximum = xSize - 1,
+                MinorStep = xSize - 1, // 최대 범위를 입력하여 MinorStep 이 표시되지 않도록 한다
+                Tag = "X"
+            });
+        }
+
+
+       
 
         [RelayCommand]
         private void ZoomOut(double zoomVal)

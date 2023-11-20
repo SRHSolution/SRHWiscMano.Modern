@@ -10,6 +10,9 @@ using SRHWiscMano.Core.ViewModels;
 
 namespace SRHWiscMano.App.ViewModels
 {
+    /// <summary>
+    /// Setting Dialog (예정)를 위한 ViewModel
+    /// </summary>
     public partial class SettingViewModel : ViewModelBase, ISettingViewModel
     {
         #region Services

@@ -33,7 +33,6 @@ namespace SRHWiscMano.App.ViewModels
         public RelayCommand<string?> ChangeBaseColorCommand { get; }
         public RelayCommand<string?> ChangeAccentColorCommand { get; }
 
-
         public AppThemeMenu(IOptions<AppSettings> settings) : this()
         {
             this.settings = settings.Value;
@@ -55,6 +54,10 @@ namespace SRHWiscMano.App.ViewModels
 
                 var backColor = (Color)Application.Current.Resources["MahApps.Colors.ThemeBackground"];
                 var foreColor = (Color)Application.Current.Resources["MahApps.Colors.ThemeForeground"];
+
+                settings.BaseBackColor = backColor;
+                settings.BaseForeColor = foreColor;
+
                 WeakReferenceMessenger.Default.Send(
                     new AppBaseThemeChangedMessage(new Tuple<Color, Color>(backColor, foreColor)));
                 Logger.Trace(name);
@@ -72,6 +75,7 @@ namespace SRHWiscMano.App.ViewModels
                 var color = (Color)Application.Current.Resources["MahApps.Colors.Accent"];
                 WeakReferenceMessenger.Default.Send(new AppSchemeColorChangedMessage(color));
 
+                settings.AccentThemeColor = color;
                 Logger.Trace(name);
             }
         }
