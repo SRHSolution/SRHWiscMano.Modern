@@ -119,11 +119,12 @@
         </Menu>
         <mah:MetroAnimatedSingleRowTabControl x:Name="MainTabControl" Grid.Row="1" SelectedIndex="{Binding SelectedTabIndex, Mode=TwoWay}" mah:HeaderedControlHelper.HeaderFontFamily="Noto Sans" mah:HeaderedControlHelper.HeaderFontSize="20"  mah:TabControlHelper.Underlined="SelectedTabItem" Margin="5,0,5,5">
             <TabItem Header="Viewer" ToolTip="Select ExamData Viewer">
-                <ScrollViewer 
-                              HorizontalScrollBarVisibility="Auto"
-                              VerticalScrollBarVisibility="Auto" >
-                    <view:ViewerView Margin="5"/>
-                </ScrollViewer>
+                <!-- <ScrollViewer  -->
+                <!--               HorizontalScrollBarVisibility="Auto" -->
+                <!--               VerticalScrollBarVisibility="Auto" > -->
+                <!--      -->
+                <!-- </ScrollViewer> -->
+                <view:ViewerView Margin="0"/>
             </TabItem>
             <TabItem Header="Explorer" ToolTip="Select explorer View">
                 <ScrollViewer 

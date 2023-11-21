@@ -9,13 +9,13 @@
 
         public static implicit operator int(HashCode hashCode) => hashCode.GetHashCode();
 
-        public static HashCode Compose<T>(T arg) => new HashCode(arg.GetHashCode());
+        public static HashCode Compose<T>(T arg) => new(arg.GetHashCode());
 
-        public static HashCode ComposeNotNull<T>(T arg) where T : class => new HashCode((object)arg == null ? 31 : arg.GetHashCode());
+        public static HashCode ComposeNotNull<T>(T arg) where T : class => new((object)arg == null ? 31 : arg.GetHashCode());
 
-        public HashCode And<T>(T arg) => new HashCode(this.hashCode * 31 + arg.GetHashCode());
+        public HashCode And<T>(T arg) => new(this.hashCode * 31 + arg.GetHashCode());
 
-        public HashCode AndNotNull<T>(T arg) => new HashCode(this.hashCode * 31 + ((object)arg == null ? 0 : arg.GetHashCode()));
+        public HashCode AndNotNull<T>(T arg) => new(this.hashCode * 31 + ((object)arg == null ? 0 : arg.GetHashCode()));
 
         public override int GetHashCode() => this.hashCode;
     }

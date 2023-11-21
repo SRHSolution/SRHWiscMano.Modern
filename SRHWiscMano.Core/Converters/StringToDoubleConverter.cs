@@ -32,12 +32,13 @@ namespace SRHWiscMano.Core.Converters
         /// <param name="parameter"></param>
         /// <param name="culture"></param>
         /// <returns></returns>
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        public object? ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
             if (value is double doubleValue)
             {
                 return doubleValue.ToString(culture);
             }
+
             return null;
         }
     }

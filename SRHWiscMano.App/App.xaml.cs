@@ -5,6 +5,7 @@ using System.Text;
 using System.Windows;
 using System.Xml.Linq;
 using CommunityToolkit.Mvvm.DependencyInjection;
+using CommunityToolkit.Mvvm.Messaging;
 using ControlzEx.Theming;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -27,8 +28,7 @@ namespace SRHWiscMano.App
     /// </summary>
     public partial class App : Application
     {
-        public IServiceProvider ServiceProvider { get; private set; }
-
+        private IServiceProvider? serviceProvider;
 
         protected override void OnStartup(StartupEventArgs e)
         {
@@ -39,13 +39,16 @@ namespace SRHWiscMano.App
             SRHWiscMano.App.ServiceRegistration.ConfigureServices(services);
 
 
-            ServiceProvider = services.BuildServiceProvider();
+            serviceProvider = services.BuildServiceProvider();
 
-            Ioc.Default.ConfigureServices(ServiceProvider);
+            Ioc.Default.ConfigureServices(serviceProvider);
 
 
             // Logging 메시지를 back단에서 계속 받기 위해서 Instance를 미리 생성함
             Ioc.Default.GetRequiredService<LoggerWindow>();
+            // MainWindow 와 관련된 ViewModel 초기화를 미리 하기 위함
+            Ioc.Default.GetService<MainWindowViewModel>();
+            Ioc.Default.GetService<IViewerViewModel>();
 
             LogManager.GetCurrentClassLogger().Info("Application Started");
 
@@ -55,9 +58,10 @@ namespace SRHWiscMano.App
         private void LoadAppSettings()
         {
             var settings = Ioc.Default.GetRequiredService<IOptions<AppSettings>>().Value;
-
+             
             ThemeManager.Current.ChangeThemeBaseColor(Application.Current, settings.BaseTheme!);
             ThemeManager.Current.ChangeThemeColorScheme(Application.Current, settings.AccentTheme!);
+
         }
 
 

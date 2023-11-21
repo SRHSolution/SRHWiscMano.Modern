@@ -9,7 +9,7 @@ namespace SRHWiscMano.Core.Helpers
 {
     public static class InstantUtils
     {
-        public static readonly Instant Epoch = new Instant();
+        public static readonly Instant Epoch = new();
 
         public static Instant InstantFromMilliseconds(long milliseconds)
         {

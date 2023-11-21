@@ -15,8 +15,8 @@ namespace SRHWiscMano.Core.Helpers
     /// </summary>
     public static class InstantExtensions
     {
-        public static readonly Instant Epoch = new Instant();
-        public static readonly Interval EmptyInterval = new Interval(Epoch, Epoch);
+        public static readonly Instant Epoch = new();
+        public static readonly Interval EmptyInterval = new(Epoch, Epoch);
 
         public static long ToMillisecondsFromEpoch(this Instant time)
         {

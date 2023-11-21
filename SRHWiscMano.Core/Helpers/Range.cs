@@ -2,7 +2,7 @@
 {
     public static class Range
     {
-        public static Range<T> Create<T>(T value1, T value2) where T : IEquatable<T>, IComparable<T> => new Range<T>(value1, value2);
+        public static Range<T> Create<T>(T value1, T value2) where T : IEquatable<T>, IComparable<T> => new(value1, value2);
     }
 
     public class Range<T> : IEquatable<Range<T>> where T : IEquatable<T>, IComparable<T>
@@ -77,9 +77,9 @@
             return !this.IsForward ? new Range<T>(obj2, obj1) : new Range<T>(obj1, obj2);
         }
 
-        public Range<T> Reverse() => new Range<T>(this.end, this.start);
+        public Range<T> Reverse() => new(this.end, this.start);
 
-        public Range<TResult> Map<TResult>(Func<T, TResult> selector) where TResult : IEquatable<TResult>, IComparable<TResult> => new Range<TResult>(selector(this.start), selector(this.end));
+        public Range<TResult> Map<TResult>(Func<T, TResult> selector) where TResult : IEquatable<TResult>, IComparable<TResult> => new(selector(this.start), selector(this.end));
 
         private static bool CheckEquals(Range<T> range1, Range<T> range2)
         {

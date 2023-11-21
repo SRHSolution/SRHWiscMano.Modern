@@ -14,6 +14,11 @@ namespace SRHWiscMano.Core.ViewModels
         double MinSensorData { get; }
         double MaxSensorData { get; }
 
+        double MinSensorRange { get; }
+        double MaxSensorRange { get; }
+
+        IRelayCommand SensorRangeChangedCommand { get; }
+
         /// <summary>
         /// Main Plot Model
         /// </summary>
@@ -33,6 +38,7 @@ namespace SRHWiscMano.Core.ViewModels
         IRelayCommand FitToScreenCommand { get; }
         IRelayCommand<double> ZoomInCommand { get; }
         IRelayCommand<double> ZoomOutCommand { get; }
+        IRelayCommand<FavoritePalette> FavoritePaletteCommand { get; }
         IRelayCommand NavigateToExplorerCommand { get; }
 
         IRelayCommand PrevTimeFrameCommand { get; }

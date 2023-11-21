@@ -18,6 +18,8 @@
     <UserControl.Resources>
         <Thickness x:Key="ControlMargin">0 5 0 0</Thickness>
         <converters:StringToDoubleConverter x:Key="StringToDoubleConverter" />
+        <converters:FavoritePaletteConverter x:Key="FavoritePaletteConverter"/>
+        
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -79,7 +81,7 @@
             <!-- Zoom Level Text Box -->
             <TextBox x:Name="zoomlevel" Text="{Binding ZoomPercentage, StringFormat='{}{0}%'}" Width="50" Margin="5"
                      HorizontalAlignment="Right" VerticalContentAlignment="Center" HorizontalContentAlignment="Right" GotFocus="Zoomlevel_OnGotFocus" PreviewMouseLeftButtonDown="Zoomlevel_PreviewMouseLeftButtonDown"/>
-            
+
             <Button Width="32"
                     Height="32 "
                     Margin="2"
@@ -118,8 +120,16 @@
                                 Height="32 "
                                 Margin="2"
                                 Foreground="{DynamicResource MahApps.Brushes.Accent}"
-                                Style="{StaticResource MahApps.Styles.Button.Circle}" Command="{Binding FavoritePaletteCommand}"
-                                CommandParameter="Hue64">
+                                Style="{StaticResource MahApps.Styles.Button.Circle}" Command="{Binding FavoritePaletteCommand}">
+                            <Button.CommandParameter>
+                                <MultiBinding Converter="{StaticResource FavoritePaletteConverter}">
+                                    <Binding Source="Hue64"/>
+                                    <!-- Replace with actual bindings -->
+                                    <Binding Source="200"/>
+                                    <Binding Source="-5"/>
+                                    <!-- Add more bindings as needed -->
+                                </MultiBinding>
+                            </Button.CommandParameter>
                             <Button.ContentTemplate>
                                 <DataTemplate>
                                     <iconPacks:PackIconJamIcons Kind="Brightness" RotationAngle="45"/>
@@ -132,8 +142,16 @@
                                 Height="32 "
                                 Margin="2"
                                 Foreground="{DynamicResource MahApps.Brushes.Accent}"
-                                Style="{StaticResource MahApps.Styles.Button.Circle}" Command="{Binding FavoritePaletteCommand}"
-                                CommandParameter="Rainbow">
+                                Style="{StaticResource MahApps.Styles.Button.Circle}" Command="{Binding FavoritePaletteCommand}">
+                            <Button.CommandParameter>
+                                <MultiBinding Converter="{StaticResource FavoritePaletteConverter}">
+                                    <Binding Source="Jet"/>
+                                    <!-- Replace with actual bindings -->
+                                    <Binding Source="200"/>
+                                    <Binding Source="-5"/>
+                                    <!-- Add more bindings as needed -->
+                                </MultiBinding>
+                            </Button.CommandParameter>
                             <Button.ContentTemplate>
                                 <DataTemplate>
                                     <iconPacks:PackIconJamIcons Kind="Brightness" RotationAngle="45"/>
@@ -146,8 +164,16 @@
                                 Height="32 "
                                 Margin="2"
                                 Foreground="{DynamicResource MahApps.Brushes.Accent}"
-                                Style="{StaticResource MahApps.Styles.Button.Circle}" Command="{Binding FavoritePaletteCommand}"
-                                CommandParameter="BlackWhiteRed">
+                                Style="{StaticResource MahApps.Styles.Button.Circle}" Command="{Binding FavoritePaletteCommand}">
+                            <Button.CommandParameter>
+                                <MultiBinding Converter="{StaticResource FavoritePaletteConverter}">
+                                    <Binding Source="Rainbow"/>
+                                    <!-- Replace with actual bindings -->
+                                    <Binding Source="200"/>
+                                    <Binding Source="-5"/>
+                                    <!-- Add more bindings as needed -->
+                                </MultiBinding>
+                            </Button.CommandParameter>
                             <Button.ContentTemplate>
                                 <DataTemplate>
                                     <iconPacks:PackIconJamIcons Kind="Brightness" RotationAngle="45"/>
@@ -157,26 +183,40 @@
                         <TextBlock Text="low" Margin="0,-2,0,0" Foreground="{DynamicResource MahApps.Brushes.Accent2}" TextAlignment="Center"/>
                     </StackPanel>
                     <Grid Grid.Column="1">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="34*"/>
+                            <RowDefinition Height="79*"/>
+                        </Grid.RowDefinitions>
                         <!-- <control:ColorRangeSlider DataContext="{Binding Source={StaticResource Locator}, Path=ColorRangeSlideViewModel}"/> -->
 
                         <mah:RangeSlider Margin="10,10, 0, 10"
                                          mah:SliderHelper.EnableMouseWheel="MouseHover"
                                          AutoToolTipPlacement="BottomRight"
                                          LargeChange="10"
-                                         LowerValue="50"
+                                         LowerValue="{Binding MinSensorRange}"
+                                         UpperValue="{Binding MaxSensorRange}"
                                          Maximum="{Binding MaxSensorData}"
                                          Minimum="{Binding MinSensorData}"
                                          Orientation="Vertical"
                                          SmallChange="1"
                                          TickPlacement="TopLeft"
                                          Ticks="20 25 30 50 70 75 80"
-                                         UpperValue="50" />
+                                          Grid.RowSpan="2" >
+                            <b:Interaction.Triggers>
+                                <b:EventTrigger EventName="UpperThumbDragCompleted">
+                                    <b:InvokeCommandAction Command="{Binding SensorRangeChangedCommand}" />
+                                </b:EventTrigger>
+                                <b:EventTrigger EventName="LowerThumbDragCompleted">
+                                    <b:InvokeCommandAction Command="{Binding SensorRangeChangedCommand}" />
+                                </b:EventTrigger>
+                            </b:Interaction.Triggers>
+                        </mah:RangeSlider>
                     </Grid>
                     
                 </Grid>
             </Grid>
-            <ScrollViewer Grid.Column="1">
-                <oxyWpf:PlotView Model="{Binding MainPlotModel}" Controller="{Binding MainPlotController}" />
+            <ScrollViewer Grid.Column="1" >
+                <oxyWpf:PlotView Model="{Binding MainPlotModel}" Margin="0"/>
             </ScrollViewer>
         </Grid>
 
