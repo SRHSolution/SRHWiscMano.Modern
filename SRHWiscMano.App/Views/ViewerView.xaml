@@ -18,6 +18,8 @@
     <UserControl.Resources>
         <Thickness x:Key="ControlMargin">0 5 0 0</Thickness>
         <converters:StringToDoubleConverter x:Key="StringToDoubleConverter" />
+        <converters:FavoritePaletteConverter x:Key="FavoritePaletteConverter"/>
+        
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -118,8 +120,16 @@
                                 Height="32 "
                                 Margin="2"
                                 Foreground="{DynamicResource MahApps.Brushes.Accent}"
-                                Style="{StaticResource MahApps.Styles.Button.Circle}" Command="{Binding FavoritePaletteCommand}"
-                                CommandParameter="Hue64">
+                                Style="{StaticResource MahApps.Styles.Button.Circle}" Command="{Binding FavoritePaletteCommand}">
+                            <Button.CommandParameter>
+                                <MultiBinding Converter="{StaticResource FavoritePaletteConverter}">
+                                    <Binding Source="Hue64"/>
+                                    <!-- Replace with actual bindings -->
+                                    <Binding Source="200"/>
+                                    <Binding Source="-5"/>
+                                    <!-- Add more bindings as needed -->
+                                </MultiBinding>
+                            </Button.CommandParameter>
                             <Button.ContentTemplate>
                                 <DataTemplate>
                                     <iconPacks:PackIconJamIcons Kind="Brightness" RotationAngle="45"/>
@@ -132,8 +142,16 @@
                                 Height="32 "
                                 Margin="2"
                                 Foreground="{DynamicResource MahApps.Brushes.Accent}"
-                                Style="{StaticResource MahApps.Styles.Button.Circle}" Command="{Binding FavoritePaletteCommand}"
-                                CommandParameter="Rainbow">
+                                Style="{StaticResource MahApps.Styles.Button.Circle}" Command="{Binding FavoritePaletteCommand}">
+                            <Button.CommandParameter>
+                                <MultiBinding Converter="{StaticResource FavoritePaletteConverter}">
+                                    <Binding Source="Jet"/>
+                                    <!-- Replace with actual bindings -->
+                                    <Binding Source="200"/>
+                                    <Binding Source="-5"/>
+                                    <!-- Add more bindings as needed -->
+                                </MultiBinding>
+                            </Button.CommandParameter>
                             <Button.ContentTemplate>
                                 <DataTemplate>
                                     <iconPacks:PackIconJamIcons Kind="Brightness" RotationAngle="45"/>
@@ -146,8 +164,16 @@
                                 Height="32 "
                                 Margin="2"
                                 Foreground="{DynamicResource MahApps.Brushes.Accent}"
-                                Style="{StaticResource MahApps.Styles.Button.Circle}" Command="{Binding FavoritePaletteCommand}"
-                                CommandParameter="BlackWhiteRed">
+                                Style="{StaticResource MahApps.Styles.Button.Circle}" Command="{Binding FavoritePaletteCommand}">
+                            <Button.CommandParameter>
+                                <MultiBinding Converter="{StaticResource FavoritePaletteConverter}">
+                                    <Binding Source="Rainbow"/>
+                                    <!-- Replace with actual bindings -->
+                                    <Binding Source="200"/>
+                                    <Binding Source="-5"/>
+                                    <!-- Add more bindings as needed -->
+                                </MultiBinding>
+                            </Button.CommandParameter>
                             <Button.ContentTemplate>
                                 <DataTemplate>
                                     <iconPacks:PackIconJamIcons Kind="Brightness" RotationAngle="45"/>

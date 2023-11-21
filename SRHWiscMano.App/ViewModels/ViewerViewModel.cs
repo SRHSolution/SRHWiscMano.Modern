@@ -43,9 +43,9 @@ namespace SRHWiscMano.App.ViewModels
 
 
         [ObservableProperty] private PlotModel mainPlotModel;
-        
+
         [ObservableProperty] private PlotController mainPlotController;
-        
+
         [ObservableProperty] private PlotModel overviewPlotModel;
 
         [ObservableProperty] private PlotController overviewPlotController;
@@ -58,6 +58,7 @@ namespace SRHWiscMano.App.ViewModels
         [ObservableProperty] private OxyPalette selectedPalette = OxyPalettes.Hue64;
 
         private string selectedPaletteKey;
+
         public string SelectedPaletteKey
         {
             get => selectedPaletteKey;
@@ -79,7 +80,8 @@ namespace SRHWiscMano.App.ViewModels
         private IRelayCommand sensorRangeChanged;
 
 
-        public ViewerViewModel(ILogger<ViewerViewModel> logger, SharedService sharedService, IOptions<AppSettings> settings)
+        public ViewerViewModel(ILogger<ViewerViewModel> logger, SharedService sharedService,
+            IOptions<AppSettings> settings)
         {
             this.logger = logger;
             this.sharedService = sharedService;
@@ -118,7 +120,7 @@ namespace SRHWiscMano.App.ViewModels
             MainPlotModel.Background = OxyColor.FromArgb(backColor.A, backColor.R, backColor.G, backColor.B);
             MainPlotModel.TextColor = OxyColor.FromArgb(foreColor.A, foreColor.R, foreColor.G, foreColor.B);
             MainPlotModel.PlotAreaBorderColor = OxyColors.Gray;
-            MainPlotModel.Axes.Where(ax => ax.GetType().Name =="LinearAxis").ForEach(lax=>
+            MainPlotModel.Axes.Where(ax => ax.GetType().Name == "LinearAxis").ForEach(lax =>
             {
                 lax.TicklineColor = MainPlotModel.TextColor;
                 lax.MinorTicklineColor = MainPlotModel.TextColor;
@@ -148,7 +150,7 @@ namespace SRHWiscMano.App.ViewModels
             {
                 for (int j = 0; j < sensorCount; j++)
                 {
-                    arrayData[i, j] = examData.Samples[i].Values[sensorCount-1-j];
+                    arrayData[i, j] = examData.Samples[i].Values[sensorCount - 1 - j];
                 }
             }
 
@@ -159,12 +161,12 @@ namespace SRHWiscMano.App.ViewModels
             logger.LogInformation($"ExamData has min/max : {MinSensorData}/{MaxSensorData}");
 
             // 기존의 PlotView를 clear 한 후 ExamData에 대한 PlotModel을 생성해서 입력한다.
-            ((IPlotModel)this.MainPlotModel)?.AttachPlotView(null);
+            ((IPlotModel) this.MainPlotModel)?.AttachPlotView(null);
             var mainModel = CreatePlotModel(examData, arrayData);
             AddAxesOnMain(mainModel, frameCount, sensorCount);
             MainPlotModel = mainModel;
 
-            ((IPlotModel)this.OverviewPlotModel)?.AttachPlotView(null);
+            ((IPlotModel) this.OverviewPlotModel)?.AttachPlotView(null);
             var overviewModel = CreatePlotModel(examData, arrayData);
             AddAxesOnOverview(overviewModel, frameCount, sensorCount);
             OverviewPlotModel = overviewModel;
@@ -182,7 +184,7 @@ namespace SRHWiscMano.App.ViewModels
         {
             var sensorCount = examData.SensorCount();
             var frameCount = examData.Samples.Count;
-            var model = new PlotModel { Title = "Peaks" };
+            var model = new PlotModel {Title = "Peaks"};
 
             // Create your heatmap series and add to MyModel
             var heatmapSeries = new HeatMapSeries
@@ -200,7 +202,7 @@ namespace SRHWiscMano.App.ViewModels
             {
                 Position = AxisPosition.Right,
                 Palette = SelectedPalette,
-                HighColor = SelectedPalette.Colors.Last(),// OxyColors.White,
+                HighColor = SelectedPalette.Colors.Last(), // OxyColors.White,
                 LowColor = SelectedPalette.Colors.First()
             });
 
@@ -222,10 +224,10 @@ namespace SRHWiscMano.App.ViewModels
                 Position = AxisPosition.Left,
                 MaximumPadding = 0,
                 MinimumPadding = 0,
-                Minimum = 0,                // 초기 시작값
-                Maximum = ySize - 1,  // 초기 최대값
-                AbsoluteMinimum = 0,        // Panning 최소값
-                AbsoluteMaximum = ySize - 1,  // Panning 최대값
+                Minimum = 0, // 초기 시작값
+                Maximum = ySize - 1, // 초기 최대값
+                AbsoluteMinimum = 0, // Panning 최소값
+                AbsoluteMaximum = ySize - 1, // Panning 최대값
                 Tag = "Y"
             });
 
@@ -236,7 +238,7 @@ namespace SRHWiscMano.App.ViewModels
                 Position = AxisPosition.Bottom,
                 MinimumPadding = 0,
                 Minimum = 0,
-                Maximum = 10000,// - 1,
+                Maximum = 10000, // - 1,
                 MajorStep = 1000,
                 AbsoluteMinimum = 0,
                 AbsoluteMaximum = xSize - 1,
@@ -260,10 +262,10 @@ namespace SRHWiscMano.App.ViewModels
                 Position = AxisPosition.Left,
                 MaximumPadding = 0,
                 MinimumPadding = 0,
-                Minimum = 0,                // 초기 시작값
-                Maximum = ySize - 1,  // 초기 최대값
-                AbsoluteMinimum = 0,        // Panning 최소값
-                AbsoluteMaximum = ySize - 1,  // Panning 최대값
+                Minimum = 0, // 초기 시작값
+                Maximum = ySize - 1, // 초기 최대값
+                AbsoluteMinimum = 0, // Panning 최소값
+                AbsoluteMaximum = ySize - 1, // Panning 최대값
                 Tag = "Y"
             });
 
@@ -284,35 +286,32 @@ namespace SRHWiscMano.App.ViewModels
         }
 
 
-       
-
         [RelayCommand]
         private void ZoomOut(double zoomVal)
         {
             logger.LogTrace($"Zoom : {zoomVal}");
-            ZoomPercentage = (int)(ZoomPercentage / zoomVal);
+            ZoomPercentage = (int) (ZoomPercentage / zoomVal);
         }
 
         [RelayCommand]
         private void ZoomIn(double zoomVal)
         {
             logger.LogTrace($"Zoom : {zoomVal}");
-            ZoomPercentage = (int)(ZoomPercentage * zoomVal);
+            ZoomPercentage = (int) (ZoomPercentage * zoomVal);
         }
 
-        
-        
 
         [RelayCommand]
-        private void FavoritePalette(string paletteName)
+        private void FavoritePalette(FavoritePalette favPalette)
         {
-            if (Palettes != null && Palettes.ContainsKey(paletteName))
+            var name = favPalette.PaletteName;
+            if (Palettes != null && Palettes.ContainsKey(name))
             {
-                logger.LogTrace($"Select favorite palette {paletteName}");
-                
-                SelectedPalette = Palettes[paletteName];
-                SelectedPaletteKey = paletteName;
-                UpdatePaletteChanged();
+                logger.LogTrace($"Select favorite palette {name}");
+
+                MinSensorRange = favPalette.LowerValue;
+                MaxSensorRange = favPalette.UpperValue;
+                SelectedPaletteKey = name;
             }
         }
 
@@ -324,12 +323,15 @@ namespace SRHWiscMano.App.ViewModels
 
         private void UpdatePaletteChanged()
         {
+            if (MainPlotModel.Series.Count == 0)
+                return;
+            
             var mainColorAxis = MainPlotModel.Axes.Single(s => s is LinearColorAxis) as LinearColorAxis;
             SelectedPalette = Palettes[SelectedPaletteKey];
             mainColorAxis.Palette = SelectedPalette;
             mainColorAxis.AbsoluteMinimum = MinSensorRange; // 최소 limit 값
             mainColorAxis.AbsoluteMaximum = MaxSensorRange; // 최대 limit 값
-            mainColorAxis.HighColor = SelectedPalette.Colors.Last();// OxyColors.White,
+            mainColorAxis.HighColor = SelectedPalette.Colors.Last(); // OxyColors.White,
             mainColorAxis.LowColor = SelectedPalette.Colors.First();
             MainPlotModel.InvalidatePlot(false);
 
@@ -339,7 +341,7 @@ namespace SRHWiscMano.App.ViewModels
             overviewColorAxis.Palette = SelectedPalette;
             overviewColorAxis.AbsoluteMinimum = MinSensorRange; // 최소 limit 값
             overviewColorAxis.AbsoluteMaximum = MaxSensorRange; // 최대 limit 값
-            overviewColorAxis.HighColor = SelectedPalette.Colors.Last();// OxyColors.White,
+            overviewColorAxis.HighColor = SelectedPalette.Colors.Last(); // OxyColors.White,
             overviewColorAxis.LowColor = SelectedPalette.Colors.First();
             OverviewPlotModel.InvalidatePlot(false);
         }

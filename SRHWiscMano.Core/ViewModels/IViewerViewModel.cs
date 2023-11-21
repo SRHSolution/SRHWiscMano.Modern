@@ -38,7 +38,7 @@ namespace SRHWiscMano.Core.ViewModels
         IRelayCommand FitToScreenCommand { get; }
         IRelayCommand<double> ZoomInCommand { get; }
         IRelayCommand<double> ZoomOutCommand { get; }
-        IRelayCommand<string> FavoritePaletteCommand { get; }
+        IRelayCommand<FavoritePalette> FavoritePaletteCommand { get; }
         IRelayCommand NavigateToExplorerCommand { get; }
 
         IRelayCommand PrevTimeFrameCommand { get; }
