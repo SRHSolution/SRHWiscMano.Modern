@@ -56,7 +56,17 @@ namespace SRHWiscMano.App.ViewModels
         [ObservableProperty] private double maxSensorRange = 100;
         [ObservableProperty] private double zoomPercentage = 100;
         [ObservableProperty] private OxyPalette selectedPalette = OxyPalettes.Hue64;
-        [ObservableProperty] private string selectedPaletteKey;
+
+        private string selectedPaletteKey;
+        public string SelectedPaletteKey
+        {
+            get => selectedPaletteKey;
+            set
+            {
+                SetProperty(ref selectedPaletteKey, value);
+                UpdatePaletteChanged();
+            }
+        }
 
         public IRelayCommand FitToScreenCommand { get; }
         public IRelayCommand PrevTimeFrameCommand { get; private set; }
@@ -264,8 +274,8 @@ namespace SRHWiscMano.App.ViewModels
                 Position = AxisPosition.Bottom,
                 MinimumPadding = 0,
                 Minimum = 0,
-                Maximum = 3000,// - 1,
-                MajorStep = 100,
+                Maximum = xSize - 1, //100000,// - 1,
+                MajorStep = 2000,
                 AbsoluteMinimum = 0,
                 AbsoluteMaximum = xSize - 1,
                 MinorStep = xSize - 1, // 최대 범위를 입력하여 MinorStep 이 표시되지 않도록 한다
@@ -290,10 +300,12 @@ namespace SRHWiscMano.App.ViewModels
             ZoomPercentage = (int)(ZoomPercentage * zoomVal);
         }
 
+        
+        
+
         [RelayCommand]
         private void FavoritePalette(string paletteName)
         {
-
             if (Palettes != null && Palettes.ContainsKey(paletteName))
             {
                 logger.LogTrace($"Select favorite palette {paletteName}");
@@ -313,6 +325,7 @@ namespace SRHWiscMano.App.ViewModels
         private void UpdatePaletteChanged()
         {
             var mainColorAxis = MainPlotModel.Axes.Single(s => s is LinearColorAxis) as LinearColorAxis;
+            SelectedPalette = Palettes[SelectedPaletteKey];
             mainColorAxis.Palette = SelectedPalette;
             mainColorAxis.AbsoluteMinimum = MinSensorRange; // 최소 limit 값
             mainColorAxis.AbsoluteMaximum = MaxSensorRange; // 최대 limit 값
