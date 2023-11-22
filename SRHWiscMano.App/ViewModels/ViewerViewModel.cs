@@ -166,6 +166,10 @@ namespace SRHWiscMano.App.ViewModels
             AddAxesOnMain(mainModel, frameCount, sensorCount);
             MainPlotModel = mainModel;
 
+            var mainController = new PlotController();
+            mainController.BindMouseEnter(OxyPlot.PlotCommands.HoverTrack);
+            MainPlotController = mainController;
+
             ((IPlotModel) this.OverviewPlotModel)?.AttachPlotView(null);
             var overviewModel = CreatePlotModel(examData, arrayData);
             AddAxesOnOverview(overviewModel, frameCount, sensorCount);
@@ -184,30 +188,25 @@ namespace SRHWiscMano.App.ViewModels
         {
             var sensorCount = examData.SensorCount();
             var frameCount = examData.Samples.Count;
-            var model = new PlotModel {Title = "Peaks"};
+            var model = new PlotModel {Title = ""};
 
             // Create your heatmap series and add to MyModel
             var heatmapSeries = new HeatMapSeries
             {
+                CoordinateDefinition = HeatMapCoordinateDefinition.Center,
                 X0 = 0,
-                X1 = frameCount - 1, // Assuming 28 sensors
+                X1 = frameCount, // Assuming 28 sensors
                 Y0 = 0,
-                Y1 = sensorCount - 1,
+                Y1 = sensorCount,
                 Data = plotData /* Your 2D data array */,
                 Interpolate = true,
+                RenderMethod = HeatMapRenderMethod.Bitmap,
             };
             model.Series.Add(heatmapSeries);
 
-            model.Axes.Add(new LinearColorAxis
-            {
-                Position = AxisPosition.Right,
-                Palette = SelectedPalette,
-                HighColor = SelectedPalette.Colors.Last(), // OxyColors.White,
-                LowColor = SelectedPalette.Colors.First()
-            });
-
             return model;
         }
+
 
         /// <summary>
         /// Main PlotViw를 위한 별도의 Axes 설정을 한다.
@@ -217,6 +216,15 @@ namespace SRHWiscMano.App.ViewModels
         /// <param name="ySize"></param>
         private void AddAxesOnMain(PlotModel model, int xSize, int ySize)
         {
+            model.Axes.Add(new LinearColorAxis
+            {
+                Position = AxisPosition.Left,
+                Palette = SelectedPalette,
+                HighColor = SelectedPalette.Colors.Last(), // OxyColors.White,
+                LowColor = SelectedPalette.Colors.First(),
+                RenderAsImage = false,
+            });
+
             model.Axes.Add(new LinearAxis()
             {
                 IsPanEnabled = false,
@@ -228,6 +236,7 @@ namespace SRHWiscMano.App.ViewModels
                 Maximum = ySize - 1, // 초기 최대값
                 AbsoluteMinimum = 0, // Panning 최소값
                 AbsoluteMaximum = ySize - 1, // Panning 최대값
+                IsAxisVisible = false,
                 Tag = "Y"
             });
 
@@ -238,8 +247,10 @@ namespace SRHWiscMano.App.ViewModels
                 Position = AxisPosition.Bottom,
                 MinimumPadding = 0,
                 Minimum = 0,
-                Maximum = 10000, // - 1,
+                Maximum = 10000 , // - 1,
                 MajorStep = 1000,
+                MajorTickSize = 4,
+                MinorTickSize = 2,
                 AbsoluteMinimum = 0,
                 AbsoluteMaximum = xSize - 1,
                 MinorStep = xSize - 1, // 최대 범위를 입력하여 MinorStep 이 표시되지 않도록 한다
@@ -255,6 +266,14 @@ namespace SRHWiscMano.App.ViewModels
         /// <param name="ySize"></param>
         private void AddAxesOnOverview(PlotModel model, int xSize, int ySize)
         {
+            model.Axes.Add(new LinearColorAxis
+            {
+                Position = AxisPosition.None,
+                Palette = SelectedPalette,
+                HighColor = SelectedPalette.Colors.Last(), // OxyColors.White,
+                LowColor = SelectedPalette.Colors.First(),
+            });
+
             model.Axes.Add(new LinearAxis()
             {
                 IsPanEnabled = false,
@@ -266,6 +285,7 @@ namespace SRHWiscMano.App.ViewModels
                 Maximum = ySize - 1, // 초기 최대값
                 AbsoluteMinimum = 0, // Panning 최소값
                 AbsoluteMaximum = ySize - 1, // Panning 최대값
+                IsAxisVisible = false,
                 Tag = "Y"
             });
 
@@ -277,10 +297,14 @@ namespace SRHWiscMano.App.ViewModels
                 MinimumPadding = 0,
                 Minimum = 0,
                 Maximum = xSize - 1, //100000,// - 1,
-                MajorStep = 2000,
+                MinorStep = 1000 , // 최대 범위를 입력하여 MinorStep 이 표시되지 않도록 한다
+                MajorStep = 5000 ,
+                MajorTickSize = 4,
+                MinorTickSize = 2,
+                IsAxisVisible = true,
+                
                 AbsoluteMinimum = 0,
                 AbsoluteMaximum = xSize - 1,
-                MinorStep = xSize - 1, // 최대 범위를 입력하여 MinorStep 이 표시되지 않도록 한다
                 Tag = "X"
             });
         }
@@ -319,6 +343,18 @@ namespace SRHWiscMano.App.ViewModels
         private void SensorRangeChanged()
         {
             UpdatePaletteChanged();
+        }
+
+        private void TestPalettes()
+        {
+            OxyPalette pal = OxyPalette.Interpolate(
+                4,
+                OxyColors.Black,
+                OxyColor.FromRgb(127, 0, 0),
+                OxyColor.FromRgb(255, 127, 0),
+                OxyColor.FromRgb(255, 255, 127),
+                OxyColors.White);
+
         }
 
         private void UpdatePaletteChanged()
