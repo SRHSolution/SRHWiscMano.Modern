@@ -123,7 +123,7 @@
                                 Style="{StaticResource MahApps.Styles.Button.Circle}" Command="{Binding FavoritePaletteCommand}">
                             <Button.CommandParameter>
                                 <MultiBinding Converter="{StaticResource FavoritePaletteConverter}">
-                                    <Binding Source="Hue64"/>
+                                    <Binding Source="Hue"/>
                                     <!-- Replace with actual bindings -->
                                     <Binding Source="200"/>
                                     <Binding Source="-5"/>
@@ -136,7 +136,7 @@
                                 </DataTemplate>
                             </Button.ContentTemplate>
                         </Button>
-                        <TextBlock Text="high" Margin="0,-2,0,0" Foreground="{DynamicResource MahApps.Brushes.Accent2}" TextAlignment="Center"/>
+                        <TextBlock Text="Hue" Margin="0,-2,0,0" Foreground="{DynamicResource MahApps.Brushes.Accent2}" TextAlignment="Center"/>
                         <Border Height="5"/>
                         <Button Width="32"
                                 Height="32 "
@@ -158,7 +158,7 @@
                                 </DataTemplate>
                             </Button.ContentTemplate>
                         </Button>
-                        <TextBlock Text="mid" Margin="0,-2,0,0" Foreground="{DynamicResource MahApps.Brushes.Accent2}" TextAlignment="Center"/>
+                        <TextBlock Text="Jet" Margin="0,-2,0,0" Foreground="{DynamicResource MahApps.Brushes.Accent2}" TextAlignment="Center"/>
                         <Border Height="5"/>
                         <Button Width="32"
                                 Height="32 "
@@ -180,7 +180,7 @@
                                 </DataTemplate>
                             </Button.ContentTemplate>
                         </Button>
-                        <TextBlock Text="low" Margin="0,-2,0,0" Foreground="{DynamicResource MahApps.Brushes.Accent2}" TextAlignment="Center"/>
+                        <TextBlock Text="Rainbow" Margin="0,-2,0,0" Foreground="{DynamicResource MahApps.Brushes.Accent2}" TextAlignment="Center"/>
                     </StackPanel>
                     <Grid Grid.Column="1">
                         <Grid.RowDefinitions>
@@ -209,6 +209,9 @@
                                 <b:EventTrigger EventName="LowerThumbDragCompleted">
                                     <b:InvokeCommandAction Command="{Binding SensorRangeChangedCommand}" />
                                 </b:EventTrigger>
+                                <b:EventTrigger EventName="CentralThumbDragCompleted">
+                                    <b:InvokeCommandAction Command="{Binding SensorRangeChangedCommand}" />
+                                </b:EventTrigger>
                             </b:Interaction.Triggers>
                         </mah:RangeSlider>
                     </Grid>
@@ -216,7 +219,7 @@
                 </Grid>
             </Grid>
             <ScrollViewer Grid.Column="1" >
-                <oxyWpf:PlotView Model="{Binding MainPlotModel}" Margin="0"/>
+                <oxyWpf:PlotView Model="{Binding MainPlotModel}" Margin="0" Controller="{Binding MainPlotController}"/>
             </ScrollViewer>
         </Grid>
 
