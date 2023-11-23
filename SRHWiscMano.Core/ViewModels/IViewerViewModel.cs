@@ -43,13 +43,15 @@ namespace SRHWiscMano.Core.ViewModels
         IRelayCommand<FavoritePalette> FavoritePaletteCommand { get; }
         IRelayCommand NavigateToExplorerCommand { get; }
 
-        IRelayCommand PrevTimeFrameCommand { get; }
-        IRelayCommand NextTimeFrameCommand { get; }
+        IRelayCommand PrevFrameNoteCommand { get; }
+        IRelayCommand NextFrameNoteCommand { get; }
         Dictionary<string, OxyPalette> Palettes { get; }
 
         OxyPalette SelectedPalette { get; }
 
         string SelectedPaletteKey { get; }
+
+        double InterpolateSensorScale { get; }
 
         
     }
