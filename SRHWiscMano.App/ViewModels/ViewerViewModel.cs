@@ -41,6 +41,7 @@ namespace SRHWiscMano.App.ViewModels
         public IExamination ExamData { get; private set; }
         public ObservableCollection<FrameNote> Notes { get; }
 
+        [ObservableProperty] private bool imageVisibility;
 
         [ObservableProperty] private PlotModel mainPlotModel;
 
@@ -99,6 +100,8 @@ namespace SRHWiscMano.App.ViewModels
             pvForeColor = settings.Value.BaseForeColor;
             ApplyTheme();
 
+            // Create an observable from the SizeChanged event
+            
             WeakReferenceMessenger.Default.Register<AppBaseThemeChangedMessage>(this, ThemeChanged);
         }
 
@@ -142,15 +145,17 @@ namespace SRHWiscMano.App.ViewModels
         private void SharedService_ExamDataLoaded(object? sender, EventArgs e)
         {
             var examData = sharedService.ExamData;
-            var sensorCount = examData.SensorCount();
+            var sensorCount = (int)(examData.SensorCount() * YScalse);
             var frameCount = examData.Samples.Count;
 
             var arrayData = new double[frameCount, sensorCount];
             for (int i = 0; i < frameCount; i++)
             {
+                var scaledSensorValues = Interpolators.LinearInterpolate(examData.Samples[i].Values.ToArray(), sensorCount);
+                
                 for (int j = 0; j < sensorCount; j++)
                 {
-                    arrayData[i, j] = examData.Samples[i].Values[sensorCount - 1 - j];
+                    arrayData[i, j] = scaledSensorValues[sensorCount - 1 - j];// examData.Samples[i].Values[sensorCount - 1 - j];
                 }
             }
 
@@ -178,6 +183,7 @@ namespace SRHWiscMano.App.ViewModels
             ApplyTheme();
         }
 
+        private double YScalse = 10;
         /// <summary>
         /// 공통 데이터를 이용하므로 Main, Overview에 대한 PlotModel을 생성한다.
         /// </summary>
@@ -195,9 +201,9 @@ namespace SRHWiscMano.App.ViewModels
             {
                 CoordinateDefinition = HeatMapCoordinateDefinition.Center,
                 X0 = 0,
-                X1 = frameCount, // Assuming 28 sensors
+                X1 = (double)frameCount, 
                 Y0 = 0,
-                Y1 = sensorCount,
+                Y1 = plotData.GetLength(1),
                 Data = plotData /* Your 2D data array */,
                 Interpolate = true,
                 RenderMethod = HeatMapRenderMethod.Bitmap,
@@ -284,7 +290,7 @@ namespace SRHWiscMano.App.ViewModels
                 Minimum = 0, // 초기 시작값
                 Maximum = ySize - 1, // 초기 최대값
                 AbsoluteMinimum = 0, // Panning 최소값
-                AbsoluteMaximum = ySize - 1, // Panning 최대값
+                AbsoluteMaximum = ySize * YScalse - 1, // Panning 최대값
                 IsAxisVisible = false,
                 Tag = "Y"
             });
@@ -337,6 +343,31 @@ namespace SRHWiscMano.App.ViewModels
                 MaxSensorRange = favPalette.UpperValue;
                 SelectedPaletteKey = name;
             }
+            else
+            {
+                var customColors = new OxyColor[]
+                {
+                    OxyColor.FromArgb(255, 24, 3, 95),
+                    OxyColor.FromArgb(255, 30, 237, 215),
+                    OxyColor.FromArgb(255, 47, 243, 38),
+                    OxyColor.FromArgb(255, 248, 248, 1),
+                    OxyColor.FromArgb(255, 253, 5, 0),
+                    OxyColor.FromArgb(255, 95, 0, 69)
+                };
+                var colorCount = favPalette.UpperValue - favPalette.LowerValue;
+                var palette = OxyPalette.Interpolate(colorCount, customColors);
+                SelectedPalette = palette;
+
+                var mainColorAxis = MainPlotModel.Axes.Single(s => s is LinearColorAxis) as LinearColorAxis;
+                mainColorAxis.Palette = palette;
+                mainColorAxis.HighColor = palette.Colors.Last(); // OxyColors.White,
+                mainColorAxis.LowColor = palette.Colors.First();
+                MinSensorRange = favPalette.LowerValue;
+                MaxSensorRange = favPalette.UpperValue;
+                mainColorAxis.AbsoluteMinimum = favPalette.LowerValue; // 최소 limit 값
+                mainColorAxis.AbsoluteMaximum = favPalette.UpperValue; // 최대 limit 값
+                MainPlotModel.InvalidatePlot(false);
+            }
         }
 
         [RelayCommand]
@@ -363,7 +394,9 @@ namespace SRHWiscMano.App.ViewModels
                 return;
             
             var mainColorAxis = MainPlotModel.Axes.Single(s => s is LinearColorAxis) as LinearColorAxis;
-            SelectedPalette = Palettes[SelectedPaletteKey];
+            if(!string.IsNullOrEmpty(SelectedPaletteKey))
+                SelectedPalette = Palettes[SelectedPaletteKey];
+            
             mainColorAxis.Palette = SelectedPalette;
             mainColorAxis.AbsoluteMinimum = MinSensorRange; // 최소 limit 값
             mainColorAxis.AbsoluteMaximum = MaxSensorRange; // 최대 limit 값

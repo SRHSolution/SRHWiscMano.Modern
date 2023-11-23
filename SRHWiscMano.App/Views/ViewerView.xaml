@@ -7,12 +7,14 @@
              xmlns:control="clr-namespace:SRHWiscMano.App.Controls"
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
              xmlns:oxyWpf="clr-namespace:OxyPlot.Wpf;assembly=OxyPlot.Wpf"
+            xmlns:oxySkia="clr-namespace:OxyPlot.SkiaSharp.Wpf;assembly=OxyPlot.SkiaSharp.Wpf"
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
              xmlns:converters="clr-namespace:SRHWiscMano.Core.Converters;assembly=SRHWiscMano.Core"
              xmlns:system="clr-namespace:System;assembly=System.Runtime"
              xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
              mc:Ignorable="d"
+             SizeChanged="ViewerView_OnSizeChanged"
              d:DesignHeight="660" d:DesignWidth="800"
              DataContext="{Binding Source={StaticResource Locator}, Path=ViewerViewModel}">
     <UserControl.Resources>
@@ -145,7 +147,7 @@
                                 Style="{StaticResource MahApps.Styles.Button.Circle}" Command="{Binding FavoritePaletteCommand}">
                             <Button.CommandParameter>
                                 <MultiBinding Converter="{StaticResource FavoritePaletteConverter}">
-                                    <Binding Source="Jet"/>
+                                    <Binding Source="custom"/>
                                     <!-- Replace with actual bindings -->
                                     <Binding Source="200"/>
                                     <Binding Source="-5"/>
@@ -218,14 +220,15 @@
                     
                 </Grid>
             </Grid>
-            <ScrollViewer Grid.Column="1" >
-                <oxyWpf:PlotView Model="{Binding MainPlotModel}" Margin="0" Controller="{Binding MainPlotController}"/>
-            </ScrollViewer>
+            <Grid Grid.Column="1" >
+                <control:SRHPlotView x:Name="mainPlot" Model="{Binding MainPlotModel}" Margin="0" Controller="{Binding MainPlotController}" DisconnectCanvasWhileUpdating="True" Visibility="{Binding ImageVisibility}" />
+                <Image x:Name="PlotImage" Visibility="{Binding ImageVisibility}" Stretch="Fill"/>
+            </Grid>
         </Grid>
 
 
-        <ScrollViewer Grid.Row="3">
-            <oxyWpf:PlotView Model="{Binding OverviewPlotModel}" Controller="{Binding OverviewPlotController}" />
-        </ScrollViewer>
+        <!-- <ScrollViewer Grid.Row="3"> -->
+        <!--     <oxyWpf:PlotView Model="{Binding OverviewPlotModel}" Controller="{Binding OverviewPlotController}" /> -->
+        <!-- </ScrollViewer> -->
     </Grid>
 </UserControl>

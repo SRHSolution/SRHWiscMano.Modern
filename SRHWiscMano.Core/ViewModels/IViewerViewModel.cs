@@ -19,6 +19,8 @@ namespace SRHWiscMano.Core.ViewModels
 
         IRelayCommand SensorRangeChangedCommand { get; }
 
+        public bool ImageVisibility { get; }
+
         /// <summary>
         /// Main Plot Model
         /// </summary>
