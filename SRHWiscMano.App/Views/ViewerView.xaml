@@ -226,9 +226,8 @@
             </Grid>
         </Grid>
 
-
-        <!-- <ScrollViewer Grid.Row="3"> -->
-        <!--     <oxyWpf:PlotView Model="{Binding OverviewPlotModel}" Controller="{Binding OverviewPlotController}" /> -->
-        <!-- </ScrollViewer> -->
+        <ScrollViewer Grid.Row="3">
+            <oxyWpf:PlotView Model="{Binding OverviewPlotModel}" Controller="{Binding OverviewPlotController}" />
+        </ScrollViewer>
     </Grid>
 </UserControl>

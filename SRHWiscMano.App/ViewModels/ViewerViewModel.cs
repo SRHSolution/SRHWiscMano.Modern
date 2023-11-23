@@ -2,14 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Printing;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Media;
-using System.Windows.Media.Media3D;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
@@ -21,10 +14,8 @@ using OxyPlot.Axes;
 using OxyPlot.Series;
 using SRHWiscMano.App.Data;
 using SRHWiscMano.App.Services;
-using SRHWiscMano.App.Views;
 using SRHWiscMano.Core.Helpers;
 using SRHWiscMano.Core.Models;
-using SRHWiscMano.Core.Services;
 using SRHWiscMano.Core.ViewModels;
 
 namespace SRHWiscMano.App.ViewModels
@@ -250,16 +241,18 @@ namespace SRHWiscMano.App.ViewModels
             model.Axes.Add(new LinearAxis()
             {
                 // IsZoomEnabled = false,
+                LabelFormatter = value=> $"{(value/1000).ToString()}",
                 Position = AxisPosition.Bottom,
                 MinimumPadding = 0,
                 Minimum = 0,
-                Maximum = 10000 , // - 1,
+                Maximum = 2000 , // - 1,
                 MajorStep = 1000,
+                // MinorStep = xSize - 1, // 최대 범위를 입력하여 MinorStep 이 표시되지 않도록 한다
+                MinorStep = 100, // 최대 범위를 입력하여 MinorStep 이 표시되지 않도록 한다
                 MajorTickSize = 4,
                 MinorTickSize = 2,
                 AbsoluteMinimum = 0,
                 AbsoluteMaximum = xSize - 1,
-                MinorStep = xSize - 1, // 최대 범위를 입력하여 MinorStep 이 표시되지 않도록 한다
                 Tag = "X"
             });
         }
@@ -298,7 +291,7 @@ namespace SRHWiscMano.App.ViewModels
             // X-Axis
             model.Axes.Add(new LinearAxis()
             {
-                // IsZoomEnabled = false,
+                LabelFormatter = value => $"{(value / 1000).ToString()} sec",
                 Position = AxisPosition.Bottom,
                 MinimumPadding = 0,
                 Minimum = 0,
