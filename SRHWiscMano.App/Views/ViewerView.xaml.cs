@@ -7,6 +7,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using SRHWiscMano.Core.ViewModels;
 using Timer = System.Timers.Timer;
 
 namespace SRHWiscMano.App.Views;
@@ -19,6 +20,8 @@ public partial class ViewerView : UserControl
     private bool isResizing;
     private DateTime eventTime;
     private Timer eventTimer;
+    private IViewerViewModel viewModel;
+
     public ViewerView()
     {
         InitializeComponent();
@@ -74,60 +77,34 @@ public partial class ViewerView : UserControl
 
     private void ViewerView_OnSizeChanged(object sender, SizeChangedEventArgs e)
     {
-        // return;
-        // if (!isResizing)
-        // {
-        //     isResizing = true;
-        //     lock (mainPlot.SyncPlot)
-        //     {
-        //         UpdatePlotImage();
-        //     
-        //         mainPlot.Visibility = Visibility.Collapsed;
-        //         PlotImage.Visibility = Visibility.Visible;
-        //     }
-        //     mainPlot.SuspendRender = true;
-        //     eventTimer.Enabled = true;
-        // }
-        // eventTime = DateTime.Now;
+        return;
+        if (viewModel == null)
+            return;
+
+        viewModel.AxisFreeze();
+        if (!isResizing)
+        {
+            isResizing = true;
+            eventTimer.Enabled = true;
+        }
+        eventTime = DateTime.Now;
     }
 
     private async void OnResizeEnd(object? sender, ElapsedEventArgs elapsedEventArgs)
     {
-        // if (!isResizing)
-        //     return;
-        //
-        // var duration = DateTime.Now - eventTime;
-        // if (duration.TotalMilliseconds < 500)
-        //     return;
-        //
-        // eventTimer.Enabled = false;
-        // isResizing = false;
-        // await Task.Run(() =>
-        // {
-        //     mainPlot.SuspendRender = false;
-        //     mainPlot.InvalidatePlot(false);
-        // });
-        //
-        // Dispatcher.BeginInvoke(new Action(() =>
-        // {
-        //     lock (mainPlot.SyncPlot)
-        //     {
-        //         mainPlot.Visibility = Visibility.Visible;
-        //         PlotImage.Visibility = Visibility.Collapsed;
-        //     }
-        // }));
-    }
-
-    private void UpdatePlotImage()
-    {
-        // if (mainPlot.ActualWidth == 0 || mainPlot.ActualHeight == 0)
-        //     return;
-        //
-        // var renderTargetBitmap = new RenderTargetBitmap(
-        //     (int) mainPlot.ActualWidth, (int) mainPlot.ActualHeight,
-        //     96, 96, PixelFormats.Pbgra32);
-        // renderTargetBitmap.Render(mainPlot);
-        //
-        // PlotImage.Source = renderTargetBitmap;
+        return;
+        if (!isResizing || viewModel == null)
+            return;
+        
+        var duration = DateTime.Now - eventTime;
+        if (duration.TotalMilliseconds < 500)
+            return;
+        
+        eventTimer.Enabled = false;
+        isResizing = false;
+        await Task.Run(() =>
+        {
+            viewModel.AxisRelease();
+        });
     }
 }

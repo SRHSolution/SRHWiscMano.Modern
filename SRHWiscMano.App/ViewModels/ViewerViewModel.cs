@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -62,6 +63,28 @@ namespace SRHWiscMano.App.ViewModels
                 UpdatePaletteChanged();
             }
         }
+
+        public void AxisFreeze()
+        {
+            var xAxis = mainPlotModel.Axes.First(ax => ax.Tag == "X");
+            var minimum = xAxis.ActualMinimum;
+            var maximum = xAxis.ActualMaximum;
+            xAxis.AbsoluteMinimum = minimum;
+            xAxis.AbsoluteMaximum = maximum;
+        }
+
+        public void AxisRelease()
+        {
+            var series = mainPlotModel.Series[0] as HeatMapSeries;
+            
+            var xAxis = mainPlotModel.Axes.First(ax => ax.Tag == "X");
+            var minimum = series.MinX;
+            var maximum = series.MaxX;
+
+            xAxis.AbsoluteMinimum = minimum;
+            xAxis.AbsoluteMaximum = maximum;
+        }
+
         public IRelayCommand FitToScreenCommand { get; }
         public IRelayCommand PrevFrameNoteCommand { get; private set; }
         public IRelayCommand NextFrameNoteCommand { get; private set; }
@@ -144,54 +167,84 @@ namespace SRHWiscMano.App.ViewModels
         }
 
         private HeatMapSeries backupHeatmap;
+        private double[,] fullExamData;
 
         private void SharedService_ExamDataLoaded(object? sender, EventArgs e)
+        {
+            LoadExamDataImpl();
+        }
+
+        private async Task LoadExamDataImpl()
         {
             var examData = sharedService.ExamData;
             var sensorCount = (int)(examData.SensorCount() * InterpolateSensorScale);
             var frameCount = examData.Samples.Count;
-
-            var arrayData = new double[frameCount, sensorCount];
-            for (int i = 0; i < frameCount; i++)
+            fullExamData = new double[frameCount, sensorCount];
+            await Task.Run(() =>
             {
-                var scaledSensorValues = Interpolators.LinearInterpolate(examData.Samples[i].Values.ToArray(), sensorCount);
-                
-                for (int j = 0; j < sensorCount; j++)
+                for (int i = 0; i < frameCount; i++)
                 {
-                    arrayData[i, j] = scaledSensorValues[sensorCount - 1 - j];// examData.Samples[i].Values[sensorCount - 1 - j];
+                    var scaledSensorValues =
+                        Interpolators.LinearInterpolate(examData.Samples[i].Values.ToArray(), sensorCount);
+
+                    for (int j = 0; j < sensorCount; j++)
+                    {
+                        fullExamData[i, j] =
+                            scaledSensorValues[sensorCount - 1 - j]; // examData.Samples[i].Values[sensorCount - 1 - j];
+                    }
                 }
-            }
 
-            logger.LogInformation($"ExamData's sensor data is interpolated by {InterpolateSensorScale} times");
+                logger.LogInformation($"ExamData's sensor data is interpolated by {InterpolateSensorScale} times");
 
-            // 입력받은 Exam 데이터에서 최소 최대 값을 얻어 RangeSlider의 최소/최대 값을 변경한다
-            MinSensorData = Math.Floor(arrayData.Cast<double>().Min());
-            MaxSensorData = Math.Ceiling(arrayData.Cast<double>().Max());
+                // 입력받은 Exam 데이터에서 최소 최대 값을 얻어 RangeSlider의 최소/최대 값을 변경한다
+                MinSensorData = Math.Floor(fullExamData.Cast<double>().Min());
+                MaxSensorData = Math.Ceiling(fullExamData.Cast<double>().Max());
 
-            logger.LogInformation($"ExamData has min/max : {MinSensorData}/{MaxSensorData}");
+                logger.LogInformation($"ExamData has min/max : {MinSensorData}/{MaxSensorData}");
+            });
+
 
             // 기존의 PlotView를 clear 한 후 ExamData에 대한 PlotModel을 생성해서 입력한다.
-            ((IPlotModel) this.MainPlotModel)?.AttachPlotView(null);
-
-
-            var mainData = CreateSubRange(arrayData, 0, 2000, 0, arrayData.GetLength(1)-1);
+            ((IPlotModel)this.MainPlotModel)?.AttachPlotView(null);
+            var mainData = CreateSubRange(fullExamData, 0, 2000, 0, fullExamData.GetLength(1) - 1);
             var mainModel = CreatePlotModel(mainData);
             backupHeatmap = (HeatMapSeries)mainModel.Series[0];
             AddAxesOnMain(mainModel, frameCount, sensorCount);
             MainPlotModel = mainModel;
+            MainPlotModel.Axes.First(ax=>ax.Tag == "X").AxisChanged += OnAxisChanged;
 
             // var mainController = new PlotController();
             // mainController.BindMouseEnter(OxyPlot.PlotCommands.Tr);
             // MainPlotController = mainController;
 
-            ((IPlotModel) this.OverviewPlotModel)?.AttachPlotView(null);
-            var overviewModel = CreatePlotModel((double[,])arrayData.Clone());
+            ((IPlotModel)this.OverviewPlotModel)?.AttachPlotView(null);
+            var overviewModel = CreatePlotModel((double[,])fullExamData.Clone());
             AddAxesOnOverview(overviewModel, frameCount, sensorCount);
             OverviewPlotModel = overviewModel;
 
             ApplyThemeToOxyPlots();
 
             IsDataLoaded = true;
+        }    
+
+        private void OnAxisChanged(object? sender, AxisChangedEventArgs e)
+        {
+            var xAxis = MainPlotModel.Axes.FirstOrDefault(a => a.Position == AxisPosition.Bottom);
+            if (xAxis != null )
+            {
+                double[,] newData = CreateSubRange(fullExamData, (int)xAxis.ActualMinimum, (int)xAxis.ActualMaximum, 0, fullExamData.GetLength(1) - 1);
+
+                var heatMapSeries = MainPlotModel.Series.OfType<HeatMapSeries>().FirstOrDefault();
+                if (heatMapSeries != null)
+                {
+                    heatMapSeries.Data = newData;
+                    // LinearAxis 에 의해서 위치가 변경되었으므로, Series 에서도 데이터를 해당 위치에 출력하도록 한다.
+                    heatMapSeries.X0 = (int)xAxis.ActualMinimum;
+                    heatMapSeries.X1 = (int)xAxis.ActualMaximum;
+                }
+            }
+
+            MainPlotModel.InvalidatePlot(true); // Redraw the plot
         }
 
         public double[,] CreateSubRange(double[,] originalArray, int startRow, int endRow, int startColumn, int endColumn)
@@ -265,6 +318,8 @@ namespace SRHWiscMano.App.ViewModels
                 HighColor = SelectedPalette.Colors.Last(), // OxyColors.White,
                 LowColor = SelectedPalette.Colors.First(),
                 RenderAsImage = false,
+                AbsoluteMinimum = MinSensorData,
+                AbsoluteMaximum = MaxSensorData,
                 Tag = "Color"
             });
 
@@ -438,8 +493,8 @@ namespace SRHWiscMano.App.ViewModels
                 mainColorAxis.LowColor = palette.Colors.First();
                 MinSensorRange = favPalette.LowerValue;
                 MaxSensorRange = favPalette.UpperValue;
-                mainColorAxis.AbsoluteMinimum = favPalette.LowerValue; // 최소 limit 값
-                mainColorAxis.AbsoluteMaximum = favPalette.UpperValue; // 최대 limit 값
+                mainColorAxis.Minimum = favPalette.LowerValue; // 최소 limit 값
+                mainColorAxis.Maximum = favPalette.UpperValue; // 최대 limit 값
                 MainPlotModel.InvalidatePlot(false);
 
                 var overviewColorAxis = OverviewPlotModel.Axes.First(ax => ax.Tag == "Color") as LinearColorAxis;
@@ -448,8 +503,8 @@ namespace SRHWiscMano.App.ViewModels
                 overviewColorAxis.LowColor = palette.Colors.First();
                 MinSensorRange = favPalette.LowerValue;
                 MaxSensorRange = favPalette.UpperValue;
-                overviewColorAxis.AbsoluteMinimum = favPalette.LowerValue; // 최소 limit 값
-                overviewColorAxis.AbsoluteMaximum = favPalette.UpperValue; // 최대 limit 값
+                overviewColorAxis.Minimum = favPalette.LowerValue; // 최소 limit 값
+                overviewColorAxis.Maximum = favPalette.UpperValue; // 최대 limit 값
                 OverviewPlotModel.InvalidatePlot(false);
             }
         }
@@ -482,8 +537,8 @@ namespace SRHWiscMano.App.ViewModels
                 SelectedPalette = Palettes[SelectedPaletteKey];
             
             mainColorAxis.Palette = SelectedPalette;
-            mainColorAxis.AbsoluteMinimum = MinSensorRange; // 최소 limit 값
-            mainColorAxis.AbsoluteMaximum = MaxSensorRange; // 최대 limit 값
+            mainColorAxis.Minimum = MinSensorRange; // 최소 limit 값
+            mainColorAxis.Maximum = MaxSensorRange; // 최대 limit 값
             mainColorAxis.HighColor = SelectedPalette.Colors.Last(); // OxyColors.White,
             mainColorAxis.LowColor = SelectedPalette.Colors.First();
             MainPlotModel.InvalidatePlot(false);
@@ -491,8 +546,8 @@ namespace SRHWiscMano.App.ViewModels
 
             var overviewColorAxis = OverviewPlotModel.Axes.Single(s => s is LinearColorAxis) as LinearColorAxis;
             overviewColorAxis.Palette = SelectedPalette;
-            overviewColorAxis.AbsoluteMinimum = MinSensorRange; // 최소 limit 값
-            overviewColorAxis.AbsoluteMaximum = MaxSensorRange; // 최대 limit 값
+            overviewColorAxis.Minimum = MinSensorRange; // 최소 limit 값
+            overviewColorAxis.Maximum = MaxSensorRange; // 최대 limit 값
             overviewColorAxis.HighColor = SelectedPalette.Colors.Last(); // OxyColors.White,
             overviewColorAxis.LowColor = SelectedPalette.Colors.First();
             OverviewPlotModel.InvalidatePlot(false);

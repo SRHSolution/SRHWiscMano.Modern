@@ -228,11 +228,8 @@
                 </Grid>
             </Grid>
             <ScrollViewer Grid.Column="1">
-                <!-- <oxyWpf:PlotView  Model="{Binding OverviewPlotModel}" Margin="0" Controller="{Binding OverviewPlotController}"/> -->
-                <!-- <Image x:Name="PlotImage" Stretch="Fill" Visibility="Collapsed"/> -->
-                <!-- <oxyWpf:PlotView Model="{Binding OverviewPlotModel}" Controller="{Binding OverviewPlotController}" /> -->
-                <control:SRHPlotView x:Name="mainPlot" Model="{Binding MainPlotModel}"
-                                     Controller="{Binding MainPlotController}" />
+                <oxyWpf:PlotView x:Name="mainPlot" Model="{Binding MainPlotModel}"
+                                 Controller="{Binding MainPlotController}" />
             </ScrollViewer>
         </Grid>
 

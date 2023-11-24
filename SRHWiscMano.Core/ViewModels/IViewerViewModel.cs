@@ -53,6 +53,8 @@ namespace SRHWiscMano.Core.ViewModels
 
         double InterpolateSensorScale { get; }
 
-        
+
+        void AxisFreeze();
+        void AxisRelease();
     }
 }
