@@ -24,7 +24,8 @@
                  NonActiveGlowColor="#CDFF0000"
                  ShowIconOnTitleBar="True"
                  WindowStartupLocation="CenterScreen"
-                 mc:Ignorable="d" ResizeMode="CanResizeWithGrip" Closing="MetroWindow_Closing">
+                 mc:Ignorable="d" ResizeMode="CanResizeWithGrip" Closing="MetroWindow_Closing" 
+                 >
     <Window.Resources>
         <ResourceDictionary>
             <Ellipse x:Key="AppThemeMenuIcon"

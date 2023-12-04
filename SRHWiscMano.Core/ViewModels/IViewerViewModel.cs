@@ -5,7 +5,7 @@ using SRHWiscMano.Core.Models;
 
 namespace SRHWiscMano.Core.ViewModels
 {
-    public interface IViewerViewModel
+    public interface IViewerViewModel 
     {
         IExamination ExamData { get; }
 
@@ -18,6 +18,8 @@ namespace SRHWiscMano.Core.ViewModels
         double MaxSensorRange { get; }
 
         IRelayCommand SensorRangeChangedCommand { get; }
+
+        public bool ImageVisibility { get; }
 
         /// <summary>
         /// Main Plot Model
@@ -41,14 +43,20 @@ namespace SRHWiscMano.Core.ViewModels
         IRelayCommand<FavoritePalette> FavoritePaletteCommand { get; }
         IRelayCommand NavigateToExplorerCommand { get; }
 
-        IRelayCommand PrevTimeFrameCommand { get; }
-        IRelayCommand NextTimeFrameCommand { get; }
+        IRelayCommand PrevFrameNoteCommand { get; }
+        IRelayCommand NextFrameNoteCommand { get; }
         Dictionary<string, OxyPalette> Palettes { get; }
 
         OxyPalette SelectedPalette { get; }
 
         string SelectedPaletteKey { get; }
 
-        
+        double InterpolateSensorScale { get; }
+
+        bool UpdateSubRange { get; }
+
+
+        void AxisFreeze();
+        void AxisRelease();
     }
 }

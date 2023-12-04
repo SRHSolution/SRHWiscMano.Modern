@@ -21,5 +21,6 @@ namespace SRHWiscMano.App.Data
         public int MaxRecentFileSize { get; set; } = 5;
         
         public List<string>? RecentFiles { get; set; }
+
     }
 }

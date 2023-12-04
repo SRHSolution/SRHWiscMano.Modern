@@ -22,5 +22,7 @@ namespace SRHWiscMano.App.Windows
             logger.AllowClose = true;
             logger.Close();
         }
+
+        
     }
 }
