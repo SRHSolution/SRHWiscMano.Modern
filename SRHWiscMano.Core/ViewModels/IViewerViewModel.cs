@@ -5,7 +5,7 @@ using SRHWiscMano.Core.Models;
 
 namespace SRHWiscMano.Core.ViewModels
 {
-    public interface IViewerViewModel
+    public interface IViewerViewModel 
     {
         IExamination ExamData { get; }
 
@@ -52,6 +52,8 @@ namespace SRHWiscMano.Core.ViewModels
         string SelectedPaletteKey { get; }
 
         double InterpolateSensorScale { get; }
+
+        bool UpdateSubRange { get; }
 
 
         void AxisFreeze();

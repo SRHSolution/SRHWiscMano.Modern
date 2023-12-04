@@ -52,6 +52,8 @@ namespace SRHWiscMano.App.ViewModels
         [ObservableProperty] private OxyPalette selectedPalette = OxyPalettes.Hue64;
         [ObservableProperty] private double interpolateSensorScale = 10;
 
+        [ObservableProperty] private bool updateSubRange = false;
+
         private string selectedPaletteKey;
 
         public string SelectedPaletteKey
@@ -189,8 +191,7 @@ namespace SRHWiscMano.App.ViewModels
 
                     for (int j = 0; j < sensorCount; j++)
                     {
-                        fullExamData[i, j] =
-                            scaledSensorValues[sensorCount - 1 - j]; // examData.Samples[i].Values[sensorCount - 1 - j];
+                        fullExamData[i, j] = scaledSensorValues[sensorCount - 1 - j]; 
                     }
                 }
 
@@ -206,7 +207,10 @@ namespace SRHWiscMano.App.ViewModels
 
             // 기존의 PlotView를 clear 한 후 ExamData에 대한 PlotModel을 생성해서 입력한다.
             ((IPlotModel)this.MainPlotModel)?.AttachPlotView(null);
-            var mainData = CreateSubRange(fullExamData, 0, 2000, 0, fullExamData.GetLength(1) - 1);
+
+            double[,] mainData = fullExamData;
+            // mainData = CreateSubRange(fullExamData, 0, 2000, 0, fullExamData.GetLength(1) - 1);
+
             var mainModel = CreatePlotModel(mainData);
             backupHeatmap = (HeatMapSeries)mainModel.Series[0];
             AddAxesOnMain(mainModel, frameCount, sensorCount);
@@ -229,6 +233,9 @@ namespace SRHWiscMano.App.ViewModels
 
         private void OnAxisChanged(object? sender, AxisChangedEventArgs e)
         {
+            if (UpdateSubRange == false)
+                return;
+
             var xAxis = MainPlotModel.Axes.FirstOrDefault(a => a.Position == AxisPosition.Bottom);
             if (xAxis != null )
             {
@@ -464,12 +471,12 @@ namespace SRHWiscMano.App.ViewModels
         private void FavoritePalette(FavoritePalette favPalette)
         {
             var name = favPalette.PaletteName;
+            MinSensorRange = favPalette.LowerValue;
+            MaxSensorRange = favPalette.UpperValue;
+
             if (Palettes != null && Palettes.ContainsKey(name))
             {
                 logger.LogTrace($"Select favorite palette {name}");
-
-                MinSensorRange = favPalette.LowerValue;
-                MaxSensorRange = favPalette.UpperValue;
                 SelectedPaletteKey = name;
             }
             else
@@ -485,27 +492,10 @@ namespace SRHWiscMano.App.ViewModels
                 };
                 var colorCount = favPalette.UpperValue - favPalette.LowerValue;
                 var palette = OxyPalette.Interpolate(colorCount, customColors);
+
+                logger.LogTrace($"Select custom palette");
                 SelectedPalette = palette;
-
-                var mainColorAxis = MainPlotModel.Axes.First(ax => ax.Tag == "Color") as LinearColorAxis;
-                mainColorAxis.Palette = palette;
-                mainColorAxis.HighColor = palette.Colors.Last(); // OxyColors.White,
-                mainColorAxis.LowColor = palette.Colors.First();
-                MinSensorRange = favPalette.LowerValue;
-                MaxSensorRange = favPalette.UpperValue;
-                mainColorAxis.Minimum = favPalette.LowerValue; // 최소 limit 값
-                mainColorAxis.Maximum = favPalette.UpperValue; // 최대 limit 값
-                MainPlotModel.InvalidatePlot(false);
-
-                var overviewColorAxis = OverviewPlotModel.Axes.First(ax => ax.Tag == "Color") as LinearColorAxis;
-                overviewColorAxis.Palette = palette;
-                overviewColorAxis.HighColor = palette.Colors.Last(); // OxyColors.White,
-                overviewColorAxis.LowColor = palette.Colors.First();
-                MinSensorRange = favPalette.LowerValue;
-                MaxSensorRange = favPalette.UpperValue;
-                overviewColorAxis.Minimum = favPalette.LowerValue; // 최소 limit 값
-                overviewColorAxis.Maximum = favPalette.UpperValue; // 최대 limit 값
-                OverviewPlotModel.InvalidatePlot(false);
+                SelectedPaletteKey = "Custom";
             }
         }
 
@@ -515,25 +505,17 @@ namespace SRHWiscMano.App.ViewModels
             UpdatePaletteChanged();
         }
 
-        private void TestPalettes()
-        {
-            OxyPalette pal = OxyPalette.Interpolate(
-                4,
-                OxyColors.Black,
-                OxyColor.FromRgb(127, 0, 0),
-                OxyColor.FromRgb(255, 127, 0),
-                OxyColor.FromRgb(255, 255, 127),
-                OxyColors.White);
 
-        }
-
+        /// <summary>
+        /// Palette가 변경시에 OxyPlot 을 업데이트 한다
+        /// </summary>
         private void UpdatePaletteChanged()
         {
             if (MainPlotModel.Series.Count == 0)
                 return;
             
             var mainColorAxis = MainPlotModel.Axes.Single(s => s is LinearColorAxis) as LinearColorAxis;
-            if(!string.IsNullOrEmpty(SelectedPaletteKey))
+            if(!string.IsNullOrEmpty(SelectedPaletteKey) && Palettes.ContainsKey(SelectedPaletteKey))
                 SelectedPalette = Palettes[SelectedPaletteKey];
             
             mainColorAxis.Palette = SelectedPalette;
