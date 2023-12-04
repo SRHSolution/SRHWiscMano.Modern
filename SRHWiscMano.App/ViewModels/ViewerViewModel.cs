@@ -12,6 +12,7 @@ using Microsoft.Extensions.Options;
 using MoreLinq.Extensions;
 using NLog;
 using OxyPlot;
+using OxyPlot.Annotations;
 using OxyPlot.Axes;
 using OxyPlot.Series;
 using SRHWiscMano.App.Data;
@@ -214,6 +215,8 @@ namespace SRHWiscMano.App.ViewModels
             var mainModel = CreatePlotModel(mainData);
             backupHeatmap = (HeatMapSeries)mainModel.Series[0];
             AddAxesOnMain(mainModel, frameCount, sensorCount);
+            AddFrameNotes(mainModel, examData.Notes.ToList());
+
             MainPlotModel = mainModel;
             MainPlotModel.Axes.First(ax=>ax.Tag == "X").AxisChanged += OnAxisChanged;
 
@@ -224,6 +227,7 @@ namespace SRHWiscMano.App.ViewModels
             ((IPlotModel)this.OverviewPlotModel)?.AttachPlotView(null);
             var overviewModel = CreatePlotModel((double[,])fullExamData.Clone());
             AddAxesOnOverview(overviewModel, frameCount, sensorCount);
+            AddFrameNotes(overviewModel, examData.Notes.ToList());
             OverviewPlotModel = overviewModel;
 
             ApplyThemeToOxyPlots();
@@ -418,6 +422,15 @@ namespace SRHWiscMano.App.ViewModels
                 AbsoluteMaximum = xSize - 1,
                 Tag = "X"
             });
+        }
+
+        private void AddFrameNotes(PlotModel model, List<FrameNote> notes)
+        {
+            foreach (var note in notes)
+            {
+                var msec = note.Time.ToMillisecondsFromEpoch() / 10;
+                AnnoationUtils.CreateVLineAnnotation(msec, note.Text, true, model);
+            }
         }
 
 
