@@ -18,6 +18,6 @@ namespace SRHWiscMano.Core.ViewModels
             strategy = initialState.Strategy;
         }
 
-        public string VolumeDisplay => volume ?? "?";
+        public string VolumeDisplay => Volume ?? "?";
     }
 }

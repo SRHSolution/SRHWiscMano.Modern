@@ -16,7 +16,7 @@ namespace SRHWiscMano.Core.Helpers
             var la = new LineAnnotation
             {
                 Type = LineAnnotationType.Vertical, X = xPos, LineStyle = LineStyle.Solid, ClipByYAxis = true,
-                Text = text, TextOrientation = AnnotationTextOrientation.Horizontal
+                Text = text, TextOrientation = AnnotationTextOrientation.Horizontal,
             };
 
             if (draggable)
@@ -51,7 +51,7 @@ namespace SRHWiscMano.Core.Helpers
                 };
             }
 
-            model.Annotations.Add(la);
+            model!.Annotations.Add(la);
         }
     }
 }
