@@ -250,8 +250,6 @@ namespace SRHWiscMano.App.ViewModels
             }, args));
 
             mainController.BindMouseDown(OxyMouseButton.Left, lineAnnotPan);
-
-            // mainController.BindMouseEnter(OxyPlot.PlotCommands.Tr);
             MainPlotController = mainController;
 
             ((IPlotModel)this.OverviewPlotModel)?.AttachPlotView(null);
@@ -260,7 +258,36 @@ namespace SRHWiscMano.App.ViewModels
             AddFrameNotes(overviewModel, examData.Notes.ToList());
             OverviewPlotModel = overviewModel;
 
+            var overviewController = new PlotController();
+            // overviewController.bind
+            overviewController.UnbindMouseDown(OxyMouseButton.Left, OxyModifierKeys.Control);
 
+            var overviewTrackAt = new DelegatePlotCommand<OxyMouseDownEventArgs>((view, controller, args) =>
+            {
+                var overviewXAxis = view.ActualModel.Axes.First(ax => ax.Tag == "X");
+                var posX = overviewXAxis.InverseTransform(args.Position.X);
+
+                var xAxis = MainPlotModel.Axes.First(ax => ax.Tag == "X");
+                var axisHalfWidth = (xAxis.ActualMaximum - xAxis.ActualMinimum)/2;
+
+                // Center 위치를 지정할 수 있음
+                if (posX - axisHalfWidth >= 0)
+                {
+                    xAxis.Minimum = posX - axisHalfWidth;
+                    xAxis.Maximum = posX + axisHalfWidth;
+                }
+                else
+                {
+                    xAxis.Minimum = 0;
+                    xAxis.Maximum = axisHalfWidth * 2;
+                }
+                MainPlotModel.InvalidatePlot(true);
+                // xAxis.InvalidatePlot(false);
+            });
+            overviewController.UnbindAll();
+            overviewController.BindMouseDown(OxyMouseButton.Left, OxyModifierKeys.Control, overviewTrackAt);
+            overviewController.BindMouseWheel(PlotCommands.ZoomWheel);
+            OverviewPlotController = overviewController;
 
             ApplyThemeToOxyPlots();
 
