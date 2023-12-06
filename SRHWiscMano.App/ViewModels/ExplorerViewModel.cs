@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using System.Linq;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
@@ -25,14 +26,29 @@ namespace SRHWiscMano.App.ViewModels
         /// <summary>
         /// Explorer View에서 보여줄 TimeFrameViewModel collection 이다.
         /// </summary>
-        public ObservableCollection<TimeFrameViewModel> TimeFrames { get; }
+        public ObservableCollection<TimeFrameViewModel> TimeFrames { get; } = new ObservableCollection<TimeFrameViewModel>();
         
         
         public ExplorerViewModel(ILogger<ExplorerViewModel> logger, SharedService sharedService)
         {
             this.logger = logger;
             this.sharedService = sharedService;
+            sharedService.ExamDataLoaded += SharedService_ExamDataLoaded;
         }
+
+        private void SharedService_ExamDataLoaded(object? sender, EventArgs e)
+        {
+            var examData = sharedService.ExamData;
+            var frameNotes = examData.Notes.ToList();
+
+            foreach (var fNote in frameNotes)
+            {
+                // var timeFrame = new TimeFrame()
+                // TimeFrames.Add(new TimeFrameViewModel());
+            }
+
+        }
+
 
         [RelayCommand]
         private void SelectAll()
@@ -51,6 +67,24 @@ namespace SRHWiscMano.App.ViewModels
         {
             logger.LogTrace($"Request navigate to Explorer view");
             WeakReferenceMessenger.Default.Send(new TabIndexChangeMessage(2));
+        }
+
+        [RelayCommand]
+        private void AdjustLeft()
+        {
+            logger.LogTrace("Explorer AdjustLeftCommand");
+        }
+
+        [RelayCommand]
+        private void AdjustRight()
+        {
+            logger.LogTrace("Explorer AdjustRightCommand");
+        }
+
+        [RelayCommand]
+        private void ToggleChecked()
+        {
+            logger.LogTrace("Explorer ToggleCheckedCommand");
         }
     }
 }
