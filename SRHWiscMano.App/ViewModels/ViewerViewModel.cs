@@ -270,18 +270,20 @@ namespace SRHWiscMano.App.ViewModels
                 var xAxis = MainPlotModel.Axes.First(ax => ax.Tag == "X");
                 var axisHalfWidth = (xAxis.ActualMaximum - xAxis.ActualMinimum)/2;
 
+                var newMinimum = 0.0;
                 // Center 위치를 지정할 수 있음
                 if (posX - axisHalfWidth >= 0)
                 {
-                    xAxis.Minimum = posX - axisHalfWidth;
-                    xAxis.Maximum = posX + axisHalfWidth;
+                    newMinimum = posX - axisHalfWidth;
                 }
                 else
                 {
-                    xAxis.Minimum = 0;
-                    xAxis.Maximum = axisHalfWidth * 2;
+                    newMinimum = 0;
                 }
-                MainPlotModel.InvalidatePlot(true);
+
+                var delta = (xAxis.ActualMinimum- newMinimum) * xAxis.Scale;
+                xAxis.Pan(delta);
+                MainPlotModel.InvalidatePlot(false);
                 // xAxis.InvalidatePlot(false);
             });
             overviewController.UnbindAll();
