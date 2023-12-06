@@ -55,7 +55,7 @@ namespace SRHWiscMano.App.ViewModels
         [ObservableProperty] private OxyPalette selectedPalette = OxyPalettes.Hue64;
         [ObservableProperty] private double interpolateSensorScale = 10;
 
-        private bool updateSubRange = false;
+        private bool updateSubRange = true;
         public bool UpdateSubRange
         {
             get => updateSubRange;
@@ -259,9 +259,6 @@ namespace SRHWiscMano.App.ViewModels
             OverviewPlotModel = overviewModel;
 
             var overviewController = new PlotController();
-            // overviewController.bind
-            overviewController.UnbindMouseDown(OxyMouseButton.Left, OxyModifierKeys.Control);
-
             var overviewTrackAt = new DelegatePlotCommand<OxyMouseDownEventArgs>((view, controller, args) =>
             {
                 var overviewXAxis = view.ActualModel.Axes.First(ax => ax.Tag == "X");
@@ -288,7 +285,9 @@ namespace SRHWiscMano.App.ViewModels
             });
             overviewController.UnbindAll();
             overviewController.BindMouseDown(OxyMouseButton.Left, OxyModifierKeys.Control, overviewTrackAt);
+            overviewController.BindMouseDown(OxyMouseButton.Right, OxyModifierKeys.None, PlotCommands.PanAt);
             overviewController.BindMouseWheel(PlotCommands.ZoomWheel);
+
             OverviewPlotController = overviewController;
 
             ApplyThemeToOxyPlots();
