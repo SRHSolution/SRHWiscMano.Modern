@@ -14,6 +14,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using SRHWiscMano.App.ViewModels;
+using SRHWiscMano.Core.ViewModels;
 
 namespace SRHWiscMano.App.Views
 {
@@ -25,7 +26,7 @@ namespace SRHWiscMano.App.Views
         public AnalyzerView()
         {
             InitializeComponent();
-            this.DataContext = Ioc.Default.GetService<AnalyzerViewModel>();
+            this.DataContext = Ioc.Default.GetService<IAnalyzerViewModel>();
         }
     }
 }
