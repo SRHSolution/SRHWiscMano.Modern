@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows.Controls;
 using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -12,10 +13,12 @@ using Microsoft.Extensions.Options;
 using MoreLinq.Extensions;
 using NLog;
 using OxyPlot;
+using OxyPlot.Annotations;
 using OxyPlot.Axes;
 using OxyPlot.Series;
 using SRHWiscMano.App.Data;
 using SRHWiscMano.App.Services;
+using SRHWiscMano.Core.Control;
 using SRHWiscMano.Core.Helpers;
 using SRHWiscMano.Core.Models;
 using SRHWiscMano.Core.ViewModels;
@@ -52,7 +55,28 @@ namespace SRHWiscMano.App.ViewModels
         [ObservableProperty] private OxyPalette selectedPalette = OxyPalettes.Hue64;
         [ObservableProperty] private double interpolateSensorScale = 10;
 
-        [ObservableProperty] private bool updateSubRange = false;
+        private bool updateSubRange = true;
+        public bool UpdateSubRange
+        {
+            get => updateSubRange;
+            set
+            {
+                SetProperty(ref updateSubRange, value);
+                if (MainPlotModel != null && value == false)
+                {
+                    var heatMapSeries = MainPlotModel.Series.OfType<HeatMapSeries>().FirstOrDefault();
+                    var xAxis = MainPlotModel.Axes.FirstOrDefault(a => a.Position == AxisPosition.Bottom);
+                    if (heatMapSeries != null)
+                    {
+                        heatMapSeries.Data = fullExamData;
+                        heatMapSeries.X0 = 0;
+                        heatMapSeries.X1 = fullExamData.GetLength(0)-1;
+                        xAxis.Minimum = xAxis.ActualMinimum;
+                        xAxis.Maximum = xAxis.ActualMaximum;
+                    }
+                }
+            }
+        }
 
         private string selectedPaletteKey;
 
@@ -68,7 +92,7 @@ namespace SRHWiscMano.App.ViewModels
 
         public void AxisFreeze()
         {
-            var xAxis = mainPlotModel.Axes.First(ax => ax.Tag == "X");
+            var xAxis = MainPlotModel.Axes.First(ax => ax.Tag == "X");
             var minimum = xAxis.ActualMinimum;
             var maximum = xAxis.ActualMaximum;
             xAxis.AbsoluteMinimum = minimum;
@@ -77,9 +101,9 @@ namespace SRHWiscMano.App.ViewModels
 
         public void AxisRelease()
         {
-            var series = mainPlotModel.Series[0] as HeatMapSeries;
+            var series = MainPlotModel.Series[0] as HeatMapSeries;
             
-            var xAxis = mainPlotModel.Axes.First(ax => ax.Tag == "X");
+            var xAxis = MainPlotModel.Axes.First(ax => ax.Tag == "X");
             var minimum = series.MinX;
             var maximum = series.MaxX;
 
@@ -214,17 +238,57 @@ namespace SRHWiscMano.App.ViewModels
             var mainModel = CreatePlotModel(mainData);
             backupHeatmap = (HeatMapSeries)mainModel.Series[0];
             AddAxesOnMain(mainModel, frameCount, sensorCount);
+            AddFrameNotes(mainModel, examData.Notes.ToList());
+
             MainPlotModel = mainModel;
             MainPlotModel.Axes.First(ax=>ax.Tag == "X").AxisChanged += OnAxisChanged;
 
-            // var mainController = new PlotController();
-            // mainController.BindMouseEnter(OxyPlot.PlotCommands.Tr);
-            // MainPlotController = mainController;
+            var mainController = new PlotController();
+            var lineAnnotPan = new DelegatePlotCommand<OxyMouseDownEventArgs>((view, controller, args) => controller.AddMouseManipulator(view, new LineAnnotationManipulator(view)
+            {
+                IsVertical = true,
+            }, args));
+
+            mainController.BindMouseDown(OxyMouseButton.Left, lineAnnotPan);
+            MainPlotController = mainController;
 
             ((IPlotModel)this.OverviewPlotModel)?.AttachPlotView(null);
             var overviewModel = CreatePlotModel((double[,])fullExamData.Clone());
             AddAxesOnOverview(overviewModel, frameCount, sensorCount);
+            AddFrameNotes(overviewModel, examData.Notes.ToList());
             OverviewPlotModel = overviewModel;
+
+            var overviewController = new PlotController();
+            var overviewTrackAt = new DelegatePlotCommand<OxyMouseDownEventArgs>((view, controller, args) =>
+            {
+                var overviewXAxis = view.ActualModel.Axes.First(ax => ax.Tag == "X");
+                var posX = overviewXAxis.InverseTransform(args.Position.X);
+
+                var xAxis = MainPlotModel.Axes.First(ax => ax.Tag == "X");
+                var axisHalfWidth = (xAxis.ActualMaximum - xAxis.ActualMinimum)/2;
+
+                var newMinimum = 0.0;
+                // Center 위치를 지정할 수 있음
+                if (posX - axisHalfWidth >= 0)
+                {
+                    newMinimum = posX - axisHalfWidth;
+                }
+                else
+                {
+                    newMinimum = 0;
+                }
+
+                var delta = (xAxis.ActualMinimum- newMinimum) * xAxis.Scale;
+                xAxis.Pan(delta);
+                MainPlotModel.InvalidatePlot(false);
+                // xAxis.InvalidatePlot(false);
+            });
+            overviewController.UnbindAll();
+            overviewController.BindMouseDown(OxyMouseButton.Left, OxyModifierKeys.Control, overviewTrackAt);
+            overviewController.BindMouseDown(OxyMouseButton.Right, OxyModifierKeys.None, PlotCommands.PanAt);
+            overviewController.BindMouseWheel(PlotCommands.ZoomWheel);
+
+            OverviewPlotController = overviewController;
 
             ApplyThemeToOxyPlots();
 
@@ -250,8 +314,7 @@ namespace SRHWiscMano.App.ViewModels
                     heatMapSeries.X1 = (int)xAxis.ActualMaximum;
                 }
             }
-
-            MainPlotModel.InvalidatePlot(true); // Redraw the plot
+            logger.LogTrace("axis changed");
         }
 
         public double[,] CreateSubRange(double[,] originalArray, int startRow, int endRow, int startColumn, int endColumn)
@@ -418,6 +481,15 @@ namespace SRHWiscMano.App.ViewModels
                 AbsoluteMaximum = xSize - 1,
                 Tag = "X"
             });
+        }
+
+        private void AddFrameNotes(PlotModel model, List<FrameNote> notes)
+        {
+            foreach (var note in notes)
+            {
+                var msec = note.Time.ToMillisecondsFromEpoch() / 10;
+                AnnoationUtils.CreateVLineAnnotation(msec, note.Text, false, model);
+            }
         }
 
 

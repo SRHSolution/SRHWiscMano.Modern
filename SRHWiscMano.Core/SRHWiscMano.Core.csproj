@@ -21,6 +21,7 @@
     <PackageReference Include="NodaTime.Serialization.SystemTextJson" Version="1.1.2" />
     <PackageReference Include="OxyPlot.Core" Version="2.1.2" />
     <PackageReference Include="OxyPlot.SkiaSharp" Version="2.1.2" />
+    <PackageReference Include="Shouldly" Version="4.2.1" />
     <PackageReference Include="WpfAnalyzers" Version="4.1.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
