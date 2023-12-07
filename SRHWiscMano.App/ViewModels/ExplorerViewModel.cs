@@ -4,6 +4,7 @@ using System.Linq;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using SRHWiscMano.App.Data;
 using SRHWiscMano.App.Services;
 using SRHWiscMano.Core.Models;
@@ -20,6 +21,7 @@ namespace SRHWiscMano.App.ViewModels
 
         private readonly ILogger<ExplorerViewModel> logger;
         private readonly SharedService sharedService;
+        private readonly IOptions<AppSettings> settings;
 
         #endregion
 
@@ -29,10 +31,12 @@ namespace SRHWiscMano.App.ViewModels
         public ObservableCollection<TimeFrameViewModel> TimeFrames { get; } = new ObservableCollection<TimeFrameViewModel>();
         
         
-        public ExplorerViewModel(ILogger<ExplorerViewModel> logger, SharedService sharedService)
+        public ExplorerViewModel(ILogger<ExplorerViewModel> logger, SharedService sharedService, IOptions<AppSettings> settings)
         {
             this.logger = logger;
             this.sharedService = sharedService;
+            this.settings = settings;
+
             sharedService.ExamDataLoaded += SharedService_ExamDataLoaded;
         }
 

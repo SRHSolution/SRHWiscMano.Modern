@@ -14,9 +14,8 @@ namespace SRHWiscMano.Core.Services
 
                 NoteXmlReader notesLoader = new NoteXmlReader();
                 var notes = notesLoader.LoadRelative(filePath) ?? Array.Empty<FrameNote>();
-                var examData = new Examination(parseSamples, notes.ToList());
                 
-                return examData;
+                return new Examination(parseSamples, notes.ToList());
             }
             catch
             {

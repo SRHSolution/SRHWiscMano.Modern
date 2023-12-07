@@ -35,12 +35,6 @@ public partial class ViewerView : UserControl
         //
         // // Subscribe to the debounced event stream
         // resizeObservable.Subscribe(_ => OnResizeEnd());
-
-        var intervalObservable = Observable.Interval(TimeSpan.FromMilliseconds(100));
-        // intervalObservable.Subscribe(_ => OnResizeEnd().Wait());
-        eventTimer = new Timer(100);
-        eventTimer.Enabled = false;
-        eventTimer.Elapsed += OnResizeEnd;
     }
 
 
@@ -73,38 +67,5 @@ public partial class ViewerView : UserControl
             textBox.Focus();
             e.Handled = true;
         }
-    }
-
-    private void ViewerView_OnSizeChanged(object sender, SizeChangedEventArgs e)
-    {
-        return;
-        if (viewModel == null)
-            return;
-
-        viewModel.AxisFreeze();
-        if (!isResizing)
-        {
-            isResizing = true;
-            eventTimer.Enabled = true;
-        }
-        eventTime = DateTime.Now;
-    }
-
-    private async void OnResizeEnd(object? sender, ElapsedEventArgs elapsedEventArgs)
-    {
-        return;
-        if (!isResizing || viewModel == null)
-            return;
-        
-        var duration = DateTime.Now - eventTime;
-        if (duration.TotalMilliseconds < 500)
-            return;
-        
-        eventTimer.Enabled = false;
-        isResizing = false;
-        await Task.Run(() =>
-        {
-            viewModel.AxisRelease();
-        });
     }
 }

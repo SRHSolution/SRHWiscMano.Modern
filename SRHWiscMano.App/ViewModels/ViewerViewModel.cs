@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Security.Cryptography.Xml;
 using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -16,6 +17,7 @@ using OxyPlot;
 using OxyPlot.Annotations;
 using OxyPlot.Axes;
 using OxyPlot.Series;
+using SkiaSharp;
 using SRHWiscMano.App.Data;
 using SRHWiscMano.App.Services;
 using SRHWiscMano.Core.Control;
@@ -31,13 +33,14 @@ namespace SRHWiscMano.App.ViewModels
 
         private readonly ILogger<ViewerViewModel> logger;
         private readonly SharedService sharedService;
+        private readonly AppSettings settings;
 
         #endregion
 
         public IExamination ExamData { get; private set; }
+
         public ObservableCollection<FrameNote> Notes { get; }
 
-        [ObservableProperty] private bool imageVisibility;
 
         [ObservableProperty] private PlotModel mainPlotModel;
 
@@ -62,6 +65,7 @@ namespace SRHWiscMano.App.ViewModels
             set
             {
                 SetProperty(ref updateSubRange, value);
+                settings.UpdateSubRange = value;
                 if (MainPlotModel != null && value == false)
                 {
                     var heatMapSeries = MainPlotModel.Series.OfType<HeatMapSeries>().FirstOrDefault();
@@ -90,30 +94,7 @@ namespace SRHWiscMano.App.ViewModels
             }
         }
 
-        public void AxisFreeze()
-        {
-            var xAxis = MainPlotModel.Axes.First(ax => ax.Tag == "X");
-            var minimum = xAxis.ActualMinimum;
-            var maximum = xAxis.ActualMaximum;
-            xAxis.AbsoluteMinimum = minimum;
-            xAxis.AbsoluteMaximum = maximum;
-        }
-
-        public void AxisRelease()
-        {
-            var series = MainPlotModel.Series[0] as HeatMapSeries;
-            
-            var xAxis = MainPlotModel.Axes.First(ax => ax.Tag == "X");
-            var minimum = series.MinX;
-            var maximum = series.MaxX;
-
-            xAxis.AbsoluteMinimum = minimum;
-            xAxis.AbsoluteMaximum = maximum;
-        }
-
         public IRelayCommand FitToScreenCommand { get; }
-        public IRelayCommand PrevFrameNoteCommand { get; private set; }
-        public IRelayCommand NextFrameNoteCommand { get; private set; }
 
         public Dictionary<string, OxyPalette> Palettes { get; }
 
@@ -136,6 +117,8 @@ namespace SRHWiscMano.App.ViewModels
         {
             this.logger = logger;
             this.sharedService = sharedService;
+            this.settings = settings.Value;
+
             sharedService.ExamDataLoaded += SharedService_ExamDataLoaded;
 
             Palettes = PaletteUtils.GetPredefinedPalettes();
@@ -146,9 +129,11 @@ namespace SRHWiscMano.App.ViewModels
             MainPlotModel = new PlotModel();
             OverviewPlotModel = new PlotModel();
 
-            pvBackColor = settings.Value.BaseBackColor;
-            pvForeColor = settings.Value.BaseForeColor;
-            // ApplyThemeToOxyPlots();
+            pvBackColor = this.settings.BaseBackColor;
+            pvForeColor = this.settings.BaseForeColor;
+            ApplyThemeToOxyPlots();
+
+            UpdateSubRange = this.settings.UpdateSubRange;
 
             FitToScreenCommand = new RelayCommand(FitToScreen, ()=> IsDataLoaded);
             
@@ -192,7 +177,6 @@ namespace SRHWiscMano.App.ViewModels
             OverviewPlotModel.InvalidatePlot(false);
         }
 
-        private HeatMapSeries backupHeatmap;
         private double[,] fullExamData;
 
         private void SharedService_ExamDataLoaded(object? sender, EventArgs e)
@@ -200,48 +184,35 @@ namespace SRHWiscMano.App.ViewModels
             LoadExamDataImpl();
         }
 
-        private async Task LoadExamDataImpl()
+        private void LoadExamDataImpl()
         {
             var examData = sharedService.ExamData;
             var sensorCount = (int)(examData.SensorCount() * InterpolateSensorScale);
             var frameCount = examData.Samples.Count;
-            fullExamData = new double[frameCount, sensorCount];
-            await Task.Run(() =>
-            {
-                for (int i = 0; i < frameCount; i++)
-                {
-                    var scaledSensorValues =
-                        Interpolators.LinearInterpolate(examData.Samples[i].Values.ToArray(), sensorCount);
 
-                    for (int j = 0; j < sensorCount; j++)
-                    {
-                        fullExamData[i, j] = scaledSensorValues[sensorCount - 1 - j]; 
-                    }
-                }
+            fullExamData = examData.PlotData;
 
-                logger.LogInformation($"ExamData's sensor data is interpolated by {InterpolateSensorScale} times");
-
-                // 입력받은 Exam 데이터에서 최소 최대 값을 얻어 RangeSlider의 최소/최대 값을 변경한다
-                MinSensorData = Math.Floor(fullExamData.Cast<double>().Min());
-                MaxSensorData = Math.Ceiling(fullExamData.Cast<double>().Max());
-
-                logger.LogInformation($"ExamData has min/max : {MinSensorData}/{MaxSensorData}");
-            });
-
+            // 입력받은 Exam 데이터에서 최소 최대 값을 얻어 RangeSlider의 최소/최대 값을 변경한다
+            MinSensorData = Math.Floor(fullExamData.Cast<double>().Min());
+            MaxSensorData = Math.Ceiling(fullExamData.Cast<double>().Max());
 
             // 기존의 PlotView를 clear 한 후 ExamData에 대한 PlotModel을 생성해서 입력한다.
             ((IPlotModel)this.MainPlotModel)?.AttachPlotView(null);
 
-            double[,] mainData = fullExamData;
-            // mainData = CreateSubRange(fullExamData, 0, 2000, 0, fullExamData.GetLength(1) - 1);
-
-            var mainModel = CreatePlotModel(mainData);
-            backupHeatmap = (HeatMapSeries)mainModel.Series[0];
+            //Mainview plotmodel, controller 설정
+            var mainModel = CreatePlotModel((double[,])fullExamData.Clone());
             AddAxesOnMain(mainModel, frameCount, sensorCount);
             AddFrameNotes(mainModel, examData.Notes.ToList());
+            if (UpdateSubRange)
+            {
+                var heatMapSeries = mainModel.Series.OfType<HeatMapSeries>().FirstOrDefault();
+                heatMapSeries.Data = CreateSubRange(fullExamData, 0, settings.MainViewFrameRange - 1, 0, sensorCount-1);
+                heatMapSeries.X1 = settings.MainViewFrameRange;
+            }
 
+            // SubRange 업데이트 기능을 위한 이벤트 등록
+            mainModel.Axes.First(ax=>ax.Tag == "X").AxisChanged += OnMainViewAxisChanged;
             MainPlotModel = mainModel;
-            MainPlotModel.Axes.First(ax=>ax.Tag == "X").AxisChanged += OnAxisChanged;
 
             var mainController = new PlotController();
             var lineAnnotPan = new DelegatePlotCommand<OxyMouseDownEventArgs>((view, controller, args) => controller.AddMouseManipulator(view, new LineAnnotationManipulator(view)
@@ -251,6 +222,9 @@ namespace SRHWiscMano.App.ViewModels
 
             mainController.BindMouseDown(OxyMouseButton.Left, lineAnnotPan);
             MainPlotController = mainController;
+
+
+            //Overview plotmodel, controller 설정
 
             ((IPlotModel)this.OverviewPlotModel)?.AttachPlotView(null);
             var overviewModel = CreatePlotModel((double[,])fullExamData.Clone());
@@ -281,7 +255,6 @@ namespace SRHWiscMano.App.ViewModels
                 var delta = (xAxis.ActualMinimum- newMinimum) * xAxis.Scale;
                 xAxis.Pan(delta);
                 MainPlotModel.InvalidatePlot(false);
-                // xAxis.InvalidatePlot(false);
             });
             overviewController.UnbindAll();
             overviewController.BindMouseDown(OxyMouseButton.Left, OxyModifierKeys.Control, overviewTrackAt);
@@ -295,7 +268,7 @@ namespace SRHWiscMano.App.ViewModels
             IsDataLoaded = true;
         }    
 
-        private void OnAxisChanged(object? sender, AxisChangedEventArgs e)
+        private void OnMainViewAxisChanged(object? sender, AxisChangedEventArgs e)
         {
             if (UpdateSubRange == false)
                 return;
@@ -317,7 +290,7 @@ namespace SRHWiscMano.App.ViewModels
             logger.LogTrace("axis changed");
         }
 
-        public double[,] CreateSubRange(double[,] originalArray, int startRow, int endRow, int startColumn, int endColumn)
+        private double[,] CreateSubRange(double[,] originalArray, int startRow, int endRow, int startColumn, int endColumn)
         {
             int numRows = endRow - startRow + 1;
             int numCols = endColumn - startColumn + 1;
@@ -328,7 +301,6 @@ namespace SRHWiscMano.App.ViewModels
                 for (int j = startColumn; j <= endColumn; j++)
                 {
                     subArray[i - startRow, j - startColumn] = originalArray[i, j];
-                    // logger.LogDebug($"subrange {i}, {j}");
                 }
             }
 
@@ -615,6 +587,24 @@ namespace SRHWiscMano.App.ViewModels
         {
             logger.LogTrace($"Request navigate to Explorer view");
             WeakReferenceMessenger.Default.Send(new TabIndexChangeMessage(1));
+        }
+
+        /// <summary>
+        /// MainView의 현재 위치에서 가장 가까운 이전 FrameNote를 화면 중앙으로 표시되도록 한다.
+        /// </summary>
+        [RelayCommand]
+        private void PrevFrameNote()
+        {
+
+        }
+
+        /// <summary>
+        /// MainView의 현재 위치에서 가장 가까운 다음 FrameNote를 화면 중앙으로 표시되도록 한다.
+        /// </summary>
+        [RelayCommand]
+        private void NextFrameNote()
+        {
+
         }
     }
 }

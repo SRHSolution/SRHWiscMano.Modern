@@ -10,16 +10,20 @@ namespace SRHWiscMano.Core.ViewModels
         IExamination ExamData { get; }
 
         ObservableCollection<FrameNote> Notes { get; }
+        Dictionary<string, OxyPalette> Palettes { get; }
+        OxyPalette SelectedPalette { get; }
+
+        string SelectedPaletteKey { get; }
+
+        double InterpolateSensorScale { get; }
+
+        bool UpdateSubRange { get; }
 
         double MinSensorData { get; }
         double MaxSensorData { get; }
 
         double MinSensorRange { get; }
         double MaxSensorRange { get; }
-
-        IRelayCommand SensorRangeChangedCommand { get; }
-
-        public bool ImageVisibility { get; }
 
         /// <summary>
         /// Main Plot Model
@@ -37,26 +41,14 @@ namespace SRHWiscMano.Core.ViewModels
 
         double ZoomPercentage { get; set; }
 
-        IRelayCommand FitToScreenCommand { get; }
+        IRelayCommand SensorRangeChangedCommand { get; }
         IRelayCommand<double> ZoomInCommand { get; }
         IRelayCommand<double> ZoomOutCommand { get; }
+        IRelayCommand FitToScreenCommand { get; }
         IRelayCommand<FavoritePalette> FavoritePaletteCommand { get; }
         IRelayCommand NavigateToExplorerCommand { get; }
 
         IRelayCommand PrevFrameNoteCommand { get; }
         IRelayCommand NextFrameNoteCommand { get; }
-        Dictionary<string, OxyPalette> Palettes { get; }
-
-        OxyPalette SelectedPalette { get; }
-
-        string SelectedPaletteKey { get; }
-
-        double InterpolateSensorScale { get; }
-
-        bool UpdateSubRange { get; }
-
-
-        void AxisFreeze();
-        void AxisRelease();
     }
 }

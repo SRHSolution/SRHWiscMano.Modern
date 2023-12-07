@@ -19,7 +19,12 @@ namespace SRHWiscMano.App.Data
         public Color AccentThemeColor { get; set; }
         
         public int MaxRecentFileSize { get; set; } = 5;
-        
+
+        public int MainViewFrameRange { get; set; } = 2000;
+        public int InterpolateSensorScale { get; set; } = 10;
+
+        public bool UpdateSubRange { get; set; } = true;
+
         public List<string>? RecentFiles { get; set; }
 
     }
