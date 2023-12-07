@@ -5,6 +5,10 @@ namespace SRHWiscMano.Core.Models
 {
     public class TimeFrame : ITimeFrame
     {
+        public TimeFrame()
+        {
+        }
+
         public TimeFrame(
             string id,  // Model id, 필요 없는듯
             IExamination data,  // 원본데이터 이지만, shared full 데이터를 참조할 예정이므로..?

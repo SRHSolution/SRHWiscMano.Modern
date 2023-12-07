@@ -10,7 +10,7 @@ namespace SRHWiscMano.Core.Services
     /// 이를 활용하며, 필요시에 json 파일을 업데이트 하는 방식으로 구현한다.
     /// </summary>
     /// <typeparam name="TSettings"></typeparam>
-    [Obsolete]
+    [Obsolete("Microsoft.Extensions.IOptions service 적용으로 인해 obsolete")]
     public class SettingsService<TSettings> where TSettings : class
     {
         private readonly IConfiguration _configuration;

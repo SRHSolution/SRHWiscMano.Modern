@@ -27,5 +27,10 @@ namespace SRHWiscMano.App.Data
 
         public List<string>? RecentFiles { get; set; }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        public double TimeFrameDurationInMillisecond { get; set; } = 3000; 
+
     }
 }

@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using SRHWiscMano.App.Data;
 using SRHWiscMano.App.Services;
+using SRHWiscMano.Core.Helpers;
 using SRHWiscMano.Core.Models;
 using SRHWiscMano.Core.ViewModels;
 
@@ -21,7 +22,7 @@ namespace SRHWiscMano.App.ViewModels
 
         private readonly ILogger<ExplorerViewModel> logger;
         private readonly SharedService sharedService;
-        private readonly IOptions<AppSettings> settings;
+        private readonly AppSettings settings;
 
         #endregion
 
@@ -35,7 +36,7 @@ namespace SRHWiscMano.App.ViewModels
         {
             this.logger = logger;
             this.sharedService = sharedService;
-            this.settings = settings;
+            this.settings = settings.Value;
 
             sharedService.ExamDataLoaded += SharedService_ExamDataLoaded;
         }
@@ -47,8 +48,14 @@ namespace SRHWiscMano.App.ViewModels
 
             foreach (var fNote in frameNotes)
             {
-                // var timeFrame = new TimeFrame()
-                // TimeFrames.Add(new TimeFrameViewModel());
+                var startRow = (int)Math.Round(fNote.Time.ToUnixTimeMilliseconds() - settings.TimeFrameDurationInMillisecond/2) / 10;
+                var endRow = (int)Math.Round(fNote.Time.ToUnixTimeMilliseconds() + settings.TimeFrameDurationInMillisecond/2) / 10;
+                var notePlotData = PlotDataUtils.CreateSubRange(examData.PlotData, startRow, endRow, 0, examData.PlotData.GetLength(1)-1);
+
+                var sensorRange = new Range<int>(0, examData.PlotData.GetLength(1) - 1);
+                var timeFrame = new TimeFrame(fNote.Text, examData, fNote.Text, fNote.Time, sensorRange, null, null, false, false, null, null, RegionsVersionType.UsesMP);
+                var timeFrameViewModel = new TimeFrameViewModel(timeFrame);
+                TimeFrames.Add(timeFrameViewModel);
             }
 
         }

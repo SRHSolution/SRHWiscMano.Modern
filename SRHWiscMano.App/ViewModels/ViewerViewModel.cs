@@ -206,7 +206,7 @@ namespace SRHWiscMano.App.ViewModels
             if (UpdateSubRange)
             {
                 var heatMapSeries = mainModel.Series.OfType<HeatMapSeries>().FirstOrDefault();
-                heatMapSeries.Data = CreateSubRange(fullExamData, 0, settings.MainViewFrameRange - 1, 0, sensorCount-1);
+                heatMapSeries.Data = PlotDataUtils.CreateSubRange(fullExamData, 0, settings.MainViewFrameRange - 1, 0, sensorCount-1);
                 heatMapSeries.X1 = settings.MainViewFrameRange;
             }
 
@@ -276,7 +276,7 @@ namespace SRHWiscMano.App.ViewModels
             var xAxis = MainPlotModel.Axes.FirstOrDefault(a => a.Position == AxisPosition.Bottom);
             if (xAxis != null )
             {
-                double[,] newData = CreateSubRange(fullExamData, (int)xAxis.ActualMinimum, (int)xAxis.ActualMaximum, 0, fullExamData.GetLength(1) - 1);
+                double[,] newData = PlotDataUtils.CreateSubRange(fullExamData, (int)xAxis.ActualMinimum, (int)xAxis.ActualMaximum, 0, fullExamData.GetLength(1) - 1);
 
                 var heatMapSeries = MainPlotModel.Series.OfType<HeatMapSeries>().FirstOrDefault();
                 if (heatMapSeries != null)
@@ -289,24 +289,6 @@ namespace SRHWiscMano.App.ViewModels
             }
             logger.LogTrace("axis changed");
         }
-
-        private double[,] CreateSubRange(double[,] originalArray, int startRow, int endRow, int startColumn, int endColumn)
-        {
-            int numRows = endRow - startRow + 1;
-            int numCols = endColumn - startColumn + 1;
-            double[,] subArray = new double[numRows, numCols];
-
-            for (int i = startRow; i <= endRow; i++)
-            {
-                for (int j = startColumn; j <= endColumn; j++)
-                {
-                    subArray[i - startRow, j - startColumn] = originalArray[i, j];
-                }
-            }
-
-            return subArray;
-        }
-
 
         /// <summary>
         /// 공통 데이터를 이용하므로 Main, Overview에 대한 PlotModel을 생성한다.
@@ -481,34 +463,9 @@ namespace SRHWiscMano.App.ViewModels
 
         private void FitToScreen()
         {
-            if (MainPlotModel.Series.Count > 0 && MainPlotModel.Series[0].IsVisible)
-            {
-                MainPlotModel.Series[0].IsVisible = false;
-                // MainPlotModel.Series.RemoveAt(0);
-            }
-            else
-            {
-                // MainPlotModel.Series.Add(backupHeatmap);
-                MainPlotModel.Series[0].IsVisible = true;
-            }
-            MainPlotModel.InvalidatePlot(false);
-            
-
-            return;
-
-
-            var mainX = MainPlotModel.Axes.First(ax => (string)ax.Tag == "X");
-            mainX.Minimum = 0;
-            mainX.Maximum = mainX.AbsoluteMaximum;
-            mainX.Reset();
-
             var overviewX = OverviewPlotModel.Axes.First(ax => (string)ax.Tag == "X");
-            overviewX.Minimum = 0;
-            overviewX.Maximum = overviewX.AbsoluteMaximum;
-            overviewX.Reset();
-
-            // MainPlotModel.InvalidatePlot(false);
-            // OverviewPlotModel.InvalidatePlot(false);
+            overviewX.Zoom(overviewX.AbsoluteMinimum, overviewX.AbsoluteMaximum);
+            OverviewPlotModel.InvalidatePlot(false);
         }
 
         [RelayCommand]
