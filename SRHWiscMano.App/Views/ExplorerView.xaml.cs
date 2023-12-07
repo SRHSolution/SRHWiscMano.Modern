@@ -1,4 +1,7 @@
-﻿using System;
+﻿using CommunityToolkit.Mvvm.DependencyInjection;
+using SRHWiscMano.App.ViewModels;
+using SRHWiscMano.Core.ViewModels;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,6 +26,7 @@ namespace SRHWiscMano.App.Views
         public ExplorerView()
         {
             InitializeComponent();
+            this.DataContext = Ioc.Default.GetService<IExplorerViewModel>();
         }
     }
 }

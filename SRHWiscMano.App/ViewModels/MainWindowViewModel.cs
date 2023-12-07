@@ -146,8 +146,8 @@ namespace SRHWiscMano.App.ViewModels
 
             AddToRecentFiles(filePath);
 
-            logger.LogTrace("Exam data : {filename}", Path.GetFileName(filePath));
             sharedStorageService.SetExamData(examData);
+            logger.LogTrace("Exam data : {filename}", Path.GetFileName(filePath));
         }
 
 

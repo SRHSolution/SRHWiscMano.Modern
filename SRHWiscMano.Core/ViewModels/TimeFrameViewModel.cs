@@ -1,6 +1,6 @@
-﻿using System.Collections.ObjectModel;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using NodaTime;
+using OxyPlot;
 using SRHWiscMano.Core.Helpers;
 using SRHWiscMano.Core.Models;
 
@@ -18,6 +18,7 @@ namespace SRHWiscMano.Core.ViewModels
             this.timeFrame = timeFrame;
         }
 
+        [ObservableProperty] private PlotModel framePlotModel;
 
         public string Id => timeFrame.Id;
         public IExamination Data { get; }

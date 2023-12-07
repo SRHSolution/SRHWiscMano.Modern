@@ -14,7 +14,6 @@
              xmlns:system="clr-namespace:System;assembly=System.Runtime"
              xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
              mc:Ignorable="d"
-             SizeChanged="ViewerView_OnSizeChanged"
              d:DesignHeight="660" d:DesignWidth="800"
              DataContext="{Binding Source={StaticResource Locator}, Path=ViewerViewModel}">
     <UserControl.Resources>
