@@ -11,7 +11,7 @@
              mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance viewModels:ExplorerViewModel}">
     <FrameworkElement.Resources>
-        <Style x:Key="StyleHoverButton" TargetType="{x:Type Button}">
+        <Style x:Key="StyleHoverButton" TargetType="{x:Type Button}" BasedOn="{StaticResource MahApps.Styles.Button.Circle}">
             <Setter Property="UIElement.Visibility" Value="Hidden" />
             <Style.Triggers>
                 <DataTrigger
@@ -71,11 +71,11 @@
         </StackPanel>
         <ListBox x:Name="snapshotsList" Grid.Row="1" SelectionMode="Extended"
                  ScrollViewer.HorizontalScrollBarVisibility="Disabled" ItemsSource="{Binding TimeFrames}">
-            <ItemsControl.ItemsPanel>
+            <ListBox.ItemsPanel>
                 <ItemsPanelTemplate>
                     <WrapPanel Orientation="Horizontal" />
                 </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
+            </ListBox.ItemsPanel>
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
                     <Grid Margin="16">
@@ -90,12 +90,28 @@
                                 Height="32 "
                                 Margin="10, 0, 0, 0"
                                 Style="{StaticResource StyleHoverButton}"
+                                Background="Transparent"
                                 Foreground="{DynamicResource MahApps.Brushes.Accent}"
                                 Command="{Binding DataContext.AdjustLeftCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}}"
                                 CommandParameter="{Binding}">
                             <Button.ContentTemplate>
                                 <DataTemplate>
                                     <iconPacks:PackIconUnicons Kind="AngleLeft" />
+                                </DataTemplate>
+                            </Button.ContentTemplate>
+                        </Button>
+                        <Button Grid.Row="0" Panel.ZIndex="1" Width="32"
+                                HorizontalAlignment="Right" Content=""
+                                Height="32 "
+                                Margin="0, 0, 10, 0"
+                                Style="{StaticResource StyleHoverButton}"
+                                Background="Transparent"
+                                Foreground="{DynamicResource MahApps.Brushes.Accent}"
+                                Command="{Binding DataContext.AdjustRightCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}}"
+                                CommandParameter="{Binding}">
+                            <Button.ContentTemplate>
+                                <DataTemplate>
+                                    <iconPacks:PackIconUnicons Kind="AngleRight" />
                                 </DataTemplate>
                             </Button.ContentTemplate>
                         </Button>
