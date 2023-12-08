@@ -16,13 +16,15 @@ namespace SRHWiscMano.Core.ViewModels
         public TimeFrameViewModel(ITimeFrame timeFrame)
         {
             this.timeFrame = timeFrame;
+            this.Text = timeFrame.Text;
         }
 
         [ObservableProperty] private PlotModel framePlotModel;
 
         public string Id => timeFrame.Id;
         public IExamination Data { get; }
-        public string Text { get; }
+
+        [ObservableProperty] private string text;
         public Instant Time { get; }
         public Range<int> SensorRange { get; }
         public int? VPUpperBound { get; }
