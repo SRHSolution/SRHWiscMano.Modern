@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using MoreLinq;
 using SRHWiscMano.App.Data;
 using SRHWiscMano.App.Services;
 using SRHWiscMano.Core.Helpers;
@@ -57,19 +58,20 @@ namespace SRHWiscMano.App.ViewModels
                 var timeFrameViewModel = new TimeFrameViewModel(timeFrame);
                 TimeFrames.Add(timeFrameViewModel);
             }
-
         }
 
 
         [RelayCommand]
         private void SelectAll()
         {
+            TimeFrames.ForEach(tf => tf.IsSelected = true);
             TimeFrames.ToList().ForEach(sn => sn.IsSelected = true);
         }
 
         [RelayCommand]
         private void UnselectAll()
         {
+            TimeFrames.ForEach(tf => tf.IsSelected = false);
             TimeFrames.ToList().ForEach(sn => sn.IsSelected = false);
         }
 
@@ -81,15 +83,17 @@ namespace SRHWiscMano.App.ViewModels
         }
 
         [RelayCommand]
-        private void AdjustLeft()
+        private void AdjustLeft(object arg)
         {
-            logger.LogTrace("Explorer AdjustLeftCommand");
+            var timeFrame = (TimeFrameViewModel)arg;
+            logger.LogTrace($"Explorer AdjustLeftCommand for {timeFrame.Id}");
         }
 
         [RelayCommand]
-        private void AdjustRight()
+        private void AdjustRight(object arg)
         {
-            logger.LogTrace("Explorer AdjustRightCommand");
+            var timeFrame = (TimeFrameViewModel) arg;
+            logger.LogTrace($"Explorer AdjustRightCommand for {timeFrame.Id}");
         }
 
         [RelayCommand]
