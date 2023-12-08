@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Windows;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.Logging;
@@ -45,7 +46,7 @@ namespace SRHWiscMano.App.ViewModels
         private void SharedService_ExamDataLoaded(object? sender, EventArgs e)
         {
             var examData = sharedService.ExamData;
-            var frameNotes = examData.Notes.ToList();
+            var frameNotes = examData.Notes;//.ToList();
 
             foreach (var fNote in frameNotes)
             {
@@ -54,8 +55,9 @@ namespace SRHWiscMano.App.ViewModels
                 var notePlotData = PlotDataUtils.CreateSubRange(examData.PlotData, startRow, endRow, 0, examData.PlotData.GetLength(1)-1);
 
                 var sensorRange = new Range<int>(0, examData.PlotData.GetLength(1) - 1);
-                var timeFrame = new TimeFrame(fNote.Text, examData, fNote.Text, fNote.Time, sensorRange, null, null, false, false, null, null, RegionsVersionType.UsesMP);
-                var timeFrameViewModel = new TimeFrameViewModel(timeFrame);
+                // var timeFrame = new TimeFrame(fNote.Text, examData, fNote.Text, fNote.Time, sensorRange, null, null, false, false, null, null, RegionsVersionType.UsesMP);
+                var timeFrame = new TimeFrame(fNote.Text, fNote.Time, notePlotData);
+                var timeFrameViewModel = new TimeFrameViewModel(timeFrame, fNote);
                 TimeFrames.Add(timeFrameViewModel);
             }
         }
@@ -86,14 +88,14 @@ namespace SRHWiscMano.App.ViewModels
         private void AdjustLeft(object arg)
         {
             var timeFrame = (TimeFrameViewModel)arg;
-            logger.LogTrace($"Explorer AdjustLeftCommand for {timeFrame.Id}");
+            logger.LogTrace($"Explorer AdjustLeftCommand for {timeFrame.Label}");
         }
 
         [RelayCommand]
         private void AdjustRight(object arg)
         {
             var timeFrame = (TimeFrameViewModel) arg;
-            logger.LogTrace($"Explorer AdjustRightCommand for {timeFrame.Id}");
+            logger.LogTrace($"Explorer AdjustRightCommand for {timeFrame.Label}");
         }
 
         [RelayCommand]

@@ -200,7 +200,8 @@ namespace SRHWiscMano.App.ViewModels
             ((IPlotModel)this.MainPlotModel)?.AttachPlotView(null);
 
             //Mainview plotmodel, controller 설정
-            var mainModel = CreatePlotModel((double[,])fullExamData.Clone());
+            var mainModel = new PlotModel();
+            PlotDataUtils.AddHeatmapSeries(mainModel, fullExamData);
             AddAxesOnMain(mainModel, frameCount, sensorCount);
             AddFrameNotes(mainModel, examData.Notes.ToList());
             if (UpdateSubRange)

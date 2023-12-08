@@ -23,6 +23,7 @@ namespace SRHWiscMano.Core.Models
             return Task.Run(() => { UpdatePlotDataImp(interpolateScale); });
         }
 
+        
         private void UpdatePlotDataImp(int interpolateScale)
         {
             var sensorCount = (int)(this.SensorCount() * interpolateScale);
