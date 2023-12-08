@@ -9,10 +9,11 @@
              xmlns:viewModels="clr-namespace:SRHWiscMano.App.ViewModels"
              xmlns:oxy="http://oxyplot.org/wpf"
              mc:Ignorable="d"
-             d:DesignHeight="450" d:DesignWidth="800" 
+             d:DesignHeight="450" d:DesignWidth="800"
              d:DataContext="{d:DesignInstance viewModels:ExplorerViewModel}">
     <FrameworkElement.Resources>
-        <Style x:Key="StyleHoverButton" TargetType="{x:Type Button}" BasedOn="{StaticResource MahApps.Styles.Button.Circle}">
+        <Style x:Key="StyleHoverButton" TargetType="{x:Type Button}"
+               BasedOn="{StaticResource MahApps.Styles.Button.Circle}">
             <Setter Property="UIElement.Visibility" Value="Hidden" />
             <Style.Triggers>
                 <DataTrigger
@@ -70,13 +71,30 @@
             </Button>
 
         </StackPanel>
-        <ListBox x:Name="snapshotsList" Grid.Row="1" SelectionMode="Extended"
-                 ScrollViewer.HorizontalScrollBarVisibility="Disabled" ItemsSource="{Binding TimeFrames}" d:ItemsSource="{d:SampleData ItemCount=5}">
+        <ListBox x:Name="timeFrameList" Grid.Row="1" SelectionMode="Extended"
+                 ScrollViewer.HorizontalScrollBarVisibility="Disabled" ItemsSource="{Binding TimeFrames}"
+                 d:ItemsSource="{d:SampleData ItemCount=5}">
             <ListBox.ItemsPanel>
                 <ItemsPanelTemplate>
-                    <WrapPanel Orientation="Horizontal"/>
+                    <WrapPanel Orientation="Horizontal" />
                 </ItemsPanelTemplate>
             </ListBox.ItemsPanel>
+            <ListBox.ItemContainerStyle>
+                <Style TargetType="ListBoxItem">
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="ListBoxItem">
+                                <Border Background="Transparent"
+                                        BorderBrush="{DynamicResource MahApps.Brushes.Accent}"
+                                        BorderThickness="1"
+                                        Margin="5" Padding="2" CornerRadius="5">
+                                    <ContentPresenter />
+                                </Border>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </ListBox.ItemContainerStyle>
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
                     <Grid Margin="8">
@@ -86,10 +104,9 @@
                         </Grid.RowDefinitions>
                         <oxy:PlotView Grid.Row="0" Panel.ZIndex="0" Width="300" Height="300"
                                       Model="{Binding FramePlotModel}" />
-                        <Button Grid.Row="0" Panel.ZIndex="1" Width="32"
+                        <Button Grid.Row="0" Panel.ZIndex="1" Width="30" Height="30"
                                 HorizontalAlignment="Left" Content=""
-                                Height="32 "
-                                Margin="10, 0, 0, 0"
+                                Margin="8, 0, 0, 0"
                                 Style="{StaticResource StyleHoverButton}"
                                 Background="Transparent"
                                 Foreground="{DynamicResource MahApps.Brushes.Accent}"
@@ -101,10 +118,9 @@
                                 </DataTemplate>
                             </Button.ContentTemplate>
                         </Button>
-                        <Button Grid.Row="0" Panel.ZIndex="1" Width="32"
+                        <Button Grid.Row="0" Panel.ZIndex="1" Width="30" Height="30"
                                 HorizontalAlignment="Right" Content=""
-                                Height="32 "
-                                Margin="0, 0, 10, 0"
+                                Margin="0, 0, 8, 0"
                                 Style="{StaticResource StyleHoverButton}"
                                 Background="Transparent"
                                 Foreground="{DynamicResource MahApps.Brushes.Accent}"
@@ -112,7 +128,7 @@
                                 CommandParameter="{Binding}">
                             <Button.ContentTemplate>
                                 <DataTemplate>
-                                    <iconPacks:PackIconUnicons Kind="AngleRight" />
+                                    <iconPacks:PackIconUnicons Kind="AngleRight"/>
                                 </DataTemplate>
                             </Button.ContentTemplate>
                         </Button>
