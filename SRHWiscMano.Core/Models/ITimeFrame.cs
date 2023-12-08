@@ -9,7 +9,7 @@ namespace SRHWiscMano.Core.Models
 
         IExamination Data { get; }
 
-        string Text { get; }
+        string Text { get; set; }
 
         Instant Time { get; }
 

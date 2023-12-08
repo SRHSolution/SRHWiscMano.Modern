@@ -8,6 +8,7 @@
              xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
              xmlns:viewModels="clr-namespace:SRHWiscMano.App.ViewModels"
              xmlns:oxy="http://oxyplot.org/wpf"
+             xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
              mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800"
              d:DataContext="{d:DesignInstance viewModels:ExplorerViewModel}">
@@ -84,8 +85,7 @@
                     <Setter Property="Template">
                         <Setter.Value>
                             <ControlTemplate TargetType="ListBoxItem">
-                                <Border Background="Transparent"
-                                        BorderBrush="{DynamicResource MahApps.Brushes.Accent}"
+                                <Border BorderBrush="{DynamicResource MahApps.Brushes.Accent}"
                                         BorderThickness="1"
                                         Margin="5" Padding="2" CornerRadius="5">
                                     <ContentPresenter />
@@ -97,7 +97,7 @@
             </ListBox.ItemContainerStyle>
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                    <Grid Margin="8">
+                    <Grid Margin="5">
                         <Grid.RowDefinitions>
                             <RowDefinition />
                             <RowDefinition />
@@ -128,16 +128,46 @@
                                 CommandParameter="{Binding}">
                             <Button.ContentTemplate>
                                 <DataTemplate>
-                                    <iconPacks:PackIconUnicons Kind="AngleRight"/>
+                                    <iconPacks:PackIconUnicons Kind="AngleRight" />
                                 </DataTemplate>
                             </Button.ContentTemplate>
                         </Button>
                         <Grid Row="1" Margin="0,5,0,0">
-                            <TextBlock Panel.ZIndex="0" HorizontalAlignment="Center" Text="{Binding Text}" />
+                            <TextBlock Panel.ZIndex="0" VerticalAlignment="Center" HorizontalAlignment="Center"
+                                       Text="{Binding Text}" />
                             <CheckBox Panel.ZIndex="1" HorizontalAlignment="Left" IsChecked="{Binding IsSelected}"
                                       Command="{Binding DataContext.ToggleCheckedCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}}"
                                       CommandParameter="{Binding}" />
+                            <Button Panel.ZIndex="2" HorizontalAlignment="Right" Background="IndianRed"
+                                    Foreground="White"
+                                    ToolTip="Bolus Size" Command="{Binding EditLabelCommand}">
+                                <StackPanel Orientation="Horizontal">
+                                    <iconPacks:PackIconModern Width="16"
+                                                              Height="16"
+                                                              Kind="CupHalf" />
+                                    <TextBlock VerticalAlignment="Center" Text="{Binding Volume, StringFormat='{}{0}cc'}" />
+                                </StackPanel>
+                            </Button>
+                            <Popup StaysOpen="false" IsOpen="{Binding IsEditing}">
+                                <Border BorderThickness="0" BorderBrush="{DynamicResource MahApps.Brushes.AccentBase}" Background="{DynamicResource MahApps.Brushes.Gray}" CornerRadius="0">
+                                    <Grid Width="160" Margin="4">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="8" />
+                                            <ColumnDefinition Width="52" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBox Grid.Column="0" Text="{Binding LabelEdit, StringFormat='{}{0}'}"/>
+                                        <Button Grid.Column="2"
+                                                Background="{DynamicResource MahApps.Brushes.Accent}" Content="OK"
+                                                Width="52" HorizontalAlignment="Center"
+                                                VerticalAlignment="Center"
+                                                Command="{Binding CommitEditLabelCommand}">
+                                        </Button> 
+                                    </Grid>
+                                </Border>
+                            </Popup>
                         </Grid>
+
                     </Grid>
                 </DataTemplate>
             </ItemsControl.ItemTemplate>

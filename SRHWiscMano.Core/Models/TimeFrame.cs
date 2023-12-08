@@ -39,7 +39,7 @@ namespace SRHWiscMano.Core.Models
 
         public string Id { get; }
         public IExamination Data { get; }
-        public string Text { get; }
+        public string Text { get; set; }
         public Instant Time { get; }
         public Range<int> SensorRange { get; }
         public int? VPUpperBound { get; }
