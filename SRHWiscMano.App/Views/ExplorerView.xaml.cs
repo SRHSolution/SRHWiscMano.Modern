@@ -3,6 +3,7 @@ using SRHWiscMano.App.ViewModels;
 using SRHWiscMano.Core.ViewModels;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -26,7 +27,8 @@ namespace SRHWiscMano.App.Views
         public ExplorerView()
         {
             InitializeComponent();
-            this.DataContext = Ioc.Default.GetService<IExplorerViewModel>();
+            if (!DesignerProperties.GetIsInDesignMode(new DependencyObject()))
+                this.DataContext = Ioc.Default.GetService<IExplorerViewModel>();
         }
     }
 }

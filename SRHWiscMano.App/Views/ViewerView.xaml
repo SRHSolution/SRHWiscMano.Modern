@@ -13,9 +13,10 @@
              xmlns:converters="clr-namespace:SRHWiscMano.Core.Converters;assembly=SRHWiscMano.Core"
              xmlns:system="clr-namespace:System;assembly=System.Runtime"
              xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:viewModels="clr-namespace:SRHWiscMano.App.ViewModels"
              mc:Ignorable="d"
              d:DesignHeight="660" d:DesignWidth="800"
-             DataContext="{Binding Source={StaticResource Locator}, Path=ViewerViewModel}">
+             d:DataContext="{d:DesignInstance viewModels:ViewerViewModel, IsDesignTimeCreatable=True}">
     <UserControl.Resources>
         <Thickness x:Key="ControlMargin">0 5 0 0</Thickness>
         <converters:StringToDoubleConverter x:Key="StringToDoubleConverter" />

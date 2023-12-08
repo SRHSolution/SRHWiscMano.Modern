@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Timers;
@@ -7,6 +8,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using SRHWiscMano.Core.ViewModels;
 using Timer = System.Timers.Timer;
 
@@ -25,7 +27,10 @@ public partial class ViewerView : UserControl
     public ViewerView()
     {
         InitializeComponent();
-
+        if (!DesignerProperties.GetIsInDesignMode(new DependencyObject()))
+        {
+            this.DataContext = Ioc.Default.GetService<IViewerViewModel>();
+        }
         // // SizeChanged 가 발생한 경우에 Subscribe 함수가 Throttle 값에 따라 call 된다.
         // var resizeObservable = Observable.FromEventPattern<SizeChangedEventHandler, SizeChangedEventArgs>(
         //         h => SizeChanged += h,

@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:SRHWiscMano.App.Views"
              xmlns:viewModels="clr-namespace:SRHWiscMano.App.ViewModels"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800" Background="Cyan" d:DataContext="{d:DesignInstance viewModels:AnalyzerViewModel}">
+             d:DesignHeight="450" d:DesignWidth="800" Background="Cyan" d:DataContext="{d:DesignInstance viewModels:AnalyzerViewModel, IsDesignTimeCreatable=True}">
     <Grid>
             
     </Grid>
