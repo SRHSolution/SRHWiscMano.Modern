@@ -23,6 +23,7 @@ namespace SRHWiscMano.App
             services.AddSingleton<IViewerViewModel, ViewerViewModel>();     // For ViewerView
             services.AddSingleton<IExplorerViewModel, ExplorerViewModel>(); // For ExplorerView
             services.AddSingleton<IAnalyzerViewModel, AnalyzerViewModel>(); // For AnalyzerView
+            services.AddSingleton<IReportViewModel, ReportViewModel>(); // For AnalyzerView
             services.AddSingleton<ISettingViewModel, SettingViewModel>();   // For SettingView
             
             // services.AddTransient<ColorRangeSliderViewModel>();

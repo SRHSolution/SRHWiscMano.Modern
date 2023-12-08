@@ -127,6 +127,9 @@
             <TabItem Header="Analyzer" ToolTip="Select analyzer View">
                 <view:AnalyzerView Margin="5"/>
             </TabItem>
+            <TabItem Header="Report" ToolTip="Select analyzer View">
+                <view:ReportView Margin="5"/>
+            </TabItem>
         </mah:MetroAnimatedSingleRowTabControl>
     </Grid>
 
