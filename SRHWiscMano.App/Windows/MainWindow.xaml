@@ -74,10 +74,17 @@
 
     <mah:MetroWindow.RightWindowCommands>
         <mah:WindowCommands>
-            <Button Command="{Binding ShowLoggerCommand}" ToolTip="Show Logging Browser">
+            <Button Command="{Binding ShowLoggerWindowCommand}" ToolTip="Show Logging Window">
                 <Button.ContentTemplate>
                     <DataTemplate>
                         <iconPacks:PackIconRadixIcons Kind="ActivityLog" />
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>
+            <Button Command="{Binding ShowSettingWindowCommand}" ToolTip="Show Setting Window">
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <iconPacks:PackIconVaadinIcons Kind="CogOutline" />
                     </DataTemplate>
                 </Button.ContentTemplate>
             </Button>
