@@ -9,7 +9,8 @@
              xmlns:viewModels="clr-namespace:SRHWiscMano.App.ViewModels"
              xmlns:oxy="http://oxyplot.org/wpf"
              mc:Ignorable="d"
-             d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance viewModels:ExplorerViewModel}">
+             d:DesignHeight="450" d:DesignWidth="800" 
+             d:DataContext="{d:DesignInstance viewModels:ExplorerViewModel}">
     <FrameworkElement.Resources>
         <Style x:Key="StyleHoverButton" TargetType="{x:Type Button}" BasedOn="{StaticResource MahApps.Styles.Button.Circle}">
             <Setter Property="UIElement.Visibility" Value="Hidden" />
@@ -70,15 +71,15 @@
 
         </StackPanel>
         <ListBox x:Name="snapshotsList" Grid.Row="1" SelectionMode="Extended"
-                 ScrollViewer.HorizontalScrollBarVisibility="Disabled" ItemsSource="{Binding TimeFrames}">
+                 ScrollViewer.HorizontalScrollBarVisibility="Disabled" ItemsSource="{Binding TimeFrames}" d:ItemsSource="{d:SampleData ItemCount=5}">
             <ListBox.ItemsPanel>
                 <ItemsPanelTemplate>
-                    <WrapPanel Orientation="Horizontal" />
+                    <WrapPanel Orientation="Horizontal"/>
                 </ItemsPanelTemplate>
             </ListBox.ItemsPanel>
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                    <Grid Margin="16">
+                    <Grid Margin="8">
                         <Grid.RowDefinitions>
                             <RowDefinition />
                             <RowDefinition />
