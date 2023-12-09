@@ -12,15 +12,13 @@ using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MoreLinq.Extensions;
-using NLog;
 using OxyPlot;
-using OxyPlot.Annotations;
 using OxyPlot.Axes;
 using OxyPlot.Series;
-using SkiaSharp;
 using SRHWiscMano.App.Data;
 using SRHWiscMano.App.Services;
 using SRHWiscMano.Core.Control;
+using SRHWiscMano.Core.Data;
 using SRHWiscMano.Core.Helpers;
 using SRHWiscMano.Core.Models;
 using SRHWiscMano.Core.ViewModels;
@@ -112,6 +110,10 @@ namespace SRHWiscMano.App.ViewModels
             }
         }
 
+        public ViewerViewModel()
+        {
+        }
+            
         public ViewerViewModel(ILogger<ViewerViewModel> logger, SharedService sharedService,
             IOptions<AppSettings> settings)
         {
@@ -147,34 +149,16 @@ namespace SRHWiscMano.App.ViewModels
                 pvBackColor = message.Value.Item1;
                 pvForeColor = message.Value.Item2;
                 ApplyThemeToOxyPlots();
+                
             }
         }
 
         private void ApplyThemeToOxyPlots()
         {
             logger.LogTrace("Apply Theme to OxyPlots");
-            var backColor = pvBackColor;
-            var foreColor = pvForeColor;
-
-            MainPlotModel.Background = OxyColor.FromArgb(backColor.A, backColor.R, backColor.G, backColor.B);
-            MainPlotModel.TextColor = OxyColor.FromArgb(foreColor.A, foreColor.R, foreColor.G, foreColor.B);
-            MainPlotModel.PlotAreaBorderColor = OxyColors.Gray;
-            MainPlotModel.Axes.Where(ax => ax.GetType().Name == "LinearAxis").ForEach(lax =>
-            {
-                lax.TicklineColor = MainPlotModel.TextColor;
-                lax.MinorTicklineColor = MainPlotModel.TextColor;
-            });
-            MainPlotModel.InvalidatePlot(false);
-
-            OverviewPlotModel.Background = OxyColor.FromArgb(backColor.A, backColor.R, backColor.G, backColor.B);
-            OverviewPlotModel.TextColor = OxyColor.FromArgb(foreColor.A, foreColor.R, foreColor.G, foreColor.B);
-            OverviewPlotModel.PlotAreaBorderColor = OxyColors.Gray;
-            OverviewPlotModel.Axes.Where(ax => ax.GetType().Name == "LinearAxis").ForEach(lax =>
-            {
-                lax.TicklineColor = OverviewPlotModel.TextColor;
-                lax.MinorTicklineColor = OverviewPlotModel.TextColor;
-            });
-            OverviewPlotModel.InvalidatePlot(false);
+            MainPlotModel.ApplyTheme(pvBackColor, pvForeColor); 
+            OverviewPlotModel.ApplyTheme(pvBackColor, pvForeColor);
+            return;
         }
 
         private double[,] fullExamData;
@@ -340,7 +324,7 @@ namespace SRHWiscMano.App.ViewModels
             {
                 Position = AxisPosition.Left,
                 Palette = SelectedPalette,
-                HighColor = SelectedPalette.Colors.Last(), // OxyColors.White,
+                HighColor = SelectedPalette.Colors.Last(),
                 LowColor = SelectedPalette.Colors.First(),
                 RenderAsImage = false,
                 AbsoluteMinimum = MinSensorData,
@@ -483,7 +467,7 @@ namespace SRHWiscMano.App.ViewModels
             }
             else
             {
-                var customColors = new OxyColor[]
+                var customColors = new[]
                 {
                     OxyColor.FromArgb(255, 24, 3, 95),
                     OxyColor.FromArgb(255, 30, 237, 215),
@@ -516,17 +500,16 @@ namespace SRHWiscMano.App.ViewModels
             if (MainPlotModel.Series.Count == 0)
                 return;
             
-            var mainColorAxis = MainPlotModel.Axes.Single(s => s is LinearColorAxis) as LinearColorAxis;
             if(!string.IsNullOrEmpty(SelectedPaletteKey) && Palettes.ContainsKey(SelectedPaletteKey))
                 SelectedPalette = Palettes[SelectedPaletteKey];
             
+            var mainColorAxis = MainPlotModel.Axes.Single(s => s is LinearColorAxis) as LinearColorAxis;
             mainColorAxis.Palette = SelectedPalette;
             mainColorAxis.Minimum = MinSensorRange; // 최소 limit 값
             mainColorAxis.Maximum = MaxSensorRange; // 최대 limit 값
             mainColorAxis.HighColor = SelectedPalette.Colors.Last(); // OxyColors.White,
             mainColorAxis.LowColor = SelectedPalette.Colors.First();
             MainPlotModel.InvalidatePlot(false);
-
 
             var overviewColorAxis = OverviewPlotModel.Axes.Single(s => s is LinearColorAxis) as LinearColorAxis;
             overviewColorAxis.Palette = SelectedPalette;
@@ -535,6 +518,17 @@ namespace SRHWiscMano.App.ViewModels
             overviewColorAxis.HighColor = SelectedPalette.Colors.Last(); // OxyColors.White,
             overviewColorAxis.LowColor = SelectedPalette.Colors.First();
             OverviewPlotModel.InvalidatePlot(false);
+
+            var changedArg = new PaletteChangedMessageArg()
+            {
+                palette = SelectedPalette,
+                Minimum = MinSensorRange,
+                Maximum = MaxSensorRange,
+                HighColor = SelectedPalette.Colors.Last(),
+                LowColor = SelectedPalette.Colors.First(),
+            };
+
+            WeakReferenceMessenger.Default.Send(new PaletteChangedMessageMessage(changedArg));
         }
 
         /// <summary>
@@ -557,6 +551,7 @@ namespace SRHWiscMano.App.ViewModels
         }
 
         /// <summary>
+        /// 
         /// MainView의 현재 위치에서 가장 가까운 다음 FrameNote를 화면 중앙으로 표시되도록 한다.
         /// </summary>
         [RelayCommand]

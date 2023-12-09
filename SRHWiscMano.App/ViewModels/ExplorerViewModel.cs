@@ -7,6 +7,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MoreLinq;
+using OxyPlot;
 using SRHWiscMano.App.Data;
 using SRHWiscMano.App.Services;
 using SRHWiscMano.Core.Helpers;
@@ -40,9 +41,12 @@ namespace SRHWiscMano.App.ViewModels
             this.sharedService = sharedService;
             this.settings = settings.Value;
 
+            
+
             sharedService.ExamDataLoaded += SharedService_ExamDataLoaded;
         }
 
+        
         private void SharedService_ExamDataLoaded(object? sender, EventArgs e)
         {
             var examData = sharedService.ExamData;
@@ -57,7 +61,8 @@ namespace SRHWiscMano.App.ViewModels
                 var sensorRange = new Range<int>(0, examData.PlotData.GetLength(1) - 1);
                 // var timeFrame = new TimeFrame(fNote.Text, examData, fNote.Text, fNote.Time, sensorRange, null, null, false, false, null, null, RegionsVersionType.UsesMP);
                 var timeFrame = new TimeFrame(fNote.Text, fNote.Time, notePlotData);
-                var timeFrameViewModel = new TimeFrameViewModel(timeFrame, fNote);
+                var defaultPalette = PaletteUtils.GetPredefinedPalettes()[settings.DefaultPaletteKey];
+                var timeFrameViewModel = new TimeFrameViewModel(timeFrame, fNote, defaultPalette);
                 TimeFrames.Add(timeFrameViewModel);
             }
         }

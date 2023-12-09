@@ -1,9 +1,11 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using NodaTime;
 using NodaTime.Serialization.SystemTextJson;
 using OxyPlot;
 using OxyPlot.Axes;
+using SRHWiscMano.Core.Data;
 using SRHWiscMano.Core.Helpers;
 using SRHWiscMano.Core.Models;
 
@@ -15,6 +17,8 @@ namespace SRHWiscMano.Core.ViewModels
     public partial class TimeFrameViewModel : ViewModelBase
     {
         private readonly ITimeFrame timeFrame;
+
+        public static OxyPalette SelectedPalette { get; set; }
 
         [ObservableProperty] private PlotModel framePlotModel;
 
@@ -36,7 +40,7 @@ namespace SRHWiscMano.Core.ViewModels
         public Instant Time => timeFrame.Time;
 
 
-        public TimeFrameViewModel(ITimeFrame timeFrame, FrameNote frameNote)
+        public TimeFrameViewModel(ITimeFrame timeFrame, FrameNote frameNote, OxyPalette defaultPalette)
         {
             this.timeFrame = timeFrame;
             this.Label = timeFrame.Text;
@@ -49,10 +53,27 @@ namespace SRHWiscMano.Core.ViewModels
                 this.Volume = Label;
             }
 
+            SelectedPalette = defaultPalette;
+
             var plotModel = new PlotModel();
             PlotDataUtils.AddHeatmapSeries(plotModel, timeFrame.PlotData);
             AddAxes(plotModel, timeFrame.PlotData.GetLength(0), timeFrame.PlotData.GetLength(1));
             FramePlotModel = plotModel;
+
+            WeakReferenceMessenger.Default.Register<PaletteChangedMessageMessage>(this, OnPaletteChange);
+        }
+
+
+        private void OnPaletteChange(object recipient, PaletteChangedMessageMessage arg)
+        {
+            var mainColorAxis = FramePlotModel.Axes.OfType<LinearColorAxis>().FirstOrDefault();
+            mainColorAxis.Palette = arg.Value.palette;
+            mainColorAxis.Minimum = arg.Value.Minimum; // 최소 limit 값
+            mainColorAxis.Maximum = arg.Value.Maximum; // 최대 limit 값
+            mainColorAxis.HighColor = arg.Value.HighColor; // OxyColors.White,
+            mainColorAxis.LowColor = arg.Value.LowColor;
+
+            FramePlotModel.InvalidatePlot(false);
         }
 
 
@@ -66,9 +87,7 @@ namespace SRHWiscMano.Core.ViewModels
             model.Axes.Add(new LinearColorAxis
             {
                 Position = AxisPosition.None,
-                Palette = OxyPalettes.Jet(256),
-                // HighColor = SelectedPalette.Colors.Last(), // OxyColors.White,
-                // LowColor = SelectedPalette.Colors.First(),
+                Palette = SelectedPalette,// OxyPalettes.Hue64,
                 RenderAsImage = false,
                 AbsoluteMinimum = -5,
                 AbsoluteMaximum = 200,
