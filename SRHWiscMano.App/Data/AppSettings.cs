@@ -33,6 +33,6 @@ namespace SRHWiscMano.App.Data
         /// </summary>
         public double TimeFrameDurationInMillisecond { get; set; } = 3000;
 
-        public string DefaultPaletteKey { get; set; } = "Hue64";
+        public string SelectedPaletteKey { get; set; } = "Hue64";
     }
 }

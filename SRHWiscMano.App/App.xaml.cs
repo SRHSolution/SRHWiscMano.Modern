@@ -18,6 +18,7 @@ using SRHWiscMano.App.Controls;
 using SRHWiscMano.App.Data;
 using SRHWiscMano.App.ViewModels;
 using SRHWiscMano.App.Windows;
+using SRHWiscMano.Core.Helpers;
 using SRHWiscMano.Core.Services;
 using SRHWiscMano.Core.ViewModels;
 
@@ -38,11 +39,11 @@ namespace SRHWiscMano.App
             SRHWiscMano.Core.ServiceRegistration.ConfigureServices(services);
             SRHWiscMano.App.ServiceRegistration.ConfigureServices(services);
 
+            services.AddSingletonTypes("SRHWiscMano.App");
 
             serviceProvider = services.BuildServiceProvider();
 
             Ioc.Default.ConfigureServices(serviceProvider);
-
 
             // Logging 메시지를 back단에서 계속 받기 위해서 Instance를 미리 생성함
             Ioc.Default.GetRequiredService<LoggerWindow>();

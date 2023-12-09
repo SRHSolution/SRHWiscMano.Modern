@@ -31,6 +31,7 @@ namespace SRHWiscMano.App.ViewModels
 
         private readonly ILogger<ViewerViewModel> logger;
         private readonly SharedService sharedService;
+        private readonly PaletteManager paletteManager;
         private readonly AppSettings settings;
 
         #endregion
@@ -115,15 +116,16 @@ namespace SRHWiscMano.App.ViewModels
         }
             
         public ViewerViewModel(ILogger<ViewerViewModel> logger, SharedService sharedService,
-            IOptions<AppSettings> settings)
+            IOptions<AppSettings> settings, PaletteManager paletteManager)
         {
             this.logger = logger;
             this.sharedService = sharedService;
+            this.paletteManager = paletteManager;
             this.settings = settings.Value;
 
             sharedService.ExamDataLoaded += SharedService_ExamDataLoaded;
 
-            Palettes = PaletteUtils.GetPredefinedPalettes();
+            Palettes = paletteManager.Palettes; //PaletteUtils.GetPredefinedPalettes();
 
             MaxSensorData = 100;
             MinSensorData = -10;
