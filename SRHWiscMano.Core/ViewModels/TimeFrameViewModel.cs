@@ -40,7 +40,7 @@ namespace SRHWiscMano.Core.ViewModels
         public Instant Time => timeFrame.Time;
 
 
-        public TimeFrameViewModel(ITimeFrame timeFrame, FrameNote frameNote, OxyPalette defaultPalette)
+        public TimeFrameViewModel(ITimeFrame timeFrame, FrameNote frameNote)
         {
             this.timeFrame = timeFrame;
             this.Label = timeFrame.Text;
@@ -52,8 +52,6 @@ namespace SRHWiscMano.Core.ViewModels
             {
                 this.Volume = Label;
             }
-
-            SelectedPalette = defaultPalette;
 
             var plotModel = new PlotModel();
             PlotDataUtils.AddHeatmapSeries(plotModel, timeFrame.PlotData);

@@ -160,7 +160,6 @@ namespace SRHWiscMano.App.ViewModels
             logger.LogTrace("Apply Theme to OxyPlots");
             MainPlotModel.ApplyTheme(pvBackColor, pvForeColor); 
             OverviewPlotModel.ApplyTheme(pvBackColor, pvForeColor);
-            return;
         }
 
         private double[,] fullExamData;
@@ -251,6 +250,8 @@ namespace SRHWiscMano.App.ViewModels
             OverviewPlotController = overviewController;
 
             ApplyThemeToOxyPlots();
+
+            SelectedPaletteKey = paletteManager.SelectedPaletteKey;
 
             IsDataLoaded = true;
         }    
@@ -469,21 +470,7 @@ namespace SRHWiscMano.App.ViewModels
             }
             else
             {
-                var customColors = new[]
-                {
-                    OxyColor.FromArgb(255, 24, 3, 95),
-                    OxyColor.FromArgb(255, 30, 237, 215),
-                    OxyColor.FromArgb(255, 47, 243, 38),
-                    OxyColor.FromArgb(255, 248, 248, 1),
-                    OxyColor.FromArgb(255, 253, 5, 0),
-                    OxyColor.FromArgb(255, 95, 0, 69)
-                };
-                var colorCount = favPalette.UpperValue - favPalette.LowerValue;
-                var palette = OxyPalette.Interpolate(colorCount, customColors);
-
-                logger.LogTrace($"Select custom palette");
-                SelectedPalette = palette;
-                SelectedPaletteKey = "Custom";
+                logger.LogError("No registered PaletteKey");
             }
         }
 
@@ -504,7 +491,11 @@ namespace SRHWiscMano.App.ViewModels
             
             if(!string.IsNullOrEmpty(SelectedPaletteKey) && Palettes.ContainsKey(SelectedPaletteKey))
                 SelectedPalette = Palettes[SelectedPaletteKey];
-            
+
+            paletteManager.SetPaletteKey(SelectedPaletteKey);
+            TimeFrameViewModel.SelectedPalette = SelectedPalette;
+
+
             var mainColorAxis = MainPlotModel.Axes.Single(s => s is LinearColorAxis) as LinearColorAxis;
             mainColorAxis.Palette = SelectedPalette;
             mainColorAxis.Minimum = MinSensorRange; // 최소 limit 값

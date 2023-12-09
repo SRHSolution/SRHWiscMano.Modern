@@ -64,8 +64,7 @@ namespace SRHWiscMano.App.ViewModels
                 var sensorRange = new Range<int>(0, examData.PlotData.GetLength(1) - 1);
                 // var timeFrame = new TimeFrame(fNote.Text, examData, fNote.Text, fNote.Time, sensorRange, null, null, false, false, null, null, RegionsVersionType.UsesMP);
                 var timeFrame = new TimeFrame(fNote.Text, fNote.Time, notePlotData);
-                var defaultPalette = paletteManager.SelectedPalette;// PaletteUtils.GetPredefinedPalettes()[settings.SelectedPaletteKey];
-                var timeFrameViewModel = new TimeFrameViewModel(timeFrame, fNote, defaultPalette);
+                var timeFrameViewModel = new TimeFrameViewModel(timeFrame, fNote);
                 TimeFrames.Add(timeFrameViewModel);
             }
         }

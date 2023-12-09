@@ -19,17 +19,7 @@ namespace SRHWiscMano.App.Data
         private readonly AppSettings settings;
         public Dictionary<string, OxyPalette> Palettes { get; } = new();
 
-
-        private string selectedPaletteKey;
-        public string SelectedPaletteKey
-        {
-            get => selectedPaletteKey;
-            set
-            {
-                selectedPaletteKey = value;
-                settings.SelectedPaletteKey = value;
-            }
-        }
+        public string SelectedPaletteKey { get; set; }
 
         public OxyPalette SelectedPalette { get; set; }
 
@@ -41,6 +31,7 @@ namespace SRHWiscMano.App.Data
             Palettes.AddRange(PaletteUtils.GetPredefinedPalettes());
 
             SelectedPalette = Palettes["Mid"];
+            SelectedPaletteKey = this.settings.SelectedPaletteKey;
         }
 
         public void ExtendPalettes()
@@ -56,6 +47,12 @@ namespace SRHWiscMano.App.Data
             };
             var palette = OxyPalette.Interpolate(200, midColors);
             Palettes.Add("Mid", palette);
+        }
+
+        public void SetPaletteKey(string newKey)
+        {
+            SelectedPaletteKey = newKey;
+            settings.SelectedPaletteKey = newKey;
         }
     }
 }
