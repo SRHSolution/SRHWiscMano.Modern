@@ -1,12 +1,7 @@
-﻿using CommunityToolkit.Mvvm.Messaging.Messages;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Media;
+﻿using System.Windows.Media;
+using CommunityToolkit.Mvvm.Messaging.Messages;
 
-namespace SRHWiscMano.App.Data
+namespace SRHWiscMano.Core.Data
 {
 
     public class AppBaseThemeChangedMessage : ValueChangedMessage<Tuple<Color, Color>>

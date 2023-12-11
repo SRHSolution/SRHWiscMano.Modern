@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media;
+using OxyPlot;
 
 namespace SRHWiscMano.App.Data
 {
@@ -30,7 +31,8 @@ namespace SRHWiscMano.App.Data
         /// <summary>
         /// 
         /// </summary>
-        public double TimeFrameDurationInMillisecond { get; set; } = 3000; 
+        public double TimeFrameDurationInMillisecond { get; set; } = 3000;
 
+        public string SelectedPaletteKey { get; set; } = "Mid";
     }
 }

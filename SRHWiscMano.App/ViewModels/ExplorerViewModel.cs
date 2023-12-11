@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Windows;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using MoreLinq;
+using OxyPlot;
 using SRHWiscMano.App.Data;
 using SRHWiscMano.App.Services;
 using SRHWiscMano.Core.Helpers;
@@ -22,6 +25,7 @@ namespace SRHWiscMano.App.ViewModels
 
         private readonly ILogger<ExplorerViewModel> logger;
         private readonly SharedService sharedService;
+        private readonly PaletteManager paletteManager;
         private readonly AppSettings settings;
 
         #endregion
@@ -32,19 +36,24 @@ namespace SRHWiscMano.App.ViewModels
         public ObservableCollection<TimeFrameViewModel> TimeFrames { get; } = new ObservableCollection<TimeFrameViewModel>();
         
         
-        public ExplorerViewModel(ILogger<ExplorerViewModel> logger, SharedService sharedService, IOptions<AppSettings> settings)
+        public ExplorerViewModel(ILogger<ExplorerViewModel> logger, SharedService sharedService, IOptions<AppSettings> settings,
+            PaletteManager paletteManager)
         {
             this.logger = logger;
             this.sharedService = sharedService;
+            this.paletteManager = paletteManager;
             this.settings = settings.Value;
+
+            
 
             sharedService.ExamDataLoaded += SharedService_ExamDataLoaded;
         }
 
+        
         private void SharedService_ExamDataLoaded(object? sender, EventArgs e)
         {
             var examData = sharedService.ExamData;
-            var frameNotes = examData.Notes.ToList();
+            var frameNotes = examData.Notes;//.ToList();
 
             foreach (var fNote in frameNotes)
             {
@@ -53,23 +62,25 @@ namespace SRHWiscMano.App.ViewModels
                 var notePlotData = PlotDataUtils.CreateSubRange(examData.PlotData, startRow, endRow, 0, examData.PlotData.GetLength(1)-1);
 
                 var sensorRange = new Range<int>(0, examData.PlotData.GetLength(1) - 1);
-                var timeFrame = new TimeFrame(fNote.Text, examData, fNote.Text, fNote.Time, sensorRange, null, null, false, false, null, null, RegionsVersionType.UsesMP);
-                var timeFrameViewModel = new TimeFrameViewModel(timeFrame);
+                // var timeFrame = new TimeFrame(fNote.Text, examData, fNote.Text, fNote.Time, sensorRange, null, null, false, false, null, null, RegionsVersionType.UsesMP);
+                var timeFrame = new TimeFrame(fNote.Text, fNote.Time, notePlotData);
+                var timeFrameViewModel = new TimeFrameViewModel(timeFrame, fNote);
                 TimeFrames.Add(timeFrameViewModel);
             }
-
         }
 
 
         [RelayCommand]
         private void SelectAll()
         {
+            TimeFrames.ForEach(tf => tf.IsSelected = true);
             TimeFrames.ToList().ForEach(sn => sn.IsSelected = true);
         }
 
         [RelayCommand]
         private void UnselectAll()
         {
+            TimeFrames.ForEach(tf => tf.IsSelected = false);
             TimeFrames.ToList().ForEach(sn => sn.IsSelected = false);
         }
 
@@ -81,15 +92,17 @@ namespace SRHWiscMano.App.ViewModels
         }
 
         [RelayCommand]
-        private void AdjustLeft()
+        private void AdjustLeft(object arg)
         {
-            logger.LogTrace("Explorer AdjustLeftCommand");
+            var timeFrame = (TimeFrameViewModel)arg;
+            logger.LogTrace($"Explorer AdjustLeftCommand for {timeFrame.Label}");
         }
 
         [RelayCommand]
-        private void AdjustRight()
+        private void AdjustRight(object arg)
         {
-            logger.LogTrace("Explorer AdjustRightCommand");
+            var timeFrame = (TimeFrameViewModel) arg;
+            logger.LogTrace($"Explorer AdjustRightCommand for {timeFrame.Label}");
         }
 
         [RelayCommand]

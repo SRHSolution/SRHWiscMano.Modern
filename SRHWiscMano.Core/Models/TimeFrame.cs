@@ -5,10 +5,14 @@ namespace SRHWiscMano.Core.Models
 {
     public class TimeFrame : ITimeFrame
     {
-        public TimeFrame()
+        public TimeFrame(string text, Instant time, double[,] plotData)
         {
+            this.Text = text;
+            PlotData = plotData;
+            Time = time;
         }
 
+        [Obsolete("ManoViewer 의 origin 구성")]
         public TimeFrame(
             string id,  // Model id, 필요 없는듯
             IExamination data,  // 원본데이터 이지만, shared full 데이터를 참조할 예정이므로..?
@@ -23,31 +27,22 @@ namespace SRHWiscMano.Core.Models
             IReadOnlyList<IRegion> regions, // Analysis 에서 수행하는 각 영역에 대한 정보를 저장하고 있음
             RegionsVersionType regionsVersionType) // region 버전
         {
-            Id = id;
-            Data = data;
-            Text = text;
-            Time = time;
-            SensorRange = sensorRange;
-            VPUpperBound = vpUpperBound;
-            UesLowerBound = uesLowerBound;
-            IsSelected = isSelected;
-            NormalEligible = normalEligible;
-            Labels = labels;
-            Regions = regions;
-            RegionsVersionType = regionsVersionType;
+            var _id = id;
+            var Data = data;
+            var Text = text;
+            var Time = time;
+            var SensorRange = sensorRange;
+            var VPUpperBound = vpUpperBound;
+            var UesLowerBound = uesLowerBound;
+            var IsSelected = isSelected;
+            var NormalEligible = normalEligible;
+            var Labels = labels;
+            var Regions = regions;
+            var RegionsVersionType = regionsVersionType;
         }
 
-        public string Id { get; }
-        public IExamination Data { get; }
-        public string Text { get; }
+        public string Text { get; set; }
         public Instant Time { get; }
-        public Range<int> SensorRange { get; }
-        public int? VPUpperBound { get; }
-        public int? UesLowerBound { get; }
-        public bool IsSelected { get; }
-        public bool NormalEligible { get; }
-        public ITimeFrameLabels Labels { get; }
-        public IReadOnlyList<IRegion> Regions { get; }
-        public RegionsVersionType RegionsVersionType { get; }
+        public double[,] PlotData { get; }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.DirectoryServices.ActiveDirectory;
 using System.Linq;
 using System.Security.Cryptography.Xml;
 using System.Threading.Tasks;
@@ -12,15 +13,13 @@ using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MoreLinq.Extensions;
-using NLog;
 using OxyPlot;
-using OxyPlot.Annotations;
 using OxyPlot.Axes;
 using OxyPlot.Series;
-using SkiaSharp;
 using SRHWiscMano.App.Data;
 using SRHWiscMano.App.Services;
 using SRHWiscMano.Core.Control;
+using SRHWiscMano.Core.Data;
 using SRHWiscMano.Core.Helpers;
 using SRHWiscMano.Core.Models;
 using SRHWiscMano.Core.ViewModels;
@@ -33,6 +32,7 @@ namespace SRHWiscMano.App.ViewModels
 
         private readonly ILogger<ViewerViewModel> logger;
         private readonly SharedService sharedService;
+        private readonly PaletteManager paletteManager;
         private readonly AppSettings settings;
 
         #endregion
@@ -94,8 +94,6 @@ namespace SRHWiscMano.App.ViewModels
             }
         }
 
-        public IRelayCommand FitToScreenCommand { get; }
-
         public Dictionary<string, OxyPalette> Palettes { get; }
 
         private Color pvBackColor;
@@ -112,16 +110,21 @@ namespace SRHWiscMano.App.ViewModels
             }
         }
 
+        public ViewerViewModel()
+        {
+        }
+            
         public ViewerViewModel(ILogger<ViewerViewModel> logger, SharedService sharedService,
-            IOptions<AppSettings> settings)
+            IOptions<AppSettings> settings, PaletteManager paletteManager)
         {
             this.logger = logger;
             this.sharedService = sharedService;
+            this.paletteManager = paletteManager;
             this.settings = settings.Value;
 
             sharedService.ExamDataLoaded += SharedService_ExamDataLoaded;
 
-            Palettes = PaletteUtils.GetPredefinedPalettes();
+            Palettes = paletteManager.Palettes; //PaletteUtils.GetPredefinedPalettes();
 
             MaxSensorData = 100;
             MinSensorData = -10;
@@ -135,8 +138,6 @@ namespace SRHWiscMano.App.ViewModels
 
             UpdateSubRange = this.settings.UpdateSubRange;
 
-            FitToScreenCommand = new RelayCommand(FitToScreen, ()=> IsDataLoaded);
-            
             WeakReferenceMessenger.Default.Register<AppBaseThemeChangedMessage>(this, ThemeChanged);
         }
 
@@ -147,34 +148,15 @@ namespace SRHWiscMano.App.ViewModels
                 pvBackColor = message.Value.Item1;
                 pvForeColor = message.Value.Item2;
                 ApplyThemeToOxyPlots();
+                
             }
         }
 
         private void ApplyThemeToOxyPlots()
         {
             logger.LogTrace("Apply Theme to OxyPlots");
-            var backColor = pvBackColor;
-            var foreColor = pvForeColor;
-
-            MainPlotModel.Background = OxyColor.FromArgb(backColor.A, backColor.R, backColor.G, backColor.B);
-            MainPlotModel.TextColor = OxyColor.FromArgb(foreColor.A, foreColor.R, foreColor.G, foreColor.B);
-            MainPlotModel.PlotAreaBorderColor = OxyColors.Gray;
-            MainPlotModel.Axes.Where(ax => ax.GetType().Name == "LinearAxis").ForEach(lax =>
-            {
-                lax.TicklineColor = MainPlotModel.TextColor;
-                lax.MinorTicklineColor = MainPlotModel.TextColor;
-            });
-            MainPlotModel.InvalidatePlot(false);
-
-            OverviewPlotModel.Background = OxyColor.FromArgb(backColor.A, backColor.R, backColor.G, backColor.B);
-            OverviewPlotModel.TextColor = OxyColor.FromArgb(foreColor.A, foreColor.R, foreColor.G, foreColor.B);
-            OverviewPlotModel.PlotAreaBorderColor = OxyColors.Gray;
-            OverviewPlotModel.Axes.Where(ax => ax.GetType().Name == "LinearAxis").ForEach(lax =>
-            {
-                lax.TicklineColor = OverviewPlotModel.TextColor;
-                lax.MinorTicklineColor = OverviewPlotModel.TextColor;
-            });
-            OverviewPlotModel.InvalidatePlot(false);
+            MainPlotModel.ApplyTheme(pvBackColor, pvForeColor); 
+            OverviewPlotModel.ApplyTheme(pvBackColor, pvForeColor);
         }
 
         private double[,] fullExamData;
@@ -200,7 +182,8 @@ namespace SRHWiscMano.App.ViewModels
             ((IPlotModel)this.MainPlotModel)?.AttachPlotView(null);
 
             //Mainview plotmodel, controller 설정
-            var mainModel = CreatePlotModel((double[,])fullExamData.Clone());
+            var mainModel = new PlotModel();
+            PlotDataUtils.AddHeatmapSeries(mainModel, fullExamData);
             AddAxesOnMain(mainModel, frameCount, sensorCount);
             AddFrameNotes(mainModel, examData.Notes.ToList());
             if (UpdateSubRange)
@@ -264,6 +247,8 @@ namespace SRHWiscMano.App.ViewModels
             OverviewPlotController = overviewController;
 
             ApplyThemeToOxyPlots();
+
+            SelectedPaletteKey = paletteManager.SelectedPaletteKey;
 
             IsDataLoaded = true;
         }    
@@ -339,7 +324,7 @@ namespace SRHWiscMano.App.ViewModels
             {
                 Position = AxisPosition.Left,
                 Palette = SelectedPalette,
-                HighColor = SelectedPalette.Colors.Last(), // OxyColors.White,
+                HighColor = SelectedPalette.Colors.Last(),
                 LowColor = SelectedPalette.Colors.First(),
                 RenderAsImage = false,
                 AbsoluteMinimum = MinSensorData,
@@ -461,6 +446,7 @@ namespace SRHWiscMano.App.ViewModels
             ZoomPercentage = (int) (ZoomPercentage * zoomVal);
         }
 
+        [RelayCommand(CanExecute = "IsDataLoaded")]
         private void FitToScreen()
         {
             var overviewX = OverviewPlotModel.Axes.First(ax => (string)ax.Tag == "X");
@@ -482,21 +468,7 @@ namespace SRHWiscMano.App.ViewModels
             }
             else
             {
-                var customColors = new OxyColor[]
-                {
-                    OxyColor.FromArgb(255, 24, 3, 95),
-                    OxyColor.FromArgb(255, 30, 237, 215),
-                    OxyColor.FromArgb(255, 47, 243, 38),
-                    OxyColor.FromArgb(255, 248, 248, 1),
-                    OxyColor.FromArgb(255, 253, 5, 0),
-                    OxyColor.FromArgb(255, 95, 0, 69)
-                };
-                var colorCount = favPalette.UpperValue - favPalette.LowerValue;
-                var palette = OxyPalette.Interpolate(colorCount, customColors);
-
-                logger.LogTrace($"Select custom palette");
-                SelectedPalette = palette;
-                SelectedPaletteKey = "Custom";
+                logger.LogError("No registered PaletteKey");
             }
         }
 
@@ -515,17 +487,20 @@ namespace SRHWiscMano.App.ViewModels
             if (MainPlotModel.Series.Count == 0)
                 return;
             
-            var mainColorAxis = MainPlotModel.Axes.Single(s => s is LinearColorAxis) as LinearColorAxis;
             if(!string.IsNullOrEmpty(SelectedPaletteKey) && Palettes.ContainsKey(SelectedPaletteKey))
                 SelectedPalette = Palettes[SelectedPaletteKey];
-            
+
+            paletteManager.SetPaletteKey(SelectedPaletteKey);
+            TimeFrameViewModel.SelectedPalette = SelectedPalette;
+
+
+            var mainColorAxis = MainPlotModel.Axes.Single(s => s is LinearColorAxis) as LinearColorAxis;
             mainColorAxis.Palette = SelectedPalette;
             mainColorAxis.Minimum = MinSensorRange; // 최소 limit 값
             mainColorAxis.Maximum = MaxSensorRange; // 최대 limit 값
             mainColorAxis.HighColor = SelectedPalette.Colors.Last(); // OxyColors.White,
             mainColorAxis.LowColor = SelectedPalette.Colors.First();
             MainPlotModel.InvalidatePlot(false);
-
 
             var overviewColorAxis = OverviewPlotModel.Axes.Single(s => s is LinearColorAxis) as LinearColorAxis;
             overviewColorAxis.Palette = SelectedPalette;
@@ -534,6 +509,17 @@ namespace SRHWiscMano.App.ViewModels
             overviewColorAxis.HighColor = SelectedPalette.Colors.Last(); // OxyColors.White,
             overviewColorAxis.LowColor = SelectedPalette.Colors.First();
             OverviewPlotModel.InvalidatePlot(false);
+
+            var changedArg = new PaletteChangedMessageArg()
+            {
+                palette = SelectedPalette,
+                Minimum = MinSensorRange,
+                Maximum = MaxSensorRange,
+                HighColor = SelectedPalette.Colors.Last(),
+                LowColor = SelectedPalette.Colors.First(),
+            };
+
+            WeakReferenceMessenger.Default.Send(new PaletteChangedMessageMessage(changedArg));
         }
 
         /// <summary>
@@ -556,6 +542,7 @@ namespace SRHWiscMano.App.ViewModels
         }
 
         /// <summary>
+        /// 
         /// MainView의 현재 위치에서 가장 가까운 다음 FrameNote를 화면 중앙으로 표시되도록 한다.
         /// </summary>
         [RelayCommand]

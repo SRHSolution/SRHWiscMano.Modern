@@ -181,9 +181,16 @@ namespace SRHWiscMano.App.ViewModels
         /// Logger single instance 를 불러와서 윈도우 창을 출력한다
         /// </summary>
         [RelayCommand]
-        private void ShowLogger()
+        private void ShowLoggerWindow()
         {
             Ioc.Default.GetRequiredService<LoggerWindow>().Show();
+        }
+
+        [RelayCommand]
+        private void ShowSettingWindow()
+        {
+            logger.LogTrace("Show Setting Window");
+            // Ioc.Default.GetRequiredService<LoggerWindow>().Show();
         }
     }
 }

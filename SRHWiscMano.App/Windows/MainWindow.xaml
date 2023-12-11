@@ -9,8 +9,8 @@
                  xmlns:view="clr-namespace:SRHWiscMano.App.Views"
                  xmlns:viewModels="clr-namespace:SRHWiscMano.App.ViewModels"
                  Title="Wisconsin Mano Modern App by SRHSolution"
-                 Width="1024"
-                 Height="768"
+                 Width="1050"
+                 Height="860"
                  MinWidth="800"
                  MinHeight="600"
                  ShowMaxRestoreButton="True"
@@ -74,10 +74,17 @@
 
     <mah:MetroWindow.RightWindowCommands>
         <mah:WindowCommands>
-            <Button Command="{Binding ShowLoggerCommand}" ToolTip="Show Logging Browser">
+            <Button Command="{Binding ShowLoggerWindowCommand}" ToolTip="Show Logging Window">
                 <Button.ContentTemplate>
                     <DataTemplate>
                         <iconPacks:PackIconRadixIcons Kind="ActivityLog" />
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>
+            <Button Command="{Binding ShowSettingWindowCommand}" ToolTip="Show Setting Window">
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <iconPacks:PackIconVaadinIcons Kind="CogOutline" />
                     </DataTemplate>
                 </Button.ContentTemplate>
             </Button>
@@ -126,6 +133,9 @@
             </TabItem>
             <TabItem Header="Analyzer" ToolTip="Select analyzer View">
                 <view:AnalyzerView Margin="5"/>
+            </TabItem>
+            <TabItem Header="Report" ToolTip="Select analyzer View">
+                <view:ReportView Margin="5"/>
             </TabItem>
         </mah:MetroAnimatedSingleRowTabControl>
     </Grid>

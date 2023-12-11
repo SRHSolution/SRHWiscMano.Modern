@@ -8,6 +8,7 @@ using ControlzEx.Theming;
 using Microsoft.Extensions.Options;
 using NLog;
 using SRHWiscMano.App.Data;
+using SRHWiscMano.Core.Data;
 using SRHWiscMano.Core.ViewModels;
 
 namespace SRHWiscMano.App.ViewModels
