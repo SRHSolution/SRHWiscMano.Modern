@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.DirectoryServices.ActiveDirectory;
 using System.Linq;
 using System.Security.Cryptography.Xml;
 using System.Threading.Tasks;
@@ -93,8 +94,6 @@ namespace SRHWiscMano.App.ViewModels
             }
         }
 
-        public IRelayCommand FitToScreenCommand { get; }
-
         public Dictionary<string, OxyPalette> Palettes { get; }
 
         private Color pvBackColor;
@@ -139,8 +138,6 @@ namespace SRHWiscMano.App.ViewModels
 
             UpdateSubRange = this.settings.UpdateSubRange;
 
-            FitToScreenCommand = new RelayCommand(FitToScreen, ()=> IsDataLoaded);
-            
             WeakReferenceMessenger.Default.Register<AppBaseThemeChangedMessage>(this, ThemeChanged);
         }
 
@@ -449,6 +446,7 @@ namespace SRHWiscMano.App.ViewModels
             ZoomPercentage = (int) (ZoomPercentage * zoomVal);
         }
 
+        [RelayCommand(CanExecute = "IsDataLoaded")]
         private void FitToScreen()
         {
             var overviewX = OverviewPlotModel.Axes.First(ax => (string)ax.Tag == "X");
