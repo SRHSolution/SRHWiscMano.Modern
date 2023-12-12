@@ -1,9 +1,13 @@
-﻿namespace SRHWiscMano.Core.Models
+﻿using System.Collections.ObjectModel;
+using DynamicData;
+
+namespace SRHWiscMano.Core.Models
 {
     public interface IExamination
     {
         IReadOnlyList<TimeSample> Samples { get; }
-        IReadOnlyList<FrameNote> Notes { get; }
+        
+        SourceList<FrameNote> Notes { get; }
 
         int InterpolationScale { get; }
 

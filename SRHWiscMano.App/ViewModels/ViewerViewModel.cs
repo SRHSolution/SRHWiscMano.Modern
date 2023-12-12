@@ -185,7 +185,7 @@ namespace SRHWiscMano.App.ViewModels
             var mainModel = new PlotModel();
             PlotDataUtils.AddHeatmapSeries(mainModel, fullExamData);
             AddAxesOnMain(mainModel, frameCount, sensorCount);
-            AddFrameNotes(mainModel, examData.Notes.ToList());
+            // AddFrameNotes(mainModel, examData.Notes.t);
             if (UpdateSubRange)
             {
                 var heatMapSeries = mainModel.Series.OfType<HeatMapSeries>().FirstOrDefault();
@@ -212,7 +212,7 @@ namespace SRHWiscMano.App.ViewModels
             ((IPlotModel)this.OverviewPlotModel)?.AttachPlotView(null);
             var overviewModel = CreatePlotModel((double[,])fullExamData.Clone());
             AddAxesOnOverview(overviewModel, frameCount, sensorCount);
-            AddFrameNotes(overviewModel, examData.Notes.ToList());
+            // AddFrameNotes(overviewModel, examData.Notes.ToList());
             OverviewPlotModel = overviewModel;
 
             var overviewController = new PlotController();

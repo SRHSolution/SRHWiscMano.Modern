@@ -1,5 +1,6 @@
 ﻿using System.Collections.Immutable;
 using System.Text;
+using DynamicData;
 using SRHWiscMano.Core.Helpers;
 
 namespace SRHWiscMano.Core.Models
@@ -7,14 +8,16 @@ namespace SRHWiscMano.Core.Models
     public class Examination : IExamination
     {
         public IReadOnlyList<TimeSample> Samples { get; }
-        public IReadOnlyList<FrameNote> Notes { get; }
+        public SourceList<FrameNote> Notes { get; }
         public int InterpolationScale { get; private set; }
         public double[,] PlotData { get; private set; }
 
         public Examination(IList<TimeSample> samples, IList<FrameNote> notes)
         {
             this.Samples = samples.ToImmutableList();
-            this.Notes = notes.ToImmutableList();
+            // this.Notes = notes.ToImmutableList();
+            this.Notes = new SourceList<FrameNote>();
+            this.Notes.AddRange(notes);
         }
 
         public Task UpdatePlotData(int interpolateScale)
