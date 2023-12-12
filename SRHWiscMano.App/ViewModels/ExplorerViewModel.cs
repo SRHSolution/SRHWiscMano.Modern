@@ -8,7 +8,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MoreLinq;
 using NodaTime;
-using OxyPlot;
 using SRHWiscMano.App.Data;
 using SRHWiscMano.App.Services;
 using SRHWiscMano.Core.Helpers;
@@ -53,6 +52,8 @@ namespace SRHWiscMano.App.ViewModels
 
         private void SharedService_ExamDataLoaded(object? sender, EventArgs e)
         {
+            TimeFrames.Clear();
+
             var examData = sharedService.ExamData;
             var frameNotes = examData.Notes; //.ToList();
 
@@ -77,7 +78,7 @@ namespace SRHWiscMano.App.ViewModels
                                 examData.PlotData.GetLength(1) - 1);
                             var timeFrame = new TimeFrame(item.Text, item.Time, notePlotData);
                             var timeFrameViewModel = new TimeFrameViewModel(timeFrame, item);
-                            TimeFrames.Add(timeFrameViewModel);
+                            TimeFrames.Insert(change.Item.CurrentIndex, timeFrameViewModel);
                             logger.LogTrace($"Added in range: {item.Text}");
                             break;
                         }
@@ -107,31 +108,26 @@ namespace SRHWiscMano.App.ViewModels
                             break;
                         case ListChangeReason.Remove:
                             logger.LogTrace($"Removed: {change.Item.Current.Text}");
+                            var itemToRem = TimeFrames.Single(tf => tf.Label == change.Item.Current.Text);
+                            TimeFrames.Remove(itemToRem);
+                            break;
+
+                        case ListChangeReason.RemoveRange:
                             break;
                     }
                 }
             });
 
+            frameNotes.Edit(list =>
+            {
+                var item = list[0];
+                list.Remove(item);
+                var newItem = new FrameNote(item.Time, item.Text);
+                newItem.Text = "modified";
+                list.Insert(0, newItem);
+            });
+
             frameNotes.Add(new FrameNote(Instant.FromUnixTimeSeconds(10), "test time"));
-
-
-            // foreach (var fNote in frameNotes)
-            // {
-            //     var startRow =
-            //         (int) Math.Round(fNote.Time.ToUnixTimeMilliseconds() -
-            //                          settings.TimeFrameDurationInMillisecond / 2) / 10;
-            //     var endRow =
-            //         (int) Math.Round(fNote.Time.ToUnixTimeMilliseconds() +
-            //                          settings.TimeFrameDurationInMillisecond / 2) / 10;
-            //     var notePlotData = PlotDataUtils.CreateSubRange(examData.PlotData, startRow, endRow, 0,
-            //         examData.PlotData.GetLength(1) - 1);
-            //
-            //     var sensorRange = new Range<int>(0, examData.PlotData.GetLength(1) - 1);
-            //     // var timeFrame = new TimeFrame(fNote.Text, examData, fNote.Text, fNote.Time, sensorRange, null, null, false, false, null, null, RegionsVersionType.UsesMP);
-            // var timeFrame = new TimeFrame(fNote.Text, fNote.Time, notePlotData);
-            // var timeFrameViewModel = new TimeFrameViewModel(timeFrame, fNote);
-            // TimeFrames.Add(timeFrameViewModel);
-            // }
         }
 
 
