@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Data;
 using System.Linq;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
@@ -33,8 +34,7 @@ namespace SRHWiscMano.App.ViewModels
         /// <summary>
         /// Explorer View에서 보여줄 TimeFrameViewModel collection 이다.
         /// </summary>
-        public ObservableCollection<TimeFrameViewModel> TimeFrames { get; } =
-            new ObservableCollection<TimeFrameViewModel>();
+        public ObservableCollection<TimeFrameViewModel> TimeFrameViewModels { get; } = new();
 
         public ExplorerViewModel(ILogger<ExplorerViewModel> logger, SharedService sharedService,
             IOptions<AppSettings> settings,
@@ -44,126 +44,95 @@ namespace SRHWiscMano.App.ViewModels
             this.sharedService = sharedService;
             this.paletteManager = paletteManager;
             this.settings = settings.Value;
+            var timeFrames = sharedService.TimeFrames; 
 
-
+            timeFrames.Connect().Subscribe(HandleTimeFrames);
             sharedService.ExamDataLoaded += SharedService_ExamDataLoaded;
         }
 
 
+        private void HandleTimeFrames(IChangeSet<TimeFrame> changeSet)
+        {
+            // Handle the initial set of items and any subsequent changes
+            foreach (var change in changeSet)
+            {
+                switch (change.Reason)
+                {
+                    case ListChangeReason.Add:
+                    {
+                        TimeFrameViewModels.Insert(change.Item.CurrentIndex, new TimeFrameViewModel(change.Item.Current));
+                        break;
+                    }
+                    case ListChangeReason.AddRange:
+                    {
+                        // Handling AddRange
+                        foreach (var item in change.Range)
+                        {
+                            TimeFrameViewModels.Add(new TimeFrameViewModel(item));
+                            logger.LogTrace($"Added in range: {item.Text}");
+                        }
+
+                        break;
+                    }
+                    case ListChangeReason.Refresh:
+                        logger.LogTrace($"Updated: {change.Item.Current.Text}");
+                        break;
+                    case ListChangeReason.Remove:
+                        logger.LogTrace($"Removed: {change.Item.Current.Text}");
+                        var itemToRem = TimeFrameViewModels.Single(tf => tf.Label == change.Item.Current.Text);
+                        TimeFrameViewModels.Remove(itemToRem);
+                        break;
+
+                    case ListChangeReason.RemoveRange:
+                        break;
+                }
+            }
+        }
+
         private void SharedService_ExamDataLoaded(object? sender, EventArgs e)
         {
-            TimeFrames.Clear();
-
+            // TimeFrames.Clear();
             var examData = sharedService.ExamData;
-            var frameNotes = examData.Notes; //.ToList();
+            var timeFrames = sharedService.TimeFrames;
 
-            frameNotes.Connect().Subscribe(changeSet =>
-            {
-                // Handle the initial set of items and any subsequent changes
-                foreach (var change in changeSet)
-                {
-                    switch (change.Reason)
-                    {
-                        case ListChangeReason.Add:
-                        {
-                            var item = change.Item.Current;
-                            logger.LogTrace($"Added: {change.Item.Current.Text}");
-                            var startRow =
-                                (int) Math.Round(item.Time.ToUnixTimeMilliseconds() -
-                                                 settings.TimeFrameDurationInMillisecond / 2) / 10;
-                            var endRow =
-                                (int) Math.Round(item.Time.ToUnixTimeMilliseconds() +
-                                                 settings.TimeFrameDurationInMillisecond / 2) / 10;
-                            var notePlotData = PlotDataUtils.CreateSubRange(examData.PlotData, startRow, endRow, 0,
-                                examData.PlotData.GetLength(1) - 1);
-                            var timeFrame = new TimeFrame(item.Text, item.Time, notePlotData);
-                            var timeFrameViewModel = new TimeFrameViewModel(timeFrame, item);
-                            TimeFrames.Insert(change.Item.CurrentIndex, timeFrameViewModel);
-                            logger.LogTrace($"Added in range: {item.Text}");
-                            break;
-                        }
-                        case ListChangeReason.AddRange:
-                        {
-                            // Handling AddRange
-                            foreach (var item in change.Range)
-                            {
-                                var startRow =
-                                    (int) Math.Round(item.Time.ToUnixTimeMilliseconds() -
-                                                     settings.TimeFrameDurationInMillisecond / 2) / 10;
-                                var endRow =
-                                    (int) Math.Round(item.Time.ToUnixTimeMilliseconds() +
-                                                     settings.TimeFrameDurationInMillisecond / 2) / 10;
-                                var notePlotData = PlotDataUtils.CreateSubRange(examData.PlotData, startRow, endRow, 0,
-                                    examData.PlotData.GetLength(1) - 1);
-                                var timeFrame = new TimeFrame(item.Text, item.Time, notePlotData);
-                                var timeFrameViewModel = new TimeFrameViewModel(timeFrame, item);
-                                TimeFrames.Add(timeFrameViewModel);
-                                logger.LogTrace($"Added in range: {item.Text}");
-                            }
-
-                            break;
-                        }
-                        case ListChangeReason.Refresh:
-                            logger.LogTrace($"Updated: {change.Item.Current.Text}");
-                            break;
-                        case ListChangeReason.Remove:
-                            logger.LogTrace($"Removed: {change.Item.Current.Text}");
-                            var itemToRem = TimeFrames.Single(tf => tf.Label == change.Item.Current.Text);
-                            TimeFrames.Remove(itemToRem);
-                            break;
-
-                        case ListChangeReason.RemoveRange:
-                            break;
-                    }
-                }
-            });
-
-            frameNotes.Edit(list =>
+            timeFrames.Edit(list =>
             {
                 var item = list[0];
                 list.Remove(item);
-                var newItem = new FrameNote(item.Time, item.Text);
-                newItem.Text = "modified";
-                list.Insert(0, newItem);
+                list.Insert(0, sharedService.CreateTimeFrame("modified", item.Time));
             });
 
-            frameNotes.Add(new FrameNote(Instant.FromUnixTimeSeconds(10), "test time"));
+            var newFrame = sharedService.CreateTimeFrame("Test time2", Instant.FromUnixTimeSeconds(100));
+            var newIndex = timeFrames.Items.Index().FirstOrDefault(itm => itm.Value.Time < newFrame.Time).Key;
+
+            timeFrames.Insert(newIndex, newFrame);
         }
 
 
         [RelayCommand]
         private void SelectAll()
         {
-            TimeFrames.ForEach(tf => tf.IsSelected = true);
-            TimeFrames.ToList().ForEach(sn => sn.IsSelected = true);
+            TimeFrameViewModels.ForEach(tf => tf.IsSelected = true);
+            TimeFrameViewModels.ToList().ForEach(sn => sn.IsSelected = true);
+            
+            logger.LogTrace($"SelectAll");
         }
 
         [RelayCommand]
         private void UnselectAll()
         {
-            TimeFrames.ForEach(tf => tf.IsSelected = false);
-            TimeFrames.ToList().ForEach(sn => sn.IsSelected = false);
+            TimeFrameViewModels.ForEach(tf => tf.IsSelected = false);
+            TimeFrameViewModels.ToList().ForEach(sn => sn.IsSelected = false);
+            
+            logger.LogTrace($"UnselectAll");
         }
 
         [RelayCommand]
         private void NavigateToDetailView()
         {
             logger.LogTrace($"Request navigate to Explorer view");
+            
             WeakReferenceMessenger.Default.Send(new TabIndexChangeMessage(2));
-        }
-
-        [RelayCommand]
-        private void AdjustLeft(object arg)
-        {
-            var timeFrame = (TimeFrameViewModel) arg;
-            logger.LogTrace($"Explorer AdjustLeftCommand for {timeFrame.Label}");
-        }
-
-        [RelayCommand]
-        private void AdjustRight(object arg)
-        {
-            var timeFrame = (TimeFrameViewModel) arg;
-            logger.LogTrace($"Explorer AdjustRightCommand for {timeFrame.Label}");
         }
 
         [RelayCommand]

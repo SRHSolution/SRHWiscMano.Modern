@@ -8,16 +8,14 @@ namespace SRHWiscMano.Core.Models
     public class Examination : IExamination
     {
         public IReadOnlyList<TimeSample> Samples { get; }
-        public SourceList<FrameNote> Notes { get; }
+        public IReadOnlyList<FrameNote> Notes { get; }
         public int InterpolationScale { get; private set; }
         public double[,] PlotData { get; private set; }
 
         public Examination(IList<TimeSample> samples, IList<FrameNote> notes)
         {
             this.Samples = samples.ToImmutableList();
-            // this.Notes = notes.ToImmutableList();
-            this.Notes = new SourceList<FrameNote>();
-            this.Notes.AddRange(notes);
+            this.Notes = notes.ToImmutableList();
         }
 
         public Task UpdatePlotData(int interpolateScale)

@@ -6,8 +6,8 @@ namespace SRHWiscMano.Core.Models
     public interface IExamination
     {
         IReadOnlyList<TimeSample> Samples { get; }
-        
-        SourceList<FrameNote> Notes { get; }
+
+        IReadOnlyList<FrameNote> Notes { get; }
 
         int InterpolationScale { get; }
 

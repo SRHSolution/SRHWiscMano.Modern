@@ -1,10 +1,13 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System.Net.Mime;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using NLog;
 using NodaTime;
 using NodaTime.Serialization.SystemTextJson;
 using OxyPlot;
 using OxyPlot.Axes;
+using OxyPlot.Series;
 using SRHWiscMano.Core.Data;
 using SRHWiscMano.Core.Helpers;
 using SRHWiscMano.Core.Models;
@@ -16,6 +19,8 @@ namespace SRHWiscMano.Core.ViewModels
     /// </summary>
     public partial class TimeFrameViewModel : ViewModelBase
     {
+        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
+
         private readonly ITimeFrame timeFrame;
 
         public static OxyPalette SelectedPalette { get; set; }
@@ -37,10 +42,13 @@ namespace SRHWiscMano.Core.ViewModels
         /// </summary>
         [ObservableProperty] private string labelEdit;
 
+        [ObservableProperty] private bool isSelected;
+
+        [ObservableProperty] private bool isEditing = false;
+
         public Instant Time => timeFrame.Time;
 
-
-        public TimeFrameViewModel(ITimeFrame timeFrame, FrameNote frameNote)
+        public TimeFrameViewModel(ITimeFrame timeFrame)
         {
             this.timeFrame = timeFrame;
             this.Label = timeFrame.Text;
@@ -125,10 +133,6 @@ namespace SRHWiscMano.Core.ViewModels
             });
         }
 
-        [ObservableProperty] private bool isSelected;
-        [ObservableProperty] private bool isEditing = false;
-
-
         /// <summary>
         /// Label을 Editing 상태로 전환
         /// </summary>
@@ -150,6 +154,38 @@ namespace SRHWiscMano.Core.ViewModels
             Label = Volume + "cc " + labelTag;
             timeFrame.Text = Label;
             IsEditing = false;
+        }
+
+        [RelayCommand]
+        private void AdjustLeft(object arg)
+        {
+            timeFrame.UpdateTime(timeFrame.Time.Plus(Duration.FromMilliseconds(-100)));
+            var heatmap = framePlotModel.Series.OfType<HeatMapSeries>().FirstOrDefault();
+            heatmap.Data = timeFrame.PlotData;
+            heatmap.X0 = 0;
+            heatmap.X1 = timeFrame.PlotData.GetLength(0) - 1;
+            heatmap.Y0 = 0;
+            heatmap.Y1 = timeFrame.PlotData.GetLength(1) - 1;
+            
+            framePlotModel.InvalidatePlot(true);
+            
+            logger.Trace($"Adjust {timeFrame.Text} -100msec");
+        }
+
+        [RelayCommand]
+        private void AdjustRight(object arg)
+        {
+            timeFrame.UpdateTime(timeFrame.Time.Plus(Duration.FromMilliseconds(100)));
+            var heatmap = framePlotModel.Series.OfType<HeatMapSeries>().FirstOrDefault();
+            heatmap.Data = timeFrame.PlotData;
+            heatmap.X0 = 0;
+            heatmap.X1 = timeFrame.PlotData.GetLength(0) - 1;
+            heatmap.Y0 = 0;
+            heatmap.Y1 = timeFrame.PlotData.GetLength(1) - 1;
+
+            framePlotModel.InvalidatePlot(true);
+            
+            logger.Trace($"Adjust {timeFrame.Text} +100msec");
         }
     }
 }

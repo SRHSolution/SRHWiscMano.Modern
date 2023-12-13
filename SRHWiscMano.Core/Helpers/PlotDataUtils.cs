@@ -19,8 +19,8 @@ namespace SRHWiscMano.Core.Helpers
         /// <returns></returns>
         public static void AddHeatmapSeries(PlotModel model, double[,] plotData)
         {
-            var frameCount = plotData.GetLength(0);
-            var sensorCount = plotData.GetLength(1);
+            var frameCount = plotData.GetLength(0)-1;
+            var sensorCount = plotData.GetLength(1)-1;
 
             // Create your heatmap series and add to MyModel
             var heatmapSeries = new HeatMapSeries

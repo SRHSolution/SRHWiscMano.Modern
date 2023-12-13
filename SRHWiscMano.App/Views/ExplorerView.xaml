@@ -73,7 +73,7 @@
 
         </StackPanel>
         <ListBox x:Name="timeFrameList" Grid.Row="1" SelectionMode="Extended"
-                 ScrollViewer.HorizontalScrollBarVisibility="Disabled" ItemsSource="{Binding TimeFrames}"
+                 ScrollViewer.HorizontalScrollBarVisibility="Disabled" ItemsSource="{Binding TimeFrameViewModels}"
                  d:ItemsSource="{d:SampleData ItemCount=5}">
             <ListBox.ItemsPanel>
                 <ItemsPanelTemplate>
@@ -110,7 +110,7 @@
                                 Style="{StaticResource StyleHoverButton}"
                                 Background="Transparent"
                                 Foreground="{DynamicResource MahApps.Brushes.Accent}"
-                                Command="{Binding DataContext.AdjustLeftCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}}"
+                                Command="{Binding AdjustLeftCommand}"
                                 CommandParameter="{Binding}">
                             <Button.ContentTemplate>
                                 <DataTemplate>
@@ -124,7 +124,7 @@
                                 Style="{StaticResource StyleHoverButton}"
                                 Background="Transparent"
                                 Foreground="{DynamicResource MahApps.Brushes.Accent}"
-                                Command="{Binding DataContext.AdjustRightCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}}"
+                                Command="{Binding AdjustRightCommand}"
                                 CommandParameter="{Binding}">
                             <Button.ContentTemplate>
                                 <DataTemplate>
