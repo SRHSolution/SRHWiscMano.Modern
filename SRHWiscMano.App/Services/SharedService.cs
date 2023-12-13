@@ -24,7 +24,7 @@ namespace SRHWiscMano.App.Services
 
         public IExamMetaData? ExamMetaData { get; private set; }
 
-        public SourceList<TimeFrame> TimeFrames { get; }= new();
+        public SourceCache<TimeFrame, int> TimeFrames { get; } = new SourceCache<TimeFrame, int>(item => item.Id);
 
         public event EventHandler? ExamDataLoaded;
         public event EventHandler? ExamMetaDataLoaded;
@@ -43,11 +43,12 @@ namespace SRHWiscMano.App.Services
             await ExamData.UpdatePlotData(settings.InterpolateSensorScale);
 
             TimeFrames.Clear();
+            // TimeFrames.Refresh();
 
             //ExamData 에서 로드한 Note를 정보를 FrameNote sourcelist에 입력한다.
             foreach (var note in ExamData.Notes)
             {
-                TimeFrames.Add(CreateTimeFrame(note.Text, note.Time));
+                TimeFrames.AddOrUpdate(CreateTimeFrame(note.Text, note.Time));
             }
 
             ExamDataLoaded?.Invoke(this, EventArgs.Empty);

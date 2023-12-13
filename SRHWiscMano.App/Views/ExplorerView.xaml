@@ -110,7 +110,7 @@
                                 Style="{StaticResource StyleHoverButton}"
                                 Background="Transparent"
                                 Foreground="{DynamicResource MahApps.Brushes.Accent}"
-                                Command="{Binding AdjustLeftCommand}"
+                                Command="{Binding DataContext.AdjustLeftCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}}"
                                 CommandParameter="{Binding}">
                             <Button.ContentTemplate>
                                 <DataTemplate>
@@ -124,7 +124,7 @@
                                 Style="{StaticResource StyleHoverButton}"
                                 Background="Transparent"
                                 Foreground="{DynamicResource MahApps.Brushes.Accent}"
-                                Command="{Binding AdjustRightCommand}"
+                                Command="{Binding DataContext.AdjustRightCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type UserControl}}}"
                                 CommandParameter="{Binding}">
                             <Button.ContentTemplate>
                                 <DataTemplate>

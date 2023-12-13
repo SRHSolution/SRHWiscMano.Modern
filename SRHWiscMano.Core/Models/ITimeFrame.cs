@@ -5,7 +5,7 @@ namespace SRHWiscMano.Core.Models
 {
     public interface ITimeFrame
     {
-        string Id { get; }
+        int Id { get; }
         string Text { get; set; }
         Instant Time { get; }
         double TimeDuration { get; }

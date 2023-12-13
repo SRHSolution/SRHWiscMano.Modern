@@ -21,11 +21,15 @@ namespace SRHWiscMano.Core.ViewModels
     {
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
-        private readonly ITimeFrame timeFrame;
+        // private readonly ITimeFrame timeFrame;
+
+        public ITimeFrame Data { get; }
 
         public static OxyPalette SelectedPalette { get; set; }
 
         [ObservableProperty] private PlotModel framePlotModel;
+
+        public int Id { get; }
 
         /// <summary>
         /// TimeFrame의 메인 Label
@@ -46,12 +50,15 @@ namespace SRHWiscMano.Core.ViewModels
 
         [ObservableProperty] private bool isEditing = false;
 
-        public Instant Time => timeFrame.Time;
+        public Instant Time => Data.Time;
 
-        public TimeFrameViewModel(ITimeFrame timeFrame)
+        
+
+        public TimeFrameViewModel(ITimeFrame data)
         {
-            this.timeFrame = timeFrame;
-            this.Label = timeFrame.Text;
+            this.Id = data.Id;
+            this.Data = data;
+            this.Label = data.Text;
             if (Label.Contains("cc"))
             {
                 this.Volume = Label.Trim().Split("cc")[0];
@@ -62,8 +69,8 @@ namespace SRHWiscMano.Core.ViewModels
             }
 
             var plotModel = new PlotModel();
-            PlotDataUtils.AddHeatmapSeries(plotModel, timeFrame.PlotData);
-            AddAxes(plotModel, timeFrame.PlotData.GetLength(0), timeFrame.PlotData.GetLength(1));
+            PlotDataUtils.AddHeatmapSeries(plotModel, data.PlotData);
+            AddAxes(plotModel, data.PlotData.GetLength(0), data.PlotData.GetLength(1));
             FramePlotModel = plotModel;
 
             WeakReferenceMessenger.Default.Register<PaletteChangedMessageMessage>(this, OnPaletteChange);
@@ -141,6 +148,7 @@ namespace SRHWiscMano.Core.ViewModels
         {
             IsEditing = true;
             LabelEdit = Volume;
+
         }
 
         /// <summary>
@@ -152,40 +160,27 @@ namespace SRHWiscMano.Core.ViewModels
             Volume = LabelEdit;
             var labelTag = Label.Split("cc")[1];
             Label = Volume + "cc " + labelTag;
-            timeFrame.Text = Label;
+            Data.Text = Label;
             IsEditing = false;
         }
 
-        [RelayCommand]
-        private void AdjustLeft(object arg)
+        public void RefreshPlotData()
         {
-            timeFrame.UpdateTime(timeFrame.Time.Plus(Duration.FromMilliseconds(-100)));
             var heatmap = framePlotModel.Series.OfType<HeatMapSeries>().FirstOrDefault();
-            heatmap.Data = timeFrame.PlotData;
+            heatmap.Data = Data.PlotData;
             heatmap.X0 = 0;
-            heatmap.X1 = timeFrame.PlotData.GetLength(0) - 1;
+            heatmap.X1 = Data.PlotData.GetLength(0) - 1;
             heatmap.Y0 = 0;
-            heatmap.Y1 = timeFrame.PlotData.GetLength(1) - 1;
-            
+            heatmap.Y1 = Data.PlotData.GetLength(1) - 1;
             framePlotModel.InvalidatePlot(true);
-            
-            logger.Trace($"Adjust {timeFrame.Text} -100msec");
         }
 
-        [RelayCommand]
-        private void AdjustRight(object arg)
+        public void AdjustTimeInMs(long delta)
         {
-            timeFrame.UpdateTime(timeFrame.Time.Plus(Duration.FromMilliseconds(100)));
-            var heatmap = framePlotModel.Series.OfType<HeatMapSeries>().FirstOrDefault();
-            heatmap.Data = timeFrame.PlotData;
-            heatmap.X0 = 0;
-            heatmap.X1 = timeFrame.PlotData.GetLength(0) - 1;
-            heatmap.Y0 = 0;
-            heatmap.Y1 = timeFrame.PlotData.GetLength(1) - 1;
+            Data.UpdateTime(Data.Time.Plus(Duration.FromMilliseconds(delta)));
+            RefreshPlotData();
 
-            framePlotModel.InvalidatePlot(true);
-            
-            logger.Trace($"Adjust {timeFrame.Text} +100msec");
+            logger.Trace($"Adjust {Data.Text} {delta}msec");
         }
     }
 }

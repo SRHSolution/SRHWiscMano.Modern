@@ -1,14 +1,18 @@
 ﻿using NodaTime;
 using SRHWiscMano.Core.Helpers;
+using System;
+using CommunityToolkit.Mvvm.ComponentModel;
+using SRHWiscMano.Core.ViewModels;
 
 namespace SRHWiscMano.Core.Models
 {
     public class TimeFrame : ITimeFrame
     {
-        public string Id { get; }
+        private static int GuidId = 0;
+        public int Id { get; }
 
         private readonly double[,] examPlotData;
-        
+
         public string Text { get; set; }
         
         public Instant Time { get; private set; }
@@ -51,6 +55,7 @@ namespace SRHWiscMano.Core.Models
 
         public TimeFrame(string text, Instant time, double[,] plotData)
         {
+            Id = Interlocked.Increment(ref GuidId);
             Text = text;
             Time = time;
             PlotData = plotData;
@@ -58,6 +63,7 @@ namespace SRHWiscMano.Core.Models
 
         public TimeFrame(string text, Instant time, double timeDuration, double[,] examPlotData)
         {
+            Id = Interlocked.Increment(ref GuidId);
             Text = text;
             Time = time;
             TimeTimeDuration = timeDuration;

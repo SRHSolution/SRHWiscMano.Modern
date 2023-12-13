@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Data;
 using System.Linq;
+using System.Reactive.Linq;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using DynamicData;
@@ -9,6 +11,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MoreLinq;
 using NodaTime;
+using ReactiveUI;
 using SRHWiscMano.App.Data;
 using SRHWiscMano.App.Services;
 using SRHWiscMano.Core.Helpers;
@@ -28,6 +31,7 @@ namespace SRHWiscMano.App.ViewModels
         private readonly SharedService sharedService;
         private readonly PaletteManager paletteManager;
         private readonly AppSettings settings;
+        private readonly SourceCache<TimeFrame, int> timeFrames;
 
         #endregion
 
@@ -44,12 +48,45 @@ namespace SRHWiscMano.App.ViewModels
             this.sharedService = sharedService;
             this.paletteManager = paletteManager;
             this.settings = settings.Value;
-            var timeFrames = sharedService.TimeFrames; 
-
-            timeFrames.Connect().Subscribe(HandleTimeFrames);
+            timeFrames = sharedService.TimeFrames; 
+            timeFrames.Connect().Subscribe((Action<IChangeSet<TimeFrame, int>>) HandleTimeFrames2);
             sharedService.ExamDataLoaded += SharedService_ExamDataLoaded;
         }
 
+        private void HandleTimeFrames2(IChangeSet<TimeFrame, int> changeSet)
+        {
+            foreach (var change in changeSet)
+            {
+                switch (change.Reason)
+                {
+                    case ChangeReason.Add:
+                    {
+                        var insertIdx = timeFrames.Items.Index()
+                            .FirstOrDefault(itm => itm.Value.Time > change.Current.Time, new (TimeFrameViewModels.Count, null)).Key;
+                        TimeFrameViewModels.Insert(insertIdx, new TimeFrameViewModel(change.Current));
+                        break;
+                    }
+                    case ChangeReason.Remove:
+                    {
+                        TimeFrameViewModels.Remove(
+                            TimeFrameViewModels.SingleOrDefault(item => item.Id == change.Current.Id));
+                        break;
+                    }
+                    case ChangeReason.Moved:
+                        break;
+                    
+                    // 다른 view에서 변경하는 것은 Time 밖에 없으므로 PlotData를 update한다.
+                    case ChangeReason.Update:
+                        var updItem = TimeFrameViewModels.SingleOrDefault(item => item.Id == change.Current.Id);
+                        updItem.RefreshPlotData();
+                        break;
+
+                    case ChangeReason.Refresh:
+                        
+                        break;
+                }
+            }
+        }
 
         private void HandleTimeFrames(IChangeSet<TimeFrame> changeSet)
         {
@@ -94,21 +131,14 @@ namespace SRHWiscMano.App.ViewModels
 
         private void SharedService_ExamDataLoaded(object? sender, EventArgs e)
         {
-            // TimeFrames.Clear();
-            var examData = sharedService.ExamData;
-            var timeFrames = sharedService.TimeFrames;
-
-            timeFrames.Edit(list =>
-            {
-                var item = list[0];
-                list.Remove(item);
-                list.Insert(0, sharedService.CreateTimeFrame("modified", item.Time));
-            });
+            var editItem = timeFrames.Items.ElementAt(0);
+            editItem.Text = "modified";
+            timeFrames.AddOrUpdate(editItem);
 
             var newFrame = sharedService.CreateTimeFrame("Test time2", Instant.FromUnixTimeSeconds(100));
             var newIndex = timeFrames.Items.Index().FirstOrDefault(itm => itm.Value.Time < newFrame.Time).Key;
 
-            timeFrames.Insert(newIndex, newFrame);
+            timeFrames.AddOrUpdate(newFrame);
         }
 
 
@@ -143,5 +173,25 @@ namespace SRHWiscMano.App.ViewModels
         {
             logger.LogTrace("Explorer ToggleCheckedCommand");
         }
+
+        [RelayCommand]
+        private void AdjustLeft(object arg)
+        {
+            var viewmodel = arg as TimeFrameViewModel;
+            viewmodel.AdjustTimeInMs(-100);
+        }
+
+        [RelayCommand]
+        private void AdjustRight(object arg)
+        {
+            var viewmodel = arg as TimeFrameViewModel;
+            viewmodel.AdjustTimeInMs(100);
+
+            // timeFrames.AddOrUpdate(viewmodel.Data);
+            // viewmodel.Data
+            
+        }
+
+
     }
 }

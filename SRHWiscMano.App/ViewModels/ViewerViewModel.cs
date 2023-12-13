@@ -16,9 +16,12 @@ using DynamicData;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MoreLinq.Extensions;
+using NodaTime;
 using OxyPlot;
+using OxyPlot.Annotations;
 using OxyPlot.Axes;
 using OxyPlot.Series;
+using Shouldly;
 using SRHWiscMano.App.Data;
 using SRHWiscMano.App.Services;
 using SRHWiscMano.Core.Control;
@@ -126,9 +129,9 @@ namespace SRHWiscMano.App.ViewModels
             this.sharedService = sharedService;
             this.paletteManager = paletteManager;
             this.settings = settings.Value;
-            var timeFrames = sharedService.TimeFrames;
+            timeFrames = sharedService.TimeFrames;
 
-            timeFrames.Connect().Subscribe(HandleTimeFrames);
+            timeFrames.Connect().Subscribe(HandleTimeFrames2);
             sharedService.ExamDataLoaded += SharedService_ExamDataLoaded;
 
             Palettes = paletteManager.Palettes;
@@ -167,6 +170,116 @@ namespace SRHWiscMano.App.ViewModels
 
         private double[,] fullExamData;
         private IDisposable axisChangeObserver = null;
+        private readonly SourceCache<TimeFrame, int> timeFrames;
+
+
+        private void HandleTimeFrames2(IChangeSet<TimeFrame, int> changeSet)
+        {
+            foreach (var change in changeSet)
+            {
+                switch (change.Reason)
+                {
+                    case ChangeReason.Add:
+                    {
+                        var item = change.Current;
+                        var msec = item.Time.ToMillisecondsFromEpoch() / 10;
+                        CreateVLineAnnotation(item, true, MainPlotModel);
+                        CreateVLineAnnotation(item, false, OverviewPlotModel);
+                        break;
+                    }
+                    case ChangeReason.Remove:
+                    {
+                        var annoItem = MainPlotModel.Annotations.OfType<LineAnnotation>()
+                            .Single(item => (int) item.Tag == change.Current.Id);
+                        MainPlotModel.Annotations.Remove(annoItem);
+
+                        annoItem = OverviewPlotModel.Annotations.OfType<LineAnnotation>()
+                            .Single(item => (int) item.Tag == change.Current.Id);
+                        OverviewPlotModel.Annotations.Remove(annoItem);
+                        logger.LogTrace($"Removed: {change.Current.Text}");
+                        break;
+                    }
+                    case ChangeReason.Moved:
+                        break;
+                    case ChangeReason.Update:
+                    {
+                        logger.LogTrace($"Removed: {change.Current.Text}");
+                        var updItem = MainPlotModel.Annotations.OfType<LineAnnotation>().Single(item => (int) item.Tag == change.Current.Id);
+                        updItem.Text = change.Current.Text;
+                        var msec = change.Current.Time.ToMillisecondsFromEpoch() / 10;
+                        updItem.X = msec;
+                        MainPlotModel.InvalidatePlot(false);
+
+                        updItem = OverviewPlotModel.Annotations.OfType<LineAnnotation>().Single(item => (int) item.Tag == change.Current.Id);
+                        updItem.Text = change.Current.Text;
+                        msec = change.Current.Time.ToMillisecondsFromEpoch() / 10;
+                        updItem.X = msec;
+                        OverviewPlotModel.InvalidatePlot(false);
+                        
+                        break;
+                    }
+                    case ChangeReason.Refresh:
+                        // MainPlotModel.Annotations.Clear();
+                        // OverviewPlotModel.Annotations.Clear();
+                        break;
+                }
+            }
+        }
+
+
+        private void CreateVLineAnnotation(TimeFrame timeFrame, bool draggable, PlotModel model)
+        {
+            var msec = timeFrame.Time.ToMillisecondsFromEpoch() / 10;
+            var la = new LineAnnotation
+            {
+                Type = LineAnnotationType.Vertical,
+                X = msec,
+                LineStyle = LineStyle.Solid,
+                ClipByYAxis = true,
+                Text = timeFrame.Text,
+                TextOrientation = AnnotationTextOrientation.Horizontal,
+                Tag = timeFrame.Id
+            };
+
+            if (draggable)
+            {
+                model.ShouldNotBeNull("Draggable Line annotation requires plot model");
+
+                la.MouseDown += (s, e) =>
+                {
+                    if (e.ChangedButton != OxyMouseButton.Left)
+                    {
+                        return;
+                    }
+
+                    la.StrokeThickness *= 5;
+                    model.InvalidatePlot(false);
+                    e.Handled = true;
+                };
+
+                // Handle mouse movements (note: this is only called when the mousedown event was handled)
+                la.MouseMove += (s, e) =>
+                {
+                    la.X = (long) la.InverseTransform(e.Position).X;
+                    model.InvalidatePlot(false);
+                    e.Handled = true;
+                };
+
+                la.MouseUp += (s, e) =>
+                {
+                    la.StrokeThickness /= 5;
+                    model.InvalidatePlot(false);
+
+                    la.X = (long) la.InverseTransform(e.Position).X;
+                    timeFrame.UpdateTime(Instant.FromUnixTimeMilliseconds((long) la.X * 10));
+                    timeFrames.AddOrUpdate(timeFrame);
+
+                    e.Handled = true;
+                };
+            }
+
+            model!.Annotations.Add(la);
+        }
 
 
         private void HandleTimeFrames(IChangeSet<TimeFrame> changeSet)
@@ -180,8 +293,8 @@ namespace SRHWiscMano.App.ViewModels
                     {
                         var item = change.Item.Current;
                         var msec = item.Time.ToMillisecondsFromEpoch() / 10;
-                        AnnoationUtils.CreateVLineAnnotation(msec, item.Text, true, MainPlotModel);
-                        AnnoationUtils.CreateVLineAnnotation(msec, item.Text, false, OverviewPlotModel);
+                        CreateVLineAnnotation(item, true, MainPlotModel);
+                        CreateVLineAnnotation(item, false, OverviewPlotModel);
                         break;
                     }
                     case ListChangeReason.AddRange:
@@ -189,10 +302,11 @@ namespace SRHWiscMano.App.ViewModels
                         // Handling AddRange
                         foreach (var item in change.Range)
                         {
-                           var msec = item.Time.ToMillisecondsFromEpoch() / 10;
-                            AnnoationUtils.CreateVLineAnnotation(msec, item.Text, true, MainPlotModel);
-                            AnnoationUtils.CreateVLineAnnotation(msec, item.Text, false, OverviewPlotModel);
+                            var msec = item.Time.ToMillisecondsFromEpoch() / 10;
+                            CreateVLineAnnotation(item, true, MainPlotModel);
+                            CreateVLineAnnotation(item, false, OverviewPlotModel);
                         }
+
                         break;
                     }
                     case ListChangeReason.Refresh:
@@ -239,16 +353,17 @@ namespace SRHWiscMano.App.ViewModels
             // AddFrameNotes(mainModel, examData.Notes.t);
             if (UpdateSubRange)
             {
-                examPlotData = PlotDataUtils.CreateSubRange(fullExamData, 0, settings.MainViewFrameRange-1, 0,
+                examPlotData = PlotDataUtils.CreateSubRange(fullExamData, 0, settings.MainViewFrameRange - 1, 0,
                     sensorCount - 1);
             }
+
             PlotDataUtils.AddHeatmapSeries(mainModel, examPlotData);
-            
+
             AddAxesOnMain(mainModel, frameCount, sensorCount);
 
             // SubRange 업데이트 기능을 위한 이벤트 등록
             var xAxis = mainModel.Axes.First(ax => ax.Tag == "X");
-            if(axisChangeObserver != null)
+            if (axisChangeObserver != null)
                 axisChangeObserver.Dispose();
 
             axisChangeObserver = Observable.FromEvent<EventHandler<AxisChangedEventArgs>, AxisChangedEventArgs>(
@@ -261,10 +376,10 @@ namespace SRHWiscMano.App.ViewModels
             // Bind 하게 되면 기존의 MouseWheel(zoom) 이 삭제된다.
             mainController.BindMouseWheel(new DelegatePlotCommand<OxyMouseWheelEventArgs>((v, c, a) =>
             {
-                var m = new ZoomStepManipulator(v) { Step = a.Delta * 0.001 * 1, FineControl = a.IsControlDown };
+                var m = new ZoomStepManipulator(v) {Step = a.Delta * 0.001 * 1, FineControl = a.IsControlDown};
                 m.Started(a);
                 var range = xAxis.ActualMaximum - xAxis.ActualMinimum + 1;
-                settings.MainViewFrameRange = (int)range;
+                settings.MainViewFrameRange = (int) range;
             }));
 
             // LineAnnotation을 Panning 하는 MouseManipulator Command를 추가한다.
@@ -346,7 +461,7 @@ namespace SRHWiscMano.App.ViewModels
 
             logger.LogTrace("axis changed");
         }
-        
+
         /// <summary>
         /// Main PlotViw를 위한 별도의 Axes 설정을 한다.
         /// </summary>
@@ -391,7 +506,7 @@ namespace SRHWiscMano.App.ViewModels
                 Position = AxisPosition.Bottom,
                 MinimumPadding = 0,
                 Minimum = 0,
-                Maximum = settings.MainViewFrameRange -1, // xSize - 1,
+                Maximum = settings.MainViewFrameRange - 1, // xSize - 1,
                 MajorStep = 1000,
                 MinorStep = 100, // 최대 범위를 입력하여 MinorStep 이 표시되지 않도록 한다
                 MajorTickSize = 4,
@@ -470,6 +585,7 @@ namespace SRHWiscMano.App.ViewModels
         [RelayCommand(CanExecute = "IsDataLoaded")]
         private void FitToScreen()
         {
+            sharedService.TimeFrames.Refresh();
             var overviewX = OverviewPlotModel.Axes.First(ax => (string) ax.Tag == "X");
             overviewX.Zoom(overviewX.AbsoluteMinimum, overviewX.AbsoluteMaximum);
             OverviewPlotModel.InvalidatePlot(false);
