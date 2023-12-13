@@ -30,7 +30,7 @@ namespace SRHWiscMano.App
     public partial class App : Application
     {
         private IServiceProvider? serviceProvider;
-
+        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
@@ -47,11 +47,14 @@ namespace SRHWiscMano.App
 
             // Logging 메시지를 back단에서 계속 받기 위해서 Instance를 미리 생성함
             Ioc.Default.GetRequiredService<LoggerWindow>();
+
             // MainWindow 와 관련된 ViewModel 초기화를 미리 하기 위함
             Ioc.Default.GetService<MainWindowViewModel>();
             Ioc.Default.GetService<IViewerViewModel>();
 
             LogManager.GetCurrentClassLogger().Info("Application Started");
+
+            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
 
             LoadAppSettings();
         }
@@ -63,6 +66,14 @@ namespace SRHWiscMano.App
             ThemeManager.Current.ChangeThemeBaseColor(Application.Current, settings.BaseTheme!);
             ThemeManager.Current.ChangeThemeColorScheme(Application.Current, settings.AccentTheme!);
 
+        }
+
+        private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            if (e.ExceptionObject is Exception ex)
+            {
+                logger.Error(ex);
+            }
         }
 
 

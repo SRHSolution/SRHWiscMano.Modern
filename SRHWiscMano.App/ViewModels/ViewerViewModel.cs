@@ -60,7 +60,7 @@ namespace SRHWiscMano.App.ViewModels
         [ObservableProperty] private double maxSensorData;
         [ObservableProperty] private double minSensorRange = 0;
         [ObservableProperty] private double maxSensorRange = 100;
-        [ObservableProperty] private double zoomPercentage = 100;
+        [ObservableProperty] private double timeDuration = 2000;
         [ObservableProperty] private OxyPalette selectedPalette = OxyPalettes.Hue64;
         [ObservableProperty] private double interpolateSensorScale = 10;
 
@@ -130,6 +130,8 @@ namespace SRHWiscMano.App.ViewModels
             this.paletteManager = paletteManager;
             this.settings = settings.Value;
             timeFrames = sharedService.TimeFrames;
+
+            timeDuration = this.settings.MainViewFrameRange;
 
             timeFrames.Connect().Subscribe(HandleTimeFrames);
             sharedService.ExamDataLoaded += SharedService_ExamDataLoaded;
@@ -327,10 +329,12 @@ namespace SRHWiscMano.App.ViewModels
             // Bind 하게 되면 기존의 MouseWheel(zoom) 이 삭제된다.
             mainController.BindMouseWheel(new DelegatePlotCommand<OxyMouseWheelEventArgs>((v, c, a) =>
             {
-                var m = new ZoomStepManipulator(v) {Step = a.Delta * 0.001 * 1, FineControl = a.IsControlDown};
-                m.Started(a);
-                var range = xAxis.ActualMaximum - xAxis.ActualMinimum + 1;
+                // var m = new ZoomStepManipulator(v) {Step = a.Delta * 0.001 * 1, FineControl = a.IsControlDown};
+                // m.Started(a);
+                ZoomInOutAt(a.Delta > 0 ? -100 : 100, a.Position);
+                var range = xAxis.ActualMaximum - xAxis.ActualMinimum;
                 settings.MainViewFrameRange = (int) range;
+                // TimeDuration = (int)range;
             }));
 
             // LineAnnotation을 Panning 하는 MouseManipulator Command를 추가한다.
@@ -520,17 +524,27 @@ namespace SRHWiscMano.App.ViewModels
         }
 
         [RelayCommand]
-        private void ZoomOut(double zoomVal)
+        private void ZoomInOut(double zoomVal)
         {
-            logger.LogTrace($"Zoom : {zoomVal}");
-            ZoomPercentage = (int) (ZoomPercentage / zoomVal);
+            TimeDuration += zoomVal;
+            var mainX = MainPlotModel.Axes.First(ax => (string) ax.Tag == "X");
+            mainX.Zoom(mainX.ActualMinimum, mainX.ActualMinimum+TimeDuration);
+            MainPlotModel.InvalidatePlot(true);
+            // OverviewPlotModel.InvalidatePlot(false);
+            logger.LogTrace($"Zoom Timeduration : {TimeDuration}");
         }
 
-        [RelayCommand]
-        private void ZoomIn(double zoomVal)
+        private void ZoomInOutAt(double zoomVal, ScreenPoint pos)
         {
-            logger.LogTrace($"Zoom : {zoomVal}");
-            ZoomPercentage = (int) (ZoomPercentage * zoomVal);
+            TimeDuration += zoomVal;
+            var mainX = MainPlotModel.Axes.First(ax => (string)ax.Tag == "X");
+            var mainY = MainPlotModel.Axes.First(ax => (string)ax.Tag == "Y");
+            var xPos = mainX.InverseTransform(pos.X, pos.Y, mainY ).X;
+            var minX = (xPos - TimeDuration / 2);
+            var maxX = (xPos + TimeDuration / 2);
+            mainX.Zoom(minX, maxX);
+            MainPlotModel.InvalidatePlot(true);
+            logger.LogTrace($"Zoom Timeduration : {TimeDuration}");
         }
 
         [RelayCommand(CanExecute = "IsDataLoaded")]

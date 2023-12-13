@@ -29,6 +29,7 @@ namespace SRHWiscMano.App
             // services.AddTransient<ColorRangeSliderViewModel>();
             services.AddSingleton<LoggerWindow>();
 
+            // AppSettings Configuration service.
             var configPath = Path.Combine(Directory.GetCurrentDirectory(), "configuration.json");
             var config = new ConfigurationBuilder()
                 // .SetBasePath(Directory.GetCurrentDirectory())
@@ -37,7 +38,8 @@ namespace SRHWiscMano.App
 
             config.GetSection("AppSettings")["FilePath"] = configPath;
 
-            services.Configure<AppSettings>(config.GetSection("AppSettings"));    // requires Microsoft.Extensions.ConfigurationExtensions, IOptions<AppSettings> 를 등록한다.
+            // requires Microsoft.Extensions.ConfigurationExtensions, IOptions<AppSettings> 를 등록한다.
+            services.Configure<AppSettings>(config.GetSection("AppSettings"));    
 
             // appsettings.json 파일을 로드한다.
             // var config = new ConfigurationBuilder()

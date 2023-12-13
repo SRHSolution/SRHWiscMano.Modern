@@ -39,11 +39,11 @@ namespace SRHWiscMano.Core.ViewModels
         PlotController OverviewPlotController { get; }
 
 
-        double ZoomPercentage { get; set; }
+        double TimeDuration { get; set; }
 
         IRelayCommand SensorRangeChangedCommand { get; }
-        IRelayCommand<double> ZoomInCommand { get; }
-        IRelayCommand<double> ZoomOutCommand { get; }
+        IRelayCommand<double> ZoomInOutCommand { get; }
+        // IRelayCommand<double> ZoomOutCommand { get; }
         IRelayCommand FitToScreenCommand { get; }
         IRelayCommand<FavoritePalette> FavoritePaletteCommand { get; }
         IRelayCommand NavigateToExplorerCommand { get; }
