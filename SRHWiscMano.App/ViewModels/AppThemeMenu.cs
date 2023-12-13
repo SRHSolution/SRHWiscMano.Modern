@@ -20,7 +20,7 @@ namespace SRHWiscMano.App.ViewModels
     {
         #region Services
 
-        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
         private readonly AppSettings? settings;
 
         #endregion
@@ -61,7 +61,7 @@ namespace SRHWiscMano.App.ViewModels
 
                 WeakReferenceMessenger.Default.Send(
                     new AppBaseThemeChangedMessage(new Tuple<Color, Color>(backColor, foreColor)));
-                Logger.Trace(name);
+                logger.Trace(name);
             }
         }
 
@@ -77,7 +77,7 @@ namespace SRHWiscMano.App.ViewModels
                 WeakReferenceMessenger.Default.Send(new AppSchemeColorChangedMessage(color));
 
                 settings.AccentThemeColor = color;
-                Logger.Trace(name);
+                logger.Trace(name);
             }
         }
     }

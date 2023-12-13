@@ -6,7 +6,7 @@ namespace SRHWiscMano.Core.ViewModels
 {
     public interface IExplorerViewModel
     {
-        ObservableCollection<TimeFrameViewModel> TimeFrames { get; }
+        ObservableCollection<TimeFrameViewModel> TimeFrameViewModels { get; }
 
         IRelayCommand SelectAllCommand { get; }
         IRelayCommand UnselectAllCommand { get; }
