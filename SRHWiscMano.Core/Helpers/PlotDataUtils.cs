@@ -50,8 +50,8 @@ namespace SRHWiscMano.Core.Helpers
         /// <returns></returns>
         public static double[,] CreateSubRange(double[,] originalArray, int startRow, int endRow, int startColumn, int endColumn)
         {
-            int numRows = endRow - startRow + 1;
-            int numCols = endColumn - startColumn + 1;
+            int numRows = endRow - startRow+1;
+            int numCols = endColumn - startColumn+1;
             double[,] subArray = new double[numRows, numCols];
 
             for (int i = startRow; i <= endRow; i++)

@@ -70,7 +70,7 @@ namespace SRHWiscMano.Core.Models
         {
             var startRow = (int)Math.Round(newTime.ToUnixTimeMilliseconds() - TimeTimeDuration / 2) / 10;
             var endRow = (int)Math.Round(newTime.ToUnixTimeMilliseconds() + TimeTimeDuration / 2) / 10;
-            PlotData = PlotDataUtils.CreateSubRange(examPlotData, startRow, endRow, 0, examPlotData.GetLength(1) - 1);
+            PlotData = PlotDataUtils.CreateSubRange(examPlotData, startRow, endRow-1, 0, examPlotData.GetLength(1)-1);
             Time = newTime;
         }
     }

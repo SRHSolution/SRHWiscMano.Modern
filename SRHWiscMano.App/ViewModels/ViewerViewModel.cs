@@ -131,7 +131,7 @@ namespace SRHWiscMano.App.ViewModels
             timeFrames.Connect().Subscribe(HandleTimeFrames);
             sharedService.ExamDataLoaded += SharedService_ExamDataLoaded;
 
-            Palettes = paletteManager.Palettes; //PaletteUtils.GetPredefinedPalettes();
+            Palettes = paletteManager.Palettes;
 
             MaxSensorData = 100;
             MinSensorData = -10;
@@ -166,6 +166,7 @@ namespace SRHWiscMano.App.ViewModels
         }
 
         private double[,] fullExamData;
+        private IDisposable axisChangeObserver = null;
 
 
         private void HandleTimeFrames(IChangeSet<TimeFrame> changeSet)
@@ -204,6 +205,8 @@ namespace SRHWiscMano.App.ViewModels
                     case ListChangeReason.RemoveRange:
                         break;
                     case ListChangeReason.Clear:
+                        MainPlotModel.Annotations.Clear();
+                        OverviewPlotModel.Annotations.Clear();
                         break;
                 }
             }
@@ -232,40 +235,51 @@ namespace SRHWiscMano.App.ViewModels
 
             //Mainview plotmodel, controller 설정
             var mainModel = MainPlotModel;
-            PlotDataUtils.AddHeatmapSeries(mainModel, fullExamData);
-            AddAxesOnMain(mainModel, frameCount, sensorCount);
+            var examPlotData = fullExamData;
             // AddFrameNotes(mainModel, examData.Notes.t);
             if (UpdateSubRange)
             {
-                var heatMapSeries = mainModel.Series.OfType<HeatMapSeries>().FirstOrDefault();
-                heatMapSeries.Data = PlotDataUtils.CreateSubRange(fullExamData, 0, settings.MainViewFrameRange - 1, 0,
+                examPlotData = PlotDataUtils.CreateSubRange(fullExamData, 0, settings.MainViewFrameRange-1, 0,
                     sensorCount - 1);
-                heatMapSeries.X1 = settings.MainViewFrameRange;
             }
+            PlotDataUtils.AddHeatmapSeries(mainModel, examPlotData);
+            
+            AddAxesOnMain(mainModel, frameCount, sensorCount);
 
             // SubRange 업데이트 기능을 위한 이벤트 등록
             var xAxis = mainModel.Axes.First(ax => ax.Tag == "X");
-            Observable.FromEvent<EventHandler<AxisChangedEventArgs>, AxisChangedEventArgs>(
+            if(axisChangeObserver != null)
+                axisChangeObserver.Dispose();
+
+            axisChangeObserver = Observable.FromEvent<EventHandler<AxisChangedEventArgs>, AxisChangedEventArgs>(
                 handler => (sender, e) => handler(e),
                 handler => xAxis.AxisChanged += handler,
                 handler => xAxis.AxisChanged -= handler).Subscribe(OnMainViewAxisChanged);
 
             var mainController = new PlotController();
+
+            // Bind 하게 되면 기존의 MouseWheel(zoom) 이 삭제된다.
+            mainController.BindMouseWheel(new DelegatePlotCommand<OxyMouseWheelEventArgs>((v, c, a) =>
+            {
+                var m = new ZoomStepManipulator(v) { Step = a.Delta * 0.001 * 1, FineControl = a.IsControlDown };
+                m.Started(a);
+                var range = xAxis.ActualMaximum - xAxis.ActualMinimum + 1;
+                settings.MainViewFrameRange = (int)range;
+            }));
+
+            // LineAnnotation을 Panning 하는 MouseManipulator Command를 추가한다.
+            // controller에 추가한 command가 완료(mouse up)되면 제거된다. 
             var lineAnnotPan = new DelegatePlotCommand<OxyMouseDownEventArgs>((view, controller, args) =>
                 controller.AddMouseManipulator(view, new LineAnnotationManipulator(view)
                 {
                     IsVertical = true,
                 }, args));
-
             mainController.BindMouseDown(OxyMouseButton.Left, lineAnnotPan);
             MainPlotController = mainController;
 
-
             //Overview plotmodel, controller 설정
-
             // ((IPlotModel)this.OverviewPlotModel)?.AttachPlotView(null);
-
-            var overviewModel = OverviewPlotModel; // CreatePlotModel((double[,])fullExamData.Clone());
+            var overviewModel = OverviewPlotModel;
             PlotDataUtils.AddHeatmapSeries(overviewModel, fullExamData);
             AddAxesOnOverview(overviewModel, frameCount, sensorCount);
             // AddFrameNotes(overviewModel, examData.Notes.ToList());
@@ -332,39 +346,7 @@ namespace SRHWiscMano.App.ViewModels
 
             logger.LogTrace("axis changed");
         }
-
-        /// <summary>
-        /// 공통 데이터를 이용하므로 Main, Overview에 대한 PlotModel을 생성한다.
-        /// </summary>
-        /// <param name="examData"></param>
-        /// <param name="plotData"></param>
-        /// <returns></returns>
-        private PlotModel CreatePlotModel(double[,] plotData)
-        {
-            var frameCount = plotData.GetLength(0);
-            var sensorCount = plotData.GetLength(1);
-            var model = new PlotModel {Title = ""};
-
-            // Create your heatmap series and add to MyModel
-            var heatmapSeries = new HeatMapSeries
-            {
-                CoordinateDefinition = HeatMapCoordinateDefinition.Center,
-                X0 = 0,
-                X1 = (double) frameCount,
-                Y0 = 0,
-                Y1 = sensorCount, //plotData.GetLength(1),
-                Data = plotData /* Your 2D data array */,
-                Interpolate = true,
-                RenderMethod = HeatMapRenderMethod.Bitmap,
-                Tag = "Heatmap"
-            };
-
-            model.Series.Add(heatmapSeries);
-
-            return model;
-        }
-
-
+        
         /// <summary>
         /// Main PlotViw를 위한 별도의 Axes 설정을 한다.
         /// </summary>
@@ -409,9 +391,8 @@ namespace SRHWiscMano.App.ViewModels
                 Position = AxisPosition.Bottom,
                 MinimumPadding = 0,
                 Minimum = 0,
-                Maximum = 2000, // - 1,
+                Maximum = settings.MainViewFrameRange -1, // xSize - 1,
                 MajorStep = 1000,
-                // MinorStep = xSize - 1, // 최대 범위를 입력하여 MinorStep 이 표시되지 않도록 한다
                 MinorStep = 100, // 최대 범위를 입력하여 MinorStep 이 표시되지 않도록 한다
                 MajorTickSize = 4,
                 MinorTickSize = 2,
@@ -471,16 +452,6 @@ namespace SRHWiscMano.App.ViewModels
                 Tag = "X"
             });
         }
-
-        private void AddFrameNotes(PlotModel model, List<FrameNote> notes)
-        {
-            foreach (var note in notes)
-            {
-                var msec = note.Time.ToMillisecondsFromEpoch() / 10;
-                AnnoationUtils.CreateVLineAnnotation(msec, note.Text, false, model);
-            }
-        }
-
 
         [RelayCommand]
         private void ZoomOut(double zoomVal)
@@ -542,7 +513,6 @@ namespace SRHWiscMano.App.ViewModels
 
             paletteManager.SetPaletteKey(SelectedPaletteKey);
             TimeFrameViewModel.SelectedPalette = SelectedPalette;
-
 
             var mainColorAxis = MainPlotModel.Axes.Single(s => s is LinearColorAxis) as LinearColorAxis;
             mainColorAxis.Palette = SelectedPalette;
