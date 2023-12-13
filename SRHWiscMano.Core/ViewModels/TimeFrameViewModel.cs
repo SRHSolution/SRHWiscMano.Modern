@@ -25,25 +25,17 @@ namespace SRHWiscMano.Core.ViewModels
 
         public ITimeFrame Data { get; }
 
-        public static OxyPalette SelectedPalette { get; set; }
+        public static OxyPalette SelectedPalette { get; private set; }
 
         [ObservableProperty] private PlotModel framePlotModel;
 
         public int Id { get; }
 
-        private string label;
         /// <summary>
         /// TimeFrame의 메인 Label
         /// </summary>
-        public string Label
-        {
-            get => label;
-            set
-            {
-                SetProperty(ref label, value);
-            }
-        }
-
+        [ObservableProperty] private string label;
+        
         /// <summary>
         /// Label에서 포함되어 있는 Volume 정보
         /// </summary>
@@ -88,6 +80,8 @@ namespace SRHWiscMano.Core.ViewModels
 
         private void OnPaletteChange(object recipient, PaletteChangedMessageMessage arg)
         {
+            SelectedPalette = arg.Value.palette;
+
             var mainColorAxis = FramePlotModel.Axes.OfType<LinearColorAxis>().FirstOrDefault();
             mainColorAxis.Palette = arg.Value.palette;
             mainColorAxis.Minimum = arg.Value.Minimum; // 최소 limit 값
@@ -109,7 +103,7 @@ namespace SRHWiscMano.Core.ViewModels
             model.Axes.Add(new LinearColorAxis
             {
                 Position = AxisPosition.None,
-                Palette = SelectedPalette, // OxyPalettes.Hue64,
+                Palette = SelectedPalette,
                 RenderAsImage = false,
                 AbsoluteMinimum = -5,
                 AbsoluteMaximum = 200,

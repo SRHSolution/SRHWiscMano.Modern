@@ -131,7 +131,7 @@ namespace SRHWiscMano.App.ViewModels
             this.settings = settings.Value;
             timeFrames = sharedService.TimeFrames;
 
-            timeFrames.Connect().Subscribe(HandleTimeFrames2);
+            timeFrames.Connect().Subscribe(HandleTimeFrames);
             sharedService.ExamDataLoaded += SharedService_ExamDataLoaded;
 
             Palettes = paletteManager.Palettes;
@@ -173,7 +173,7 @@ namespace SRHWiscMano.App.ViewModels
         private readonly SourceCache<ITimeFrame, int> timeFrames;
 
 
-        private void HandleTimeFrames2(IChangeSet<ITimeFrame, int> changeSet)
+        private void HandleTimeFrames(IChangeSet<ITimeFrame, int> changeSet)
         {
             foreach (var change in changeSet)
             {
@@ -189,13 +189,12 @@ namespace SRHWiscMano.App.ViewModels
                     }
                     case ChangeReason.Remove:
                     {
-                        var annoItem = MainPlotModel.Annotations.OfType<LineAnnotation>()
-                            .Single(item => (int) item.Tag == change.Current.Id);
-                        MainPlotModel.Annotations.Remove(annoItem);
+                        var mainAnno = MainPlotModel.Annotations.OfType<LineAnnotation>().Single(item => (int) item.Tag == change.Current.Id);
+                        MainPlotModel.Annotations.Remove(mainAnno);
 
-                        annoItem = OverviewPlotModel.Annotations.OfType<LineAnnotation>()
-                            .Single(item => (int) item.Tag == change.Current.Id);
-                        OverviewPlotModel.Annotations.Remove(annoItem);
+                        var overAnno = OverviewPlotModel.Annotations.OfType<LineAnnotation>().Single(item => (int) item.Tag == change.Current.Id);
+                        OverviewPlotModel.Annotations.Remove(overAnno);
+
                         logger.LogTrace($"Removed: {change.Current.Text}");
                         break;
                     }
@@ -203,24 +202,21 @@ namespace SRHWiscMano.App.ViewModels
                         break;
                     case ChangeReason.Update:
                     {
-                        logger.LogTrace($"Removed: {change.Current.Text}");
-                        var updItem = MainPlotModel.Annotations.OfType<LineAnnotation>().Single(item => (int) item.Tag == change.Current.Id);
-                        updItem.Text = change.Current.Text;
                         var msec = change.Current.Time.ToMillisecondsFromEpoch() / 10;
-                        updItem.X = msec;
+                        var mainAnno = MainPlotModel.Annotations.OfType<LineAnnotation>().Single(item => (int) item.Tag == change.Current.Id);
+                        mainAnno.Text = change.Current.Text;
+                        mainAnno.X = msec;
                         MainPlotModel.InvalidatePlot(false);
 
-                        updItem = OverviewPlotModel.Annotations.OfType<LineAnnotation>().Single(item => (int) item.Tag == change.Current.Id);
-                        updItem.Text = change.Current.Text;
-                        msec = change.Current.Time.ToMillisecondsFromEpoch() / 10;
-                        updItem.X = msec;
+                        var overAnno = OverviewPlotModel.Annotations.OfType<LineAnnotation>().Single(item => (int) item.Tag == change.Current.Id);
+                        overAnno.Text = change.Current.Text;
+                        overAnno.X = msec;
                         OverviewPlotModel.InvalidatePlot(false);
-                        
+
+                        logger.LogTrace($"Update: {change.Current.Text}");
                         break;
                     }
                     case ChangeReason.Refresh:
-                        // MainPlotModel.Annotations.Clear();
-                        // OverviewPlotModel.Annotations.Clear();
                         break;
                 }
             }
@@ -279,51 +275,6 @@ namespace SRHWiscMano.App.ViewModels
             }
 
             model!.Annotations.Add(la);
-        }
-
-
-        private void HandleTimeFrames(IChangeSet<TimeFrame> changeSet)
-        {
-            // Handle the initial set of items and any subsequent changes
-            foreach (var change in changeSet)
-            {
-                switch (change.Reason)
-                {
-                    case ListChangeReason.Add:
-                    {
-                        var item = change.Item.Current;
-                        var msec = item.Time.ToMillisecondsFromEpoch() / 10;
-                        CreateVLineAnnotation(item, true, MainPlotModel);
-                        CreateVLineAnnotation(item, false, OverviewPlotModel);
-                        break;
-                    }
-                    case ListChangeReason.AddRange:
-                    {
-                        // Handling AddRange
-                        foreach (var item in change.Range)
-                        {
-                            var msec = item.Time.ToMillisecondsFromEpoch() / 10;
-                            CreateVLineAnnotation(item, true, MainPlotModel);
-                            CreateVLineAnnotation(item, false, OverviewPlotModel);
-                        }
-
-                        break;
-                    }
-                    case ListChangeReason.Refresh:
-                        logger.LogTrace($"Updated: {change.Item.Current.Text}");
-                        break;
-                    case ListChangeReason.Remove:
-                        logger.LogTrace($"Removed: {change.Item.Current.Text}");
-                        break;
-
-                    case ListChangeReason.RemoveRange:
-                        break;
-                    case ListChangeReason.Clear:
-                        MainPlotModel.Annotations.Clear();
-                        OverviewPlotModel.Annotations.Clear();
-                        break;
-                }
-            }
         }
 
 
@@ -628,7 +579,7 @@ namespace SRHWiscMano.App.ViewModels
                 SelectedPalette = Palettes[SelectedPaletteKey];
 
             paletteManager.SetPaletteKey(SelectedPaletteKey);
-            TimeFrameViewModel.SelectedPalette = SelectedPalette;
+            // TimeFrameViewModel.SelectedPalette = SelectedPalette;
 
             var mainColorAxis = MainPlotModel.Axes.Single(s => s is LinearColorAxis) as LinearColorAxis;
             mainColorAxis.Palette = SelectedPalette;

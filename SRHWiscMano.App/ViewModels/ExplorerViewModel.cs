@@ -50,11 +50,11 @@ namespace SRHWiscMano.App.ViewModels
             this.paletteManager = paletteManager;
             this.settings = settings.Value;
             timeFrames = sharedService.TimeFrames; 
-            timeFrames.Connect().Subscribe((Action<IChangeSet<ITimeFrame, int>>) HandleTimeFrames2);
+            timeFrames.Connect().Subscribe(HandleTimeFrames);
             sharedService.ExamDataLoaded += SharedService_ExamDataLoaded;
         }
 
-        private void HandleTimeFrames2(IChangeSet<ITimeFrame, int> changeSet)
+        private void HandleTimeFrames(IChangeSet<ITimeFrame, int> changeSet)
         {
             foreach (var change in changeSet)
             {
@@ -66,16 +66,18 @@ namespace SRHWiscMano.App.ViewModels
                             .FirstOrDefault(itm => itm.Value.Time > change.Current.Time, new (TimeFrameViewModels.Count, null)).Key;
                         var viewmodel = new TimeFrameViewModel(change.Current);
                         TimeFrameViewModels.Insert(insertIdx, viewmodel);
+
+                        // TimeFrameViewModels에서 Label property 가 변경될 경우 이에 대한 Update 이벤트를 발생하도록 한다.
                         Observable.FromEvent<PropertyChangedEventHandler, PropertyChangedEventArgs>(
-                                handler => (sender, e) => handler(e),
-                                handler => viewmodel.PropertyChanged += handler,
-                                handler => viewmodel.PropertyChanged -= handler)
-                            .Where(x => x.PropertyName == nameof(viewmodel.Label)).Subscribe(
-                                (arg) =>
-                                {
-                                    change.Current.Text = viewmodel.Label;
-                                    timeFrames.AddOrUpdate(change.Current);
-                                });
+                            handler => (sender, e) => handler(e),
+                            handler => viewmodel.PropertyChanged += handler,
+                            handler => viewmodel.PropertyChanged -= handler)
+                        .Where(x => x.PropertyName == nameof(viewmodel.Label)).Subscribe(
+                            (arg) =>
+                            {
+                                change.Current.Text = viewmodel.Label;
+                                timeFrames.AddOrUpdate(change.Current);
+                            });
                         break;
                     }
                     case ChangeReason.Remove:
@@ -95,47 +97,6 @@ namespace SRHWiscMano.App.ViewModels
 
                     case ChangeReason.Refresh:
                         
-                        break;
-                }
-            }
-        }
-
-        private void HandleTimeFrames(IChangeSet<TimeFrame> changeSet)
-        {
-            // Handle the initial set of items and any subsequent changes
-            foreach (var change in changeSet)
-            {
-                switch (change.Reason)
-                {
-                    case ListChangeReason.Add:
-                    {
-                        TimeFrameViewModels.Insert(change.Item.CurrentIndex, new TimeFrameViewModel(change.Item.Current));
-                        break;
-                    }
-                    case ListChangeReason.AddRange:
-                    {
-                        // Handling AddRange
-                        foreach (var item in change.Range)
-                        {
-                            TimeFrameViewModels.Add(new TimeFrameViewModel(item));
-                            logger.LogTrace($"Added in range: {item.Text}");
-                        }
-
-                        break;
-                    }
-                    case ListChangeReason.Refresh:
-                        logger.LogTrace($"Updated: {change.Item.Current.Text}");
-                        break;
-                    case ListChangeReason.Remove:
-                        logger.LogTrace($"Removed: {change.Item.Current.Text}");
-                        var itemToRem = TimeFrameViewModels.Single(tf => tf.Label == change.Item.Current.Text);
-                        TimeFrameViewModels.Remove(itemToRem);
-                        break;
-
-                    case ListChangeReason.RemoveRange:
-                        break;
-                    case ListChangeReason.Clear:
-                        TimeFrameViewModels.Clear();
                         break;
                 }
             }
