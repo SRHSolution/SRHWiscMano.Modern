@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Windows.Controls;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using DynamicData;
@@ -31,7 +32,7 @@ namespace SRHWiscMano.App.ViewModels
         private readonly SharedService sharedService;
         private readonly PaletteManager paletteManager;
         private readonly AppSettings settings;
-        private readonly SourceCache<TimeFrame, int> timeFrames;
+        private readonly SourceCache<ITimeFrame, int> timeFrames;
 
         #endregion
 
@@ -49,11 +50,11 @@ namespace SRHWiscMano.App.ViewModels
             this.paletteManager = paletteManager;
             this.settings = settings.Value;
             timeFrames = sharedService.TimeFrames; 
-            timeFrames.Connect().Subscribe((Action<IChangeSet<TimeFrame, int>>) HandleTimeFrames2);
+            timeFrames.Connect().Subscribe((Action<IChangeSet<ITimeFrame, int>>) HandleTimeFrames2);
             sharedService.ExamDataLoaded += SharedService_ExamDataLoaded;
         }
 
-        private void HandleTimeFrames2(IChangeSet<TimeFrame, int> changeSet)
+        private void HandleTimeFrames2(IChangeSet<ITimeFrame, int> changeSet)
         {
             foreach (var change in changeSet)
             {
@@ -63,7 +64,18 @@ namespace SRHWiscMano.App.ViewModels
                     {
                         var insertIdx = timeFrames.Items.Index()
                             .FirstOrDefault(itm => itm.Value.Time > change.Current.Time, new (TimeFrameViewModels.Count, null)).Key;
-                        TimeFrameViewModels.Insert(insertIdx, new TimeFrameViewModel(change.Current));
+                        var viewmodel = new TimeFrameViewModel(change.Current);
+                        TimeFrameViewModels.Insert(insertIdx, viewmodel);
+                        Observable.FromEvent<PropertyChangedEventHandler, PropertyChangedEventArgs>(
+                                handler => (sender, e) => handler(e),
+                                handler => viewmodel.PropertyChanged += handler,
+                                handler => viewmodel.PropertyChanged -= handler)
+                            .Where(x => x.PropertyName == nameof(viewmodel.Label)).Subscribe(
+                                (arg) =>
+                                {
+                                    change.Current.Text = viewmodel.Label;
+                                    timeFrames.AddOrUpdate(change.Current);
+                                });
                         break;
                     }
                     case ChangeReason.Remove:
@@ -179,6 +191,7 @@ namespace SRHWiscMano.App.ViewModels
         {
             var viewmodel = arg as TimeFrameViewModel;
             viewmodel.AdjustTimeInMs(-100);
+            timeFrames.AddOrUpdate(viewmodel.Data);
         }
 
         [RelayCommand]
@@ -186,10 +199,7 @@ namespace SRHWiscMano.App.ViewModels
         {
             var viewmodel = arg as TimeFrameViewModel;
             viewmodel.AdjustTimeInMs(100);
-
-            // timeFrames.AddOrUpdate(viewmodel.Data);
-            // viewmodel.Data
-            
+            timeFrames.AddOrUpdate(viewmodel.Data);
         }
 
 

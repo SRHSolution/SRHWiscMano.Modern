@@ -31,10 +31,18 @@ namespace SRHWiscMano.Core.ViewModels
 
         public int Id { get; }
 
+        private string label;
         /// <summary>
         /// TimeFrame의 메인 Label
         /// </summary>
-        [ObservableProperty] private string label;
+        public string Label
+        {
+            get => label;
+            set
+            {
+                SetProperty(ref label, value);
+            }
+        }
 
         /// <summary>
         /// Label에서 포함되어 있는 Volume 정보
@@ -49,15 +57,16 @@ namespace SRHWiscMano.Core.ViewModels
         [ObservableProperty] private bool isSelected;
 
         [ObservableProperty] private bool isEditing = false;
-
-        public Instant Time => Data.Time;
-
         
+
+        public Instant Time { get; private set; }
+
 
         public TimeFrameViewModel(ITimeFrame data)
         {
             this.Id = data.Id;
             this.Data = data;
+            this.Time = data.Time;
             this.Label = data.Text;
             if (Label.Contains("cc"))
             {
@@ -100,7 +109,7 @@ namespace SRHWiscMano.Core.ViewModels
             model.Axes.Add(new LinearColorAxis
             {
                 Position = AxisPosition.None,
-                Palette = SelectedPalette,// OxyPalettes.Hue64,
+                Palette = SelectedPalette, // OxyPalettes.Hue64,
                 RenderAsImage = false,
                 AbsoluteMinimum = -5,
                 AbsoluteMaximum = 200,
@@ -148,7 +157,6 @@ namespace SRHWiscMano.Core.ViewModels
         {
             IsEditing = true;
             LabelEdit = Volume;
-
         }
 
         /// <summary>
@@ -158,14 +166,18 @@ namespace SRHWiscMano.Core.ViewModels
         private void CommitEditLabel()
         {
             Volume = LabelEdit;
-            var labelTag = Label.Split("cc")[1];
-            Label = Volume + "cc " + labelTag;
+            var labelTag = Label.Split("cc")[1].Trim();
+            Label = Volume + "cc" + labelTag;
             Data.Text = Label;
             IsEditing = false;
         }
 
         public void RefreshPlotData()
         {
+            // 이전과 동일하면 skip
+            if (Time.Equals(Data.Time))
+                return;
+
             var heatmap = framePlotModel.Series.OfType<HeatMapSeries>().FirstOrDefault();
             heatmap.Data = Data.PlotData;
             heatmap.X0 = 0;
@@ -173,6 +185,8 @@ namespace SRHWiscMano.Core.ViewModels
             heatmap.Y0 = 0;
             heatmap.Y1 = Data.PlotData.GetLength(1) - 1;
             framePlotModel.InvalidatePlot(true);
+
+            this.Time = Data.Time;
         }
 
         public void AdjustTimeInMs(long delta)

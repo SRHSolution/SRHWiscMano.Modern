@@ -24,7 +24,7 @@ namespace SRHWiscMano.App.Services
 
         public IExamMetaData? ExamMetaData { get; private set; }
 
-        public SourceCache<TimeFrame, int> TimeFrames { get; } = new SourceCache<TimeFrame, int>(item => item.Id);
+        public SourceCache<ITimeFrame, int> TimeFrames { get; } = new SourceCache<ITimeFrame, int>(item => item.Id);
 
         public event EventHandler? ExamDataLoaded;
         public event EventHandler? ExamMetaDataLoaded;

@@ -170,10 +170,10 @@ namespace SRHWiscMano.App.ViewModels
 
         private double[,] fullExamData;
         private IDisposable axisChangeObserver = null;
-        private readonly SourceCache<TimeFrame, int> timeFrames;
+        private readonly SourceCache<ITimeFrame, int> timeFrames;
 
 
-        private void HandleTimeFrames2(IChangeSet<TimeFrame, int> changeSet)
+        private void HandleTimeFrames2(IChangeSet<ITimeFrame, int> changeSet)
         {
             foreach (var change in changeSet)
             {
@@ -227,7 +227,7 @@ namespace SRHWiscMano.App.ViewModels
         }
 
 
-        private void CreateVLineAnnotation(TimeFrame timeFrame, bool draggable, PlotModel model)
+        private void CreateVLineAnnotation(ITimeFrame timeFrame, bool draggable, PlotModel model)
         {
             var msec = timeFrame.Time.ToMillisecondsFromEpoch() / 10;
             var la = new LineAnnotation
