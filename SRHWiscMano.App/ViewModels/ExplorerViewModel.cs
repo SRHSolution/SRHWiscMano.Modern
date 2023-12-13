@@ -85,6 +85,9 @@ namespace SRHWiscMano.App.ViewModels
 
                     case ListChangeReason.RemoveRange:
                         break;
+                    case ListChangeReason.Clear:
+                        TimeFrameViewModels.Clear();
+                        break;
                 }
             }
         }
