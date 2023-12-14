@@ -18,14 +18,16 @@ namespace SRHWiscMano.App.ViewModels
         #region Services
 
         private readonly ILogger<SettingViewModel> logger;
+        private readonly ConfigAlgorithms configAlg;
         private readonly AppSettings settings;
 
         #endregion
 
 
-        public SettingViewModel(ILogger<SettingViewModel> logger, IOptions<AppSettings> settings)
+        public SettingViewModel(ILogger<SettingViewModel> logger, IOptions<AppSettings> settings, IOptions<ConfigAlgorithms> configAlg)
         {
             this.logger = logger;
+            this.configAlg = configAlg.Value;
             this.settings = settings.Value;
         }
 
@@ -40,6 +42,7 @@ namespace SRHWiscMano.App.ViewModels
             // config 파일에 다른 section 이 있는 것을 감안하여 AppSettings Section만 업데이트 하도록 한다.
             var jsonConfig = JObject.Parse(File.ReadAllText(configFilePath));
             jsonConfig[nameof(AppSettings)] = JObject.Parse(JsonConvert.SerializeObject(settings, Formatting.Indented));
+            jsonConfig[nameof(ConfigAlgorithms)] = JObject.Parse(JsonConvert.SerializeObject(configAlg, Formatting.Indented));
             File.WriteAllText(configFilePath, jsonConfig.ToString(Formatting.Indented));
             
             logger.LogInformation("Updated configuration file for AppSettings");            

@@ -40,6 +40,7 @@ namespace SRHWiscMano.App
 
             // requires Microsoft.Extensions.ConfigurationExtensions, IOptions<AppSettings> 를 등록한다.
             services.Configure<AppSettings>(config.GetSection("AppSettings"));    
+            services.Configure<ConfigAlgorithms>(config.GetSection("ConfigAlgorithms"));    
 
             // appsettings.json 파일을 로드한다.
             // var config = new ConfigurationBuilder()
