@@ -40,6 +40,11 @@ namespace SRHWiscMano.Test
         [TearDown]
         public void OnTearDown()
         {
+            if (Environment.GetEnvironmentVariable("SKIP_STA_TEST") == "true")
+            {
+                Assert.Ignore("Skipping this test as per environment variable setting.");
+            }
+
             w.Show();
             // Start the dispatcher to make it interactive.
             Dispatcher.Run();
