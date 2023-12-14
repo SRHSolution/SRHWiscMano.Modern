@@ -3,6 +3,9 @@
     "FilePath": "",
     "BaseTheme": "Dark",
     "AccentTheme": "Orange"
-    
+
+  },
+  "ConfigAlgorithms": {
+
   }
 }
