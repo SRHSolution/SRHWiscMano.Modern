@@ -410,6 +410,16 @@ namespace SRHWiscMano.App.ViewModels
                 double[,] newData = PlotDataUtils.CreateSubRange(fullExamData, (int) xAxis.ActualMinimum,
                     (int) xAxis.ActualMaximum, 0, fullExamData.GetLength(1) - 1);
 
+                var axisRange = xAxis.ActualMaximum - xAxis.ActualMinimum;
+                if (axisRange < 1000)
+                {
+                    xAxis.MajorStep = 500;
+                }
+                else
+                {
+                    xAxis.MajorStep = 1000;
+                }
+                
                 var heatMapSeries = MainPlotModel.Series.OfType<HeatMapSeries>().FirstOrDefault();
                 if (heatMapSeries != null)
                 {
@@ -420,7 +430,7 @@ namespace SRHWiscMano.App.ViewModels
                 }
             }
 
-            logger.LogTrace("axis changed");
+            // logger.LogTrace("axis changed");
         }
 
         /// <summary>

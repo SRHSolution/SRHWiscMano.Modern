@@ -104,14 +104,14 @@ namespace SRHWiscMano.App.ViewModels
 
         private void SharedService_ExamDataLoaded(object? sender, EventArgs e)
         {
-            var editItem = timeFrames.Items.ElementAt(0);
-            editItem.Text = "modified";
-            timeFrames.AddOrUpdate(editItem);
-
-            var newFrame = sharedService.CreateTimeFrame("Test time2", Instant.FromUnixTimeSeconds(100));
-            var newIndex = timeFrames.Items.Index().FirstOrDefault(itm => itm.Value.Time < newFrame.Time).Key;
-
-            timeFrames.AddOrUpdate(newFrame);
+            // var editItem = timeFrames.Items.ElementAt(0);
+            // editItem.Text = "modified";
+            // timeFrames.AddOrUpdate(editItem);
+            //
+            // var newFrame = sharedService.CreateTimeFrame("Test time2", Instant.FromUnixTimeSeconds(100));
+            // var newIndex = timeFrames.Items.Index().FirstOrDefault(itm => itm.Value.Time < newFrame.Time).Key;
+            //
+            // timeFrames.AddOrUpdate(newFrame);
         }
 
 
