@@ -6,17 +6,20 @@ using System.Threading.Tasks;
 using OxyPlot;
 using OxyPlot.Annotations;
 using Shouldly;
+using SRHWiscMano.Core.Models;
 
 namespace SRHWiscMano.Core.Helpers
 {
     public static class AnnoationUtils
     {
-        public static void CreateVLineAnnotation(double xPos, string text, bool draggable, PlotModel? model)
+        public static void CreateVLineAnnotation(ITimeFrame timeFrame, bool draggable, PlotModel? model)
         {
+            var msec = timeFrame.Time.ToMillisecondsFromEpoch() / 10;
             var la = new LineAnnotation
             {
-                Type = LineAnnotationType.Vertical, X = xPos, LineStyle = LineStyle.Solid, ClipByYAxis = true,
-                Text = text, TextOrientation = AnnotationTextOrientation.Horizontal,
+                Type = LineAnnotationType.Vertical, X = msec, LineStyle = LineStyle.Solid, ClipByYAxis = true,
+                Text = timeFrame.Text, TextOrientation = AnnotationTextOrientation.Horizontal,
+                Tag = timeFrame.Id
             };
 
             if (draggable)

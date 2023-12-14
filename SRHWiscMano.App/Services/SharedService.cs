@@ -3,9 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DynamicData;
 using MahApps.Metro.Converters;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using NodaTime;
+using Shouldly;
 using SRHWiscMano.App.Data;
 using SRHWiscMano.Core.Helpers;
 using SRHWiscMano.Core.Models;
@@ -21,6 +24,7 @@ namespace SRHWiscMano.App.Services
 
         public IExamMetaData? ExamMetaData { get; private set; }
 
+        public SourceCache<ITimeFrame, int> TimeFrames { get; } = new SourceCache<ITimeFrame, int>(item => item.Id);
 
         public event EventHandler? ExamDataLoaded;
         public event EventHandler? ExamMetaDataLoaded;
@@ -38,8 +42,24 @@ namespace SRHWiscMano.App.Services
             this.ExamData = data;
             await ExamData.UpdatePlotData(settings.InterpolateSensorScale);
 
+            TimeFrames.Clear();
+            // TimeFrames.Refresh();
+
+            //ExamData 에서 로드한 Note를 정보를 FrameNote sourcelist에 입력한다.
+            foreach (var note in ExamData.Notes)
+            {
+                TimeFrames.AddOrUpdate(CreateTimeFrame(note.Text, note.Time));
+            }
+
             ExamDataLoaded?.Invoke(this, EventArgs.Empty);
         }
+
+        public TimeFrame CreateTimeFrame(string text, Instant time)
+        {
+            ExamData.ShouldNotBeNull("Examdata should be loaded first");
+            return new TimeFrame(text, time, settings.TimeFrameDurationInMillisecond, ExamData.PlotData);
+        }
+
 
         public void SetExamMetaData(IExamMetaData data)
         {

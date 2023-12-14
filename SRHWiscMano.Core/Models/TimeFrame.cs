@@ -1,16 +1,27 @@
 ﻿using NodaTime;
 using SRHWiscMano.Core.Helpers;
+using System;
+using CommunityToolkit.Mvvm.ComponentModel;
+using SRHWiscMano.Core.ViewModels;
 
 namespace SRHWiscMano.Core.Models
 {
     public class TimeFrame : ITimeFrame
     {
-        public TimeFrame(string text, Instant time, double[,] plotData)
-        {
-            this.Text = text;
-            PlotData = plotData;
-            Time = time;
-        }
+        private static int GuidId = 0;
+        public int Id { get; }
+
+        private readonly double[,] examPlotData;
+
+        public string Text { get; set; }
+        
+        public Instant Time { get; private set; }
+        
+        public double TimeDuration { get; }
+
+        public double TimeTimeDuration { get; }
+
+        public double[,] PlotData { get; private set; }
 
         [Obsolete("ManoViewer 의 origin 구성")]
         public TimeFrame(
@@ -41,8 +52,32 @@ namespace SRHWiscMano.Core.Models
             var RegionsVersionType = regionsVersionType;
         }
 
-        public string Text { get; set; }
-        public Instant Time { get; }
-        public double[,] PlotData { get; }
+
+        public TimeFrame(string text, Instant time, double[,] plotData)
+        {
+            Id = Interlocked.Increment(ref GuidId);
+            Text = text;
+            Time = time;
+            PlotData = plotData;
+        }
+
+        public TimeFrame(string text, Instant time, double timeDuration, double[,] examPlotData)
+        {
+            Id = Interlocked.Increment(ref GuidId);
+            Text = text;
+            Time = time;
+            TimeTimeDuration = timeDuration;
+            this.examPlotData = examPlotData;
+            
+            UpdateTime(Time);
+        }
+
+        public void UpdateTime(Instant newTime)
+        {
+            var startRow = (int)Math.Round(newTime.ToUnixTimeMilliseconds() - TimeTimeDuration / 2) / 10;
+            var endRow = (int)Math.Round(newTime.ToUnixTimeMilliseconds() + TimeTimeDuration / 2) / 10;
+            PlotData = PlotDataUtils.CreateSubRange(examPlotData, startRow, endRow-1, 0, examPlotData.GetLength(1)-1);
+            Time = newTime;
+        }
     }
 }

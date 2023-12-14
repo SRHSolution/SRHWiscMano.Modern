@@ -1,10 +1,13 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System.Net.Mime;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using NLog;
 using NodaTime;
 using NodaTime.Serialization.SystemTextJson;
 using OxyPlot;
 using OxyPlot.Axes;
+using OxyPlot.Series;
 using SRHWiscMano.Core.Data;
 using SRHWiscMano.Core.Helpers;
 using SRHWiscMano.Core.Models;
@@ -16,17 +19,23 @@ namespace SRHWiscMano.Core.ViewModels
     /// </summary>
     public partial class TimeFrameViewModel : ViewModelBase
     {
-        private readonly ITimeFrame timeFrame;
+        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
-        public static OxyPalette SelectedPalette { get; set; }
+        // private readonly ITimeFrame timeFrame;
+
+        public ITimeFrame Data { get; }
+
+        public static OxyPalette SelectedPalette { get; private set; }
 
         [ObservableProperty] private PlotModel framePlotModel;
+
+        public int Id { get; }
 
         /// <summary>
         /// TimeFrame의 메인 Label
         /// </summary>
         [ObservableProperty] private string label;
-
+        
         /// <summary>
         /// Label에서 포함되어 있는 Volume 정보
         /// </summary>
@@ -37,13 +46,20 @@ namespace SRHWiscMano.Core.ViewModels
         /// </summary>
         [ObservableProperty] private string labelEdit;
 
-        public Instant Time => timeFrame.Time;
+        [ObservableProperty] private bool isSelected;
+
+        [ObservableProperty] private bool isEditing = false;
+        
+
+        public Instant Time { get; private set; }
 
 
-        public TimeFrameViewModel(ITimeFrame timeFrame, FrameNote frameNote)
+        public TimeFrameViewModel(ITimeFrame data)
         {
-            this.timeFrame = timeFrame;
-            this.Label = timeFrame.Text;
+            this.Id = data.Id;
+            this.Data = data;
+            this.Time = data.Time;
+            this.Label = data.Text;
             if (Label.Contains("cc"))
             {
                 this.Volume = Label.Trim().Split("cc")[0];
@@ -54,8 +70,8 @@ namespace SRHWiscMano.Core.ViewModels
             }
 
             var plotModel = new PlotModel();
-            PlotDataUtils.AddHeatmapSeries(plotModel, timeFrame.PlotData);
-            AddAxes(plotModel, timeFrame.PlotData.GetLength(0), timeFrame.PlotData.GetLength(1));
+            PlotDataUtils.AddHeatmapSeries(plotModel, data.PlotData);
+            AddAxes(plotModel, data.PlotData.GetLength(0), data.PlotData.GetLength(1));
             FramePlotModel = plotModel;
 
             WeakReferenceMessenger.Default.Register<PaletteChangedMessageMessage>(this, OnPaletteChange);
@@ -64,6 +80,8 @@ namespace SRHWiscMano.Core.ViewModels
 
         private void OnPaletteChange(object recipient, PaletteChangedMessageMessage arg)
         {
+            SelectedPalette = arg.Value.palette;
+
             var mainColorAxis = FramePlotModel.Axes.OfType<LinearColorAxis>().FirstOrDefault();
             mainColorAxis.Palette = arg.Value.palette;
             mainColorAxis.Minimum = arg.Value.Minimum; // 최소 limit 값
@@ -85,7 +103,7 @@ namespace SRHWiscMano.Core.ViewModels
             model.Axes.Add(new LinearColorAxis
             {
                 Position = AxisPosition.None,
-                Palette = SelectedPalette,// OxyPalettes.Hue64,
+                Palette = SelectedPalette,
                 RenderAsImage = false,
                 AbsoluteMinimum = -5,
                 AbsoluteMaximum = 200,
@@ -125,10 +143,6 @@ namespace SRHWiscMano.Core.ViewModels
             });
         }
 
-        [ObservableProperty] private bool isSelected;
-        [ObservableProperty] private bool isEditing = false;
-
-
         /// <summary>
         /// Label을 Editing 상태로 전환
         /// </summary>
@@ -146,10 +160,35 @@ namespace SRHWiscMano.Core.ViewModels
         private void CommitEditLabel()
         {
             Volume = LabelEdit;
-            var labelTag = Label.Split("cc")[1];
-            Label = Volume + "cc " + labelTag;
-            timeFrame.Text = Label;
+            var labelTag = Label.Split("cc")[1].Trim();
+            Label = Volume + "cc" + labelTag;
+            Data.Text = Label;
             IsEditing = false;
+        }
+
+        public void RefreshPlotData()
+        {
+            // 이전과 동일하면 skip
+            if (Time.Equals(Data.Time))
+                return;
+
+            var heatmap = framePlotModel.Series.OfType<HeatMapSeries>().FirstOrDefault();
+            heatmap.Data = Data.PlotData;
+            heatmap.X0 = 0;
+            heatmap.X1 = Data.PlotData.GetLength(0) - 1;
+            heatmap.Y0 = 0;
+            heatmap.Y1 = Data.PlotData.GetLength(1) - 1;
+            framePlotModel.InvalidatePlot(true);
+
+            this.Time = Data.Time;
+        }
+
+        public void AdjustTimeInMs(long delta)
+        {
+            Data.UpdateTime(Data.Time.Plus(Duration.FromMilliseconds(delta)));
+            RefreshPlotData();
+
+            logger.Trace($"Adjust {Data.Text} {delta}msec");
         }
     }
 }
