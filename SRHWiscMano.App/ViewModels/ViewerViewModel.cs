@@ -329,12 +329,18 @@ namespace SRHWiscMano.App.ViewModels
             // Bind 하게 되면 기존의 MouseWheel(zoom) 이 삭제된다.
             mainController.BindMouseWheel(new DelegatePlotCommand<OxyMouseWheelEventArgs>((v, c, a) =>
             {
-                // var m = new ZoomStepManipulator(v) {Step = a.Delta * 0.001 * 1, FineControl = a.IsControlDown};
-                // m.Started(a);
-                ZoomInOutAt(a.Delta > 0 ? -100 : 100, a.Position);
                 var range = xAxis.ActualMaximum - xAxis.ActualMinimum;
-                settings.MainViewFrameRange = (int) range;
-                // TimeDuration = (int)range;
+                var delta = a.Delta > 0 ? -50 : 50;
+                var newRange = range + delta;
+                var scale =  range/ newRange;
+                var current = xAxis.InverseTransform(a.Position.X);
+                xAxis.ZoomAt(scale, current);
+                
+                // update view
+                var newActualRange = Math.Round(xAxis.ActualMaximum - xAxis.ActualMinimum);
+                MainPlotModel.InvalidatePlot(true);
+                settings.MainViewFrameRange = (int)newActualRange;
+                TimeDuration = (int)newActualRange;
             }));
 
             // LineAnnotation을 Panning 하는 MouseManipulator Command를 추가한다.
