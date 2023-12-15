@@ -17,6 +17,7 @@ using SRHWiscMano.Core.Services;
 using SRHWiscMano.Core.Helpers;
 using MahApps.Metro.Controls;
 using OxyPlot.Annotations;
+using System.Reflection;
 
 namespace SRHWiscMano.Test
 {
@@ -25,6 +26,12 @@ namespace SRHWiscMano.Test
     {
         private Window window = new Window();
         private PlotView plotView = new PlotView();
+
+        [OneTimeSetUp]
+        public void SetupOneTime()
+        {
+            Console.WriteLine($"{this.GetType().Namespace}");
+        }
 
         [SetUp]
         public void SetUp()
@@ -58,6 +65,7 @@ namespace SRHWiscMano.Test
         [Test]
         public void TestHeatmapSeries()
         {
+            Console.WriteLine($"Called {this.GetType().Namespace}.{MethodBase.GetCurrentMethod().Name}");
             var model = CreateHeatmapPeaks(OxyPalettes.Hue64, true, 200);
             plotView.Model = model;
             var controller = new PlotController();
@@ -74,6 +82,7 @@ namespace SRHWiscMano.Test
         [Test]
         public void TestPlotCommandHover()
         {
+            Console.WriteLine($"Called {this.GetType().Namespace}.{MethodBase.GetCurrentMethod().Name}");
             var model = CreateFuncionSeries();
             plotView.Model = model;
             var controller = new PlotController();
@@ -99,6 +108,7 @@ namespace SRHWiscMano.Test
         [Test]
         public void TestPlotCommandPanning()
         {
+            Console.WriteLine($"Called {this.GetType().Namespace}.{MethodBase.GetCurrentMethod().Name}");
             var model = ImportExamination();
             plotView.Model = model;
 

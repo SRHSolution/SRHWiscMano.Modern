@@ -3,6 +3,7 @@ using Shouldly;
 using SRHWiscMano.Core.Helpers;
 using SRHWiscMano.Core.Models;
 using SRHWiscMano.Core.Services;
+using System.Reflection;
 
 namespace SRHWiscMano.Test
 {
@@ -13,6 +14,8 @@ namespace SRHWiscMano.Test
         [OneTimeSetUp]
         public void SetupConfigServices()
         {
+            Console.WriteLine($"{this.GetType().Namespace}");
+
             var services = new ServiceCollection();
             SRHWiscMano.Core.ServiceRegistration.ConfigureServices(services);
             provider = services.BuildServiceProvider();
@@ -21,6 +24,7 @@ namespace SRHWiscMano.Test
         [Test]
         public void TestSensorRange()
         {
+            Console.WriteLine($"Called {this.GetType().Namespace}.{MethodBase.GetCurrentMethod().Name}");
             Range<int> range = new Range<int>(1, 3);
             foreach (var i in range.AsEnumerable())
             {
@@ -34,6 +38,7 @@ namespace SRHWiscMano.Test
         [TestCase("100.txt")]
         public void TestImportExamData(string fileName)
         {
+            Console.WriteLine($"Called {this.GetType().Namespace}.{MethodBase.GetCurrentMethod().Name} : {fileName}");
             var examImporter = provider.GetService<IImportService<IExamination>>();
             var examData = examImporter.ReadFromFile(LoadTestData(fileName));
 
@@ -45,6 +50,7 @@ namespace SRHWiscMano.Test
         [TestCase("100.txt")]
         public void TestExamDataExtensions(string fileName)
         {
+            Console.WriteLine($"Called {this.GetType().Namespace}.{MethodBase.GetCurrentMethod().Name} : {fileName}");
             var examImporter = provider.GetService<IImportService<IExamination>>();
             var examData = examImporter.ReadFromFile(LoadTestData(fileName));
 

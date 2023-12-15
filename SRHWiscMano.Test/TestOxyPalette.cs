@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using OxyPlot;
 using SRHWiscMano.Core.Helpers;
+using System.Reflection;
 using System.Windows.Media.Imaging;
 
 namespace SRHWiscMano.Test
@@ -14,6 +15,7 @@ namespace SRHWiscMano.Test
         [OneTimeSetUp]
         public void SetupViewModel()
         {
+            Console.WriteLine($"{this.GetType().Namespace}");
             provider = ConfigureServices();
         }
         private static IServiceProvider ConfigureServices()
@@ -30,6 +32,7 @@ namespace SRHWiscMano.Test
         [Test]
         public void DrawOxyImage()
         {
+            Console.WriteLine($"Called {this.GetType().Namespace}.{MethodBase.GetCurrentMethod().Name}");
             var palette = OxyPalettes.BlackWhiteRed(200);
             var paletteImage = palette.GenerateColorAxisImage(false, false);
 

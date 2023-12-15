@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "UnitTestRunAll": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "SKIP_STA_TEST": "true"
+      }
+    }
+  }
+}

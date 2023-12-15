@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using SRHWiscMano.Core.ViewModels;
 using SRHWiscMano.Core.Helpers;
+using System.Reflection;
 
 namespace SRHWiscMano.Test
 {
@@ -20,12 +21,14 @@ namespace SRHWiscMano.Test
         [Test]
         public void WriteLogInform()
         {
+            Console.WriteLine($"Called {this.GetType().Namespace}.{MethodBase.GetCurrentMethod().Name}");
             var vmViewer = provider.GetService<IViewerViewModel>();
         }
 
         [Test]
         public void GetPalettes()
         {
+            Console.WriteLine($"Called {this.GetType().Namespace}.{MethodBase.GetCurrentMethod().Name}");
             var dics = PaletteUtils.GetPredefinedPalettes();
         }
     }

@@ -1,4 +1,5 @@
-﻿using System.Windows.Threading;
+﻿using System.Reflection;
+using System.Windows.Threading;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using MahApps.Metro.Controls;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,6 +15,7 @@ namespace SRHWiscMano.Test
         [OneTimeSetUp]
         public void SetupViewModel()
         {
+            
             provider = ConfigureServices();
         }
 
@@ -57,7 +59,7 @@ namespace SRHWiscMano.Test
         [Test]
         public void TestViewerPage()
         {
-            ;
+            Console.WriteLine($"Called {this.GetType().Namespace}.{MethodBase.GetCurrentMethod().Name}");
         }
     }
 }
