@@ -9,11 +9,12 @@ namespace SRHWiscMano.Test
     [TestFixture, Apartment(ApartmentState.STA)]
     internal class TestOxyPalette : TestModelBase
     {
+        private IServiceProvider provider;
 
         [OneTimeSetUp]
         public void SetupViewModel()
         {
-            Ioc.Default.ConfigureServices(ConfigureServices());
+            provider = ConfigureServices();
         }
         private static IServiceProvider ConfigureServices()
         {

@@ -8,13 +8,15 @@ namespace SRHWiscMano.Test
     [TestFixture, Apartment(ApartmentState.STA)]
     internal class TestViewPage
     {
+        private IServiceProvider provider;
         private MetroWindow w = new();
 
         [OneTimeSetUp]
         public void SetupViewModel()
         {
-            Ioc.Default.ConfigureServices(ConfigureServices());
+            provider = ConfigureServices();
         }
+
         private static IServiceProvider ConfigureServices()
         {
             var services = new ServiceCollection();
@@ -55,7 +57,7 @@ namespace SRHWiscMano.Test
         [Test]
         public void TestViewerPage()
         {
-
+            ;
         }
     }
 }
