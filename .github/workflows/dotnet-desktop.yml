@@ -83,7 +83,7 @@ jobs:
       run: dotnet test
 
     - name: Build app for release
-      run: msbuild ${{env.App_Project_Path}}.csproj -t:rebuild -verbosity:diag -property:Configuration=Release
+      run: msbuild ${{env.App_Project_Path}} -t:rebuild -verbosity:diag -property:Configuration=Release
 
     # Upload the MSIX package: https://github.com/marketplace/actions/upload-a-build-artifact
     - name: Upload build artifacts
