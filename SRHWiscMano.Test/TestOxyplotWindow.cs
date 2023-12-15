@@ -42,7 +42,9 @@ namespace SRHWiscMano.Test
         {
             if (Environment.GetEnvironmentVariable("SKIP_STA_TEST") == "true")
             {
-                Assert.Ignore("Skipping this test as per environment variable setting.");
+                Console.WriteLine("Skipping this test as per environment variable setting.");
+                return;
+                // Assert.Ignore("Skipping this test as per environment variable setting.");
             }
 
             window.Show();

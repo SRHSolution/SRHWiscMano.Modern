@@ -18,6 +18,15 @@ namespace SRHWiscMano.Test
             provider = services.BuildServiceProvider();
         }
 
+        [Test]
+        public void TestSensorRange()
+        {
+            Range<int> range = new Range<int>(1, 3);
+            foreach (var i in range.AsEnumerable())
+            {
+                Console.WriteLine($"Range {i}");
+            }
+        }
 
         /// <summary>
         /// TimeSeriesData 을 읽는 기능을 테스트 
