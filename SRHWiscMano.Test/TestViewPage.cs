@@ -1,4 +1,5 @@
-﻿using System.Windows.Threading;
+﻿using System.Reflection;
+using System.Windows.Threading;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using MahApps.Metro.Controls;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,13 +9,16 @@ namespace SRHWiscMano.Test
     [TestFixture, Apartment(ApartmentState.STA)]
     internal class TestViewPage
     {
+        private IServiceProvider provider;
         private MetroWindow w = new();
 
         [OneTimeSetUp]
         public void SetupViewModel()
         {
-            Ioc.Default.ConfigureServices(ConfigureServices());
+            
+            provider = ConfigureServices();
         }
+
         private static IServiceProvider ConfigureServices()
         {
             var services = new ServiceCollection();
@@ -40,6 +44,13 @@ namespace SRHWiscMano.Test
         [TearDown]
         public void OnTearDown()
         {
+            if (Environment.GetEnvironmentVariable("SKIP_STA_TEST") == "true")
+            {
+                Console.WriteLine("Skipping this test as per environment variable setting.");
+                return;
+                // Assert.Ignore("Skipping this test as per environment variable setting.");
+            }
+
             w.Show();
             // Start the dispatcher to make it interactive.
             Dispatcher.Run();
@@ -48,7 +59,7 @@ namespace SRHWiscMano.Test
         [Test]
         public void TestViewerPage()
         {
-
+            Console.WriteLine($"Called {this.GetType().Namespace}.{MethodBase.GetCurrentMethod().Name}");
         }
     }
 }

@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using NUnit.Framework.Internal.Execution;
@@ -13,6 +14,12 @@ namespace SRHWiscMano.Test
     [TestFixture]
     internal class TestRx
     {
+        [OneTimeSetUp]
+        public void SetupOneTime()
+        {
+            Console.WriteLine($"{this.GetType().Namespace}");
+        }
+
         public IEnumerable<int> GetNumbers()
         {
             for (int i = 1; i <= 5; i++)
@@ -25,6 +32,7 @@ namespace SRHWiscMano.Test
         [Test]
         public void TestYieldReturn()
         {
+            Console.WriteLine($"Called {this.GetType().Namespace}.{MethodBase.GetCurrentMethod().Name}");
             var watch = Stopwatch.StartNew();
             GetNumbers();
             Console.WriteLine($"call enumerable {watch.ElapsedMilliseconds}");
@@ -60,6 +68,7 @@ namespace SRHWiscMano.Test
         [Test]
         public void TestRxSequence()
         {
+            Console.WriteLine($"Called {this.GetType().Namespace}.{MethodBase.GetCurrentMethod().Name}");
             var watch = Stopwatch.StartNew();
             var subscription = GetNumberSequence().Subscribe(
                 onNext: number => Console.WriteLine($"Received: {number}, {watch.ElapsedMilliseconds}"),
@@ -76,6 +85,7 @@ namespace SRHWiscMano.Test
         [Test]
         public void TestRxTimer()
         {
+            Console.WriteLine($"Called {this.GetType().Namespace}.{MethodBase.GetCurrentMethod().Name}");
             IObservable<long> ticks = Observable.Timer(
                 dueTime: TimeSpan.Zero,
                 period: TimeSpan.FromSeconds(1));

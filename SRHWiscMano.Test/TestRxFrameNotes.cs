@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Channels;
 using System.Threading.Tasks;
@@ -16,10 +17,18 @@ namespace SRHWiscMano.Test
     [TestFixture]
     internal class TestRxFrameNotes : TestModelBase
     {
+        [OneTimeSetUp]
+        public void SetupOneTime()
+        {
+            Console.WriteLine($"{this.GetType().Namespace}");
+        }
+
 
         [Test]
         public void RxFrameNotes()
         {
+            Console.WriteLine($"Called {this.GetType().Namespace}.{MethodBase.GetCurrentMethod().Name}");
+
             ExamDataTextReader reader = new ExamDataTextReader();
             var examData = reader.ReadFromFile(LoadTestData("100.txt"));
 
