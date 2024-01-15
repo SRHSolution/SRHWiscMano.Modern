@@ -11,6 +11,7 @@ using DynamicData;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MoreLinq.Extensions;
+using OxyPlot;
 using SRHWiscMano.App.Data;
 using SRHWiscMano.App.Services;
 using SRHWiscMano.Core.Models;
@@ -49,6 +50,9 @@ namespace SRHWiscMano.App.ViewModels
                         var insertIdx = timeFrames.Items.Index()
                             .FirstOrDefault(itm => itm.Value.Time > change.Current.Time, new(TimeFrameViewModels.Count, null)).Key;
                         var viewmodel = new TimeFrameViewModel(change.Current);
+                        viewmodel.FramePlotController = new PlotController();
+                        viewmodel.FramePlotController.UnbindAll();
+
                         TimeFrameViewModels.Insert(insertIdx, viewmodel);
 
                         // TimeFrameViewModels에서 Label property 가 변경될 경우 이에 대한 Update 이벤트를 발생하도록 한다.

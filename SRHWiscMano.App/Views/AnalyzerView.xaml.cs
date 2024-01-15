@@ -30,5 +30,48 @@ namespace SRHWiscMano.App.Views
             if (!DesignerProperties.GetIsInDesignMode(new DependencyObject()))
                 this.DataContext = Ioc.Default.GetService<IAnalyzerViewModel>();
         }
+        private void ListBox_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            ScrollViewer scrollViewer = GetScrollViewer(sender as ListBox);
+            if (scrollViewer != null)
+            {
+                if (e.Delta > 0)
+                {
+                    scrollViewer.LineLeft();
+                    scrollViewer.LineLeft();
+                    scrollViewer.LineLeft();
+                    scrollViewer.LineLeft();
+                    scrollViewer.LineLeft();
+                }
+                else
+                {
+                    scrollViewer.LineRight();
+                    scrollViewer.LineRight();
+                    scrollViewer.LineRight();
+                    scrollViewer.LineRight();
+                    scrollViewer.LineRight();
+                }
+                e.Handled = true;
+            }
+        }
+
+        private ScrollViewer GetScrollViewer(DependencyObject o)
+        {
+            if (o is ScrollViewer)
+                return o as ScrollViewer;
+
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(o); i++)
+            {
+                var child = VisualTreeHelper.GetChild(o, i);
+                var result = GetScrollViewer(child);
+                if (result == null)
+                    continue;
+                else
+                    return result;
+            }
+
+            return null;
+        }
+
     }
 }

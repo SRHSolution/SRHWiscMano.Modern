@@ -28,6 +28,7 @@ namespace SRHWiscMano.Core.ViewModels
         public static OxyPalette SelectedPalette { get; private set; }
 
         [ObservableProperty] private PlotModel framePlotModel;
+        [ObservableProperty] private PlotController framePlotController;
 
         public int Id { get; }
 
