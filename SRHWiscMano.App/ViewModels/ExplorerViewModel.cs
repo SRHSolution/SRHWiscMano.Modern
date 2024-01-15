@@ -50,6 +50,7 @@ namespace SRHWiscMano.App.ViewModels
             this.paletteManager = paletteManager;
             this.settings = settings.Value;
             timeFrames = sharedService.TimeFrames; 
+            // 이전에 있던 데이터를 connect로 연결해서 등록되어 있던 item에 대해 모두 call 될수 있도록 한다
             timeFrames.Connect().Subscribe(HandleTimeFrames);
             sharedService.ExamDataLoaded += SharedService_ExamDataLoaded;
         }

@@ -6,6 +6,6 @@ namespace SRHWiscMano.Core.ViewModels
 {
     public interface IAnalyzerViewModel
     {
-        TimeFrameViewModel TimeFrame { get; }
+        ObservableCollection<TimeFrameViewModel> TimeFrameViewModels { get; }
     }
 }
