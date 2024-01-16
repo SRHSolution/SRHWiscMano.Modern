@@ -6,7 +6,9 @@ using System.Linq;
 using System.Reactive.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Markup;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using DynamicData;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -14,6 +16,7 @@ using MoreLinq.Extensions;
 using OxyPlot;
 using SRHWiscMano.App.Data;
 using SRHWiscMano.App.Services;
+using SRHWiscMano.Core.Helpers;
 using SRHWiscMano.Core.Models;
 using SRHWiscMano.Core.ViewModels;
 
@@ -25,6 +28,14 @@ namespace SRHWiscMano.App.ViewModels
         private readonly SharedService sharedService;
         private readonly IOptions<AppSettings> settings;
         private readonly SourceCache<ITimeFrame, int> timeFrames;
+
+        [ObservableProperty] private PlotModel mainPlotModel;
+        [ObservableProperty] private PlotController mainPlotController;
+
+        [ObservableProperty] private PlotModel graphPlotModel;
+        [ObservableProperty] private PlotController graphPlotController;
+
+        [ObservableProperty] private string statusMessage = "Test status message";
 
         public ObservableCollection<TimeFrameViewModel> TimeFrameViewModels { get; } = new();
 
@@ -89,5 +100,26 @@ namespace SRHWiscMano.App.ViewModels
                 }
             }
         }
+
+        [RelayCommand]
+        private void SelectionChanged(object selectedItem)
+        {
+            var timeFrameData = (selectedItem as TimeFrameViewModel).Data;
+            var timeFrameClone = new TimeFrameViewModel(timeFrameData);
+            MainPlotModel = timeFrameClone.FramePlotModel;
+        }
+
+        [RelayCommand]
+        private void PreviousTimeFrame(int selectedIndex)
+        {
+            
+        }
+
+        [RelayCommand]
+        private void NextTimeFrame(int selectedIndex)
+        {
+
+        }
+
     }
 }

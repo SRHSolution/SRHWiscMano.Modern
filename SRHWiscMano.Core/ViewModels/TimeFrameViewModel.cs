@@ -57,8 +57,8 @@ namespace SRHWiscMano.Core.ViewModels
 
         public TimeFrameViewModel(ITimeFrame data)
         {
-            this.Id = data.Id;
             this.Data = data;
+            this.Id = data.Id;
             this.Time = data.Time;
             this.Label = data.Text;
             if (Label.Contains("cc"))

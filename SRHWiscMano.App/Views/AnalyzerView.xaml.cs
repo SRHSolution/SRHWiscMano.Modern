@@ -16,6 +16,8 @@ using System.Windows.Shapes;
 using SRHWiscMano.App.ViewModels;
 using SRHWiscMano.Core.ViewModels;
 using System.ComponentModel;
+using Microsoft.Extensions.Options;
+using SRHWiscMano.App.Data;
 
 namespace SRHWiscMano.App.Views
 {
@@ -24,12 +26,21 @@ namespace SRHWiscMano.App.Views
     /// </summary>
     public partial class AnalyzerView : UserControl
     {
+        private int scrollLineNum = 5;
+
         public AnalyzerView()
         {
             InitializeComponent();
             if (!DesignerProperties.GetIsInDesignMode(new DependencyObject()))
                 this.DataContext = Ioc.Default.GetService<IAnalyzerViewModel>();
         }
+
+
+        /// <summary>
+        /// ListBox Preview Mouse Wheel event
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void ListBox_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
         {
             ScrollViewer scrollViewer = GetScrollViewer(sender as ListBox);
@@ -37,23 +48,18 @@ namespace SRHWiscMano.App.Views
             {
                 if (e.Delta > 0)
                 {
-                    scrollViewer.LineLeft();
-                    scrollViewer.LineLeft();
-                    scrollViewer.LineLeft();
-                    scrollViewer.LineLeft();
-                    scrollViewer.LineLeft();
+                    for(int i=0; i<scrollLineNum; i++)
+                        scrollViewer.LineLeft();
                 }
                 else
                 {
-                    scrollViewer.LineRight();
-                    scrollViewer.LineRight();
-                    scrollViewer.LineRight();
-                    scrollViewer.LineRight();
-                    scrollViewer.LineRight();
+                    for (int i = 0; i < scrollLineNum; i++)
+                        scrollViewer.LineRight();
                 }
                 e.Handled = true;
             }
         }
+
 
         private ScrollViewer GetScrollViewer(DependencyObject o)
         {
