@@ -4,6 +4,8 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Reflection;
+using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Markup;
@@ -36,6 +38,8 @@ namespace SRHWiscMano.App.ViewModels
         [ObservableProperty] private PlotController graphPlotController;
 
         [ObservableProperty] private string statusMessage = "Test status message";
+
+        [ObservableProperty] private int selectedIndexOfTimeFrameViewModel = 0;
 
         public ObservableCollection<TimeFrameViewModel> TimeFrameViewModels { get; } = new();
 
@@ -104,22 +108,32 @@ namespace SRHWiscMano.App.ViewModels
         [RelayCommand]
         private void SelectionChanged(object selectedItem)
         {
-            var timeFrameData = (selectedItem as TimeFrameViewModel).Data;
-            var timeFrameClone = new TimeFrameViewModel(timeFrameData);
-            MainPlotModel = timeFrameClone.FramePlotModel;
+            try
+            {
+                var timeFrameData = (selectedItem as TimeFrameViewModel).Data;
+                var timeFrameClone = new TimeFrameViewModel(timeFrameData);
+                MainPlotModel = timeFrameClone.FramePlotModel;
+            }
+            catch
+            {
+                logger.LogError("Selecting timeframe viewmodel got error");
+            }
         }
 
         [RelayCommand]
         private void PreviousTimeFrame(int selectedIndex)
         {
+            if (selectedIndex > 0)
+                SelectedIndexOfTimeFrameViewModel -= 1;
+
             
         }
 
         [RelayCommand]
         private void NextTimeFrame(int selectedIndex)
         {
-
+            if (selectedIndex < TimeFrameViewModels.Count-1)
+                SelectedIndexOfTimeFrameViewModel += 1;
         }
-
     }
 }

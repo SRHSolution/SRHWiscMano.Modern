@@ -18,7 +18,7 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <ListBox x:Name="timeFrameList" Grid.Row="0" SelectionMode="Single" VerticalContentAlignment="Center"
-                 ScrollViewer.HorizontalScrollBarVisibility="Auto" ItemsSource="{Binding TimeFrameViewModels}"
+                 ScrollViewer.HorizontalScrollBarVisibility="Auto" ItemsSource="{Binding TimeFrameViewModels}" SelectedIndex="{Binding SelectedIndexOfTimeFrameViewModel}"
                  d:ItemsSource="{d:SampleData ItemCount=10}" PreviewMouseWheel="ListBox_PreviewMouseWheel" >
             <ListBox.ItemsPanel>
                 <ItemsPanelTemplate>
