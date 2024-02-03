@@ -7,7 +7,9 @@ using System.Linq;
 using System.Reactive.Linq;
 using System.Security.Cryptography.Xml;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -62,7 +64,17 @@ namespace SRHWiscMano.App.ViewModels
         [ObservableProperty] private double maxSensorRange = 100;
         [ObservableProperty] private double timeDuration = 2000;
         [ObservableProperty] private OxyPalette selectedPalette = OxyPalettes.Hue64;
-        [ObservableProperty] private double interpolateSensorScale = 10;
+        
+        
+        // Sensor Bound Properties
+        [ObservableProperty] private bool pickingSensorBounds = false;
+        [ObservableProperty] private Thickness sensorBoundUpperMargin;
+        [ObservableProperty] private Thickness sensorBoundLowerMargin;
+
+        [ObservableProperty] private double sensorBoundWidth;
+        [ObservableProperty] private double sensorBoundUpperHeight;
+        [ObservableProperty] private double sensorBoundLowerHeight;
+
 
         private bool updateSubRange = true;
 
@@ -149,8 +161,12 @@ namespace SRHWiscMano.App.ViewModels
             ApplyThemeToOxyPlots();
 
             UpdateSubRange = this.settings.UpdateSubRange;
-
+            
             WeakReferenceMessenger.Default.Register<AppBaseThemeChangedMessage>(this, ThemeChanged);
+        }
+
+        private void ToggleExecute(object parameter)
+        {
         }
 
         private void ThemeChanged(object recipient, AppBaseThemeChangedMessage message)
@@ -288,7 +304,7 @@ namespace SRHWiscMano.App.ViewModels
         private void LoadExamDataImpl()
         {
             var examData = sharedService.ExamData;
-            var sensorCount = (int) (examData.SensorCount() * InterpolateSensorScale);
+            var sensorCount = (int) (examData.SensorCount() * settings.InterpolateSensorScale);
             var frameCount = examData.Samples.Count;
 
             fullExamData = examData.PlotData;
@@ -407,6 +423,7 @@ namespace SRHWiscMano.App.ViewModels
             var xAxis = MainPlotModel.Axes.FirstOrDefault(a => a.Position == AxisPosition.Bottom);
             if (xAxis != null)
             {
+                // TODO : WiscMono 처럼 fullExamData를 Load시에 모두 interpolation 하고 사용하는 것이 아니라, 원본 데이터는 그대로 현재의 view에 넣을 데이터만 interpolation 을 수행해서 업데이트 하는 방식을 도입하는 것을 고려하자.
                 double[,] newData = PlotDataUtils.CreateSubRange(fullExamData, (int) xAxis.ActualMinimum,
                     (int) xAxis.ActualMaximum, 0, fullExamData.GetLength(1) - 1);
 
@@ -506,6 +523,7 @@ namespace SRHWiscMano.App.ViewModels
                 Tag = "Color"
             });
 
+            // Y-Axiss
             model.Axes.Add(new LinearAxis()
             {
                 IsPanEnabled = false,
@@ -516,7 +534,7 @@ namespace SRHWiscMano.App.ViewModels
                 Minimum = 0, // 초기 시작값
                 Maximum = ySize - 1, // 초기 최대값
                 AbsoluteMinimum = 0, // Panning 최소값
-                AbsoluteMaximum = ySize * InterpolateSensorScale - 1, // Panning 최대값
+                AbsoluteMaximum = ySize * settings.InterpolateSensorScale - 1, // Panning 최대값
                 IsAxisVisible = false,
                 Tag = "Y"
             });
@@ -664,6 +682,24 @@ namespace SRHWiscMano.App.ViewModels
         [RelayCommand]
         private void NextFrameNote()
         {
+        }
+
+        [RelayCommand]
+        private void ToggleSensorBounds(object sender)
+        {
+            PickingSensorBounds = (bool)sender;
+
+            if (PickingSensorBounds)
+            {
+                var area = MainPlotModel.PlotArea;
+
+                SensorBoundUpperMargin = new Thickness(area.Left, area.Top, 0,0);
+                SensorBoundLowerMargin = new Thickness(area.Left, 0, 0, MainPlotModel.Height-area.Bottom);
+
+                SensorBoundUpperHeight = 100;
+                SensorBoundLowerHeight = 50;
+                SensorBoundWidth = area.Width;
+            }
         }
     }
 }

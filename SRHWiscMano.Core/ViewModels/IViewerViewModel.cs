@@ -15,8 +15,6 @@ namespace SRHWiscMano.Core.ViewModels
 
         string SelectedPaletteKey { get; }
 
-        double InterpolateSensorScale { get; }
-
         bool UpdateSubRange { get; }
 
         double MinSensorData { get; }
