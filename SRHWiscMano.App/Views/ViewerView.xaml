@@ -37,7 +37,12 @@
             <RowDefinition Height="180" />
         </Grid.RowDefinitions>
         <Grid Grid.Row="0">
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
 
                 <!-- Zoom Out Button -->
                 <Button Width="32"
@@ -110,7 +115,43 @@
                           HorizontalAlignment="Left"
                           VerticalAlignment="Center" IsChecked="{Binding UpdateSubRange}" />
             </StackPanel>
-            <DockPanel HorizontalAlignment="Right">
+            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <Button Width="32"
+                        Height="32 "
+                        Margin="2"
+                        Foreground="{DynamicResource MahApps.Brushes.Accent}"
+                        Style="{StaticResource MahApps.Styles.Button.Circle}" ToolTip="Zoom out heatmap">
+                    <b:Interaction.Triggers>
+                        <b:EventTrigger EventName="Click">
+                            <b:InvokeCommandAction Command="{Binding PrevFrameNoteCommand}"/>
+                        </b:EventTrigger>
+                    </b:Interaction.Triggers>
+                    <Button.ContentTemplate>
+                        <DataTemplate>
+                            <iconPacks:PackIconUnicons Kind="AngleLeft" />
+                        </DataTemplate>
+                    </Button.ContentTemplate>
+                </Button>
+                <Separator Width="10" Visibility="Hidden"/>
+                <Button Width="32"
+                        Height="32 "
+                        Margin="2"
+                        Foreground="{DynamicResource MahApps.Brushes.Accent}"
+                        Style="{StaticResource MahApps.Styles.Button.Circle}" ToolTip="Zoom out heatmap">
+                    <b:Interaction.Triggers>
+                        <b:EventTrigger EventName="Click">
+                            <b:InvokeCommandAction Command="{Binding NextFrameNoteCommand}"/>
+                        </b:EventTrigger>
+                    </b:Interaction.Triggers>
+                    <Button.ContentTemplate>
+                        <DataTemplate>
+                            <iconPacks:PackIconUnicons Kind="AngleRight" />
+                        </DataTemplate>
+                    </Button.ContentTemplate>
+                </Button>
+
+            </StackPanel>
+            <DockPanel  Grid.Column="2" HorizontalAlignment="Right">
                 <mah:ToggleSwitch x:Name="editToggle" OffContent="Edit Bounds"
                                   OnContent="Editing Bounds"
                                   Command="{Binding  ToggleSensorBoundsCommand}"
@@ -293,13 +334,13 @@
                              SmallChange="0.1" Height="{Binding SensorBoundHeight}">
                 <b:Interaction.Triggers>
                     <b:EventTrigger EventName="UpperValueChanged">
-                        <b:InvokeCommandAction Command="{Binding SensorBoundsChangedCommand}" CommandParameter="{Binding ElementName=sensorBoundSlider}"/>
+                        <b:InvokeCommandAction Command="{Binding SensorBoundsChangedCommand}"/>
                     </b:EventTrigger>
                     <b:EventTrigger EventName="LowerValueChanged">
-                        <b:InvokeCommandAction Command="{Binding SensorBoundsChangedCommand}" CommandParameter="{Binding ElementName=sensorBoundSlider}"/>
+                        <b:InvokeCommandAction Command="{Binding SensorBoundsChangedCommand}"/>
                     </b:EventTrigger>
                     <b:EventTrigger EventName="CentralThumbDragCompleted">
-                        <b:InvokeCommandAction Command="{Binding SensorBoundsChangedCommand}" CommandParameter="{Binding ElementName=sensorBoundSlider}"/>
+                        <b:InvokeCommandAction Command="{Binding SensorBoundsChangedCommand}"/>
                     </b:EventTrigger>
                 </b:Interaction.Triggers>
                 <mah:RangeSlider.Style>
