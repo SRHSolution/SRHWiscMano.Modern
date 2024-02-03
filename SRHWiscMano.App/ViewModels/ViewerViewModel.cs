@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.DirectoryServices.ActiveDirectory;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Runtime.Serialization;
 using System.Security.Cryptography.Xml;
 using System.Threading.Tasks;
 using System.Windows;
@@ -62,18 +63,28 @@ namespace SRHWiscMano.App.ViewModels
         [ObservableProperty] private double maxSensorData;
         [ObservableProperty] private double minSensorRange = 0;
         [ObservableProperty] private double maxSensorRange = 100;
+
         [ObservableProperty] private double timeDuration = 2000;
         [ObservableProperty] private OxyPalette selectedPalette = OxyPalettes.Hue64;
-        
-        
+
+        [ObservableProperty] private double examSensorSize;
+
         // Sensor Bound Properties
         [ObservableProperty] private bool pickingSensorBounds = false;
         [ObservableProperty] private Thickness sensorBoundUpperMargin;
         [ObservableProperty] private Thickness sensorBoundLowerMargin;
+        [ObservableProperty] private Thickness sensorBoundsSliderMargin;
+
+        [ObservableProperty] private double minSensorBound ;
+        [ObservableProperty] private double maxSensorBound ;
+
+
 
         [ObservableProperty] private double sensorBoundWidth;
+        [ObservableProperty] private double sensorBoundHeight;
         [ObservableProperty] private double sensorBoundUpperHeight;
         [ObservableProperty] private double sensorBoundLowerHeight;
+        
 
 
         private bool updateSubRange = true;
@@ -161,7 +172,10 @@ namespace SRHWiscMano.App.ViewModels
             ApplyThemeToOxyPlots();
 
             UpdateSubRange = this.settings.UpdateSubRange;
-            
+
+            minSensorBound = this.settings.MinSensorBound;
+            maxSensorBound = this.settings.MaxSensorBound;
+
             WeakReferenceMessenger.Default.Register<AppBaseThemeChangedMessage>(this, ThemeChanged);
         }
 
@@ -306,6 +320,7 @@ namespace SRHWiscMano.App.ViewModels
             var examData = sharedService.ExamData;
             var sensorCount = (int) (examData.SensorCount() * settings.InterpolateSensorScale);
             var frameCount = examData.Samples.Count;
+            ExamSensorSize = sensorCount;
 
             fullExamData = examData.PlotData;
 
@@ -695,10 +710,40 @@ namespace SRHWiscMano.App.ViewModels
 
                 SensorBoundUpperMargin = new Thickness(area.Left, area.Top, 0,0);
                 SensorBoundLowerMargin = new Thickness(area.Left, 0, 0, MainPlotModel.Height-area.Bottom);
+                SensorBoundsSliderMargin = new Thickness(area.Left - 12, area.Top-4, 0, 0);
 
-                SensorBoundUpperHeight = 100;
-                SensorBoundLowerHeight = 50;
+                SensorBoundHeight = MainPlotModel.PlotArea.Height+8;
                 SensorBoundWidth = area.Width;
+            }
+        }
+
+        [RelayCommand]
+        private void SensorBoundsChanged(object sender)
+        {
+            var slider = sender as MahApps.Metro.Controls.RangeSlider;
+            var minPos = minSensorBound / (ExamSensorSize) * (MainPlotModel.PlotArea.Height-8);
+            var maxPos =  (ExamSensorSize- maxSensorBound) * (MainPlotModel.PlotArea.Height - 8)/ ExamSensorSize;
+            SensorBoundLowerHeight = minPos;
+            SensorBoundUpperHeight = maxPos;
+        }
+
+        [RelayCommand]
+        private void WindowSizeChanged(object sender)
+        {
+            if (PickingSensorBounds)
+            {
+                var area = MainPlotModel.PlotArea;
+
+                SensorBoundUpperMargin = new Thickness(area.Left, area.Top, 0, 0);
+                SensorBoundLowerMargin = new Thickness(area.Left, 0, 0, MainPlotModel.Height - area.Bottom);
+                SensorBoundsSliderMargin = new Thickness(area.Left - 12, area.Top - 4, 0, 0);
+                SensorBoundHeight = MainPlotModel.PlotArea.Height + 8;
+                SensorBoundWidth = area.Width;
+
+                var minPos = minSensorBound / (ExamSensorSize) * (MainPlotModel.PlotArea.Height - 8);
+                var maxPos = (ExamSensorSize - maxSensorBound) * (MainPlotModel.PlotArea.Height - 8) / ExamSensorSize;
+                SensorBoundLowerHeight = minPos;
+                SensorBoundUpperHeight = maxPos;
             }
         }
     }

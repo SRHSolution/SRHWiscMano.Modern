@@ -23,6 +23,12 @@
         <converters:FavoritePaletteConverter x:Key="FavoritePaletteConverter" />
 
     </UserControl.Resources>
+    <b:Interaction.Triggers>
+        <b:EventTrigger EventName="SizeChanged">
+            <b:InvokeCommandAction Command="{Binding WindowSizeChangedCommand}"
+                                   PassEventArgsToCommand="True" />
+        </b:EventTrigger>
+    </b:Interaction.Triggers>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="36" />
@@ -105,7 +111,7 @@
                           VerticalAlignment="Center" IsChecked="{Binding UpdateSubRange}" />
             </StackPanel>
             <DockPanel HorizontalAlignment="Right">
-                <mah:ToggleSwitch x:Name="editToggle" OffContent="Edit Bounds" 
+                <mah:ToggleSwitch x:Name="editToggle" OffContent="Edit Bounds"
                                   OnContent="Editing Bounds"
                                   Command="{Binding  ToggleSensorBoundsCommand}"
                                   CommandParameter="{Binding ElementName=editToggle, Path=IsOn}" />
@@ -244,30 +250,69 @@
                 <oxyWpf:PlotView x:Name="mainPlot" Model="{Binding MainPlotModel}"
                                  Controller="{Binding MainPlotController}" />
             </ScrollViewer>
-            <Rectangle Grid.Column="1" Fill="DarkGray" VerticalAlignment="Top" HorizontalAlignment="Left" Opacity="0.5" Margin="{Binding  SensorBoundUpperMargin}" Width="{Binding SensorBoundWidth}" Height="{Binding SensorBoundUpperHeight}">
+            
+            <Rectangle Grid.Column="1" Fill="DarkGray" VerticalAlignment="Top" HorizontalAlignment="Left" Opacity="0.5"
+                       Margin="{Binding  SensorBoundUpperMargin}" Width="{Binding SensorBoundWidth}"
+                       Height="{Binding SensorBoundUpperHeight}">
                 <Rectangle.Style>
                     <Style TargetType="Rectangle">
-                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Setter Property="Visibility" Value="Collapsed" />
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding PickingSensorBounds}" Value="True">
-                                <Setter Property="Visibility" Value="Visible"/>
+                                <Setter Property="Visibility" Value="Visible" />
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
                 </Rectangle.Style>
             </Rectangle>
-            <Rectangle Grid.Column="1" Fill="DarkGray" VerticalAlignment="Bottom" HorizontalAlignment="Left" Opacity="0.5" Margin="{Binding  SensorBoundLowerMargin}"  Width="{Binding SensorBoundWidth}" Height="{Binding SensorBoundLowerHeight}">
+            <Rectangle Grid.Column="1" Fill="DarkGray" VerticalAlignment="Bottom" HorizontalAlignment="Left"
+                       Opacity="0.5" Margin="{Binding  SensorBoundLowerMargin}" Width="{Binding SensorBoundWidth}"
+                       Height="{Binding SensorBoundLowerHeight}">
                 <Rectangle.Style>
                     <Style TargetType="Rectangle">
-                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Setter Property="Visibility" Value="Collapsed" />
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding PickingSensorBounds}" Value="True">
-                                <Setter Property="Visibility" Value="Visible"/>
+                                <Setter Property="Visibility" Value="Visible" />
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
                 </Rectangle.Style>
             </Rectangle>
+            <mah:RangeSlider Grid.Column="1" x:Name="sensorBoundSlider" Margin="{Binding  SensorBoundsSliderMargin}"
+                             mah:SliderHelper.EnableMouseWheel="MouseHover"
+                             AutoToolTipPlacement="None" HorizontalAlignment="Left" VerticalAlignment="Top"
+                 
+                             LargeChange="10"
+                             IsSnapToTickEnabled=" True"
+                             LowerValue="{Binding MinSensorBound}"
+                             UpperValue="{Binding MaxSensorBound}"
+                             Maximum="{Binding ExamSensorSize}"
+                             Minimum="0" MinRangeWidth="0" 
+                             Orientation="Vertical"
+                             SmallChange="0.1" Height="{Binding SensorBoundHeight}">
+                <b:Interaction.Triggers>
+                    <b:EventTrigger EventName="UpperValueChanged">
+                        <b:InvokeCommandAction Command="{Binding SensorBoundsChangedCommand}" CommandParameter="{Binding ElementName=sensorBoundSlider}"/>
+                    </b:EventTrigger>
+                    <b:EventTrigger EventName="LowerValueChanged">
+                        <b:InvokeCommandAction Command="{Binding SensorBoundsChangedCommand}" CommandParameter="{Binding ElementName=sensorBoundSlider}"/>
+                    </b:EventTrigger>
+                    <b:EventTrigger EventName="CentralThumbDragCompleted">
+                        <b:InvokeCommandAction Command="{Binding SensorBoundsChangedCommand}" CommandParameter="{Binding ElementName=sensorBoundSlider}"/>
+                    </b:EventTrigger>
+                </b:Interaction.Triggers>
+                <mah:RangeSlider.Style>
+                    <Style TargetType="mah:RangeSlider">
+                        <Setter Property="Visibility" Value="Collapsed" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding PickingSensorBounds}" Value="True">
+                                <Setter Property="Visibility" Value="Visible" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </mah:RangeSlider.Style>
+            </mah:RangeSlider>
         </Grid>
 
         <ScrollViewer Grid.Row="2" Margin="5">
