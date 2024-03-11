@@ -756,8 +756,23 @@ namespace SRHWiscMano.App.ViewModels
         private void ToggleSensorBounds(bool sender)
         {
             PickingSensorBounds = sender;
+            var heatMapSeries = MainPlotModel.Series.OfType<HeatMapSeries>().FirstOrDefault();
+            var mainYAxis = MainPlotModel.Axes.First(ax => ax.Tag == "Y");
+
             if (PickingSensorBounds)
             {
+                if (heatMapSeries != null)
+                {
+                    // LinearAxis 에 의해서 위치가 변경되었으므로, Series 에서도 데이터를 해당 위치에 출력하도록 한다.
+                    mainYAxis.Minimum = mainYAxis.AbsoluteMinimum;
+                    mainYAxis.Maximum = mainYAxis.AbsoluteMaximum;
+
+                    heatMapSeries.Y0 = (int)mainYAxis.ActualMinimum;
+                    heatMapSeries.Y1 = (int)mainYAxis.ActualMaximum;
+
+                    MainPlotModel.InvalidatePlot(true);
+                }
+
                 var area = MainPlotModel.PlotArea;
 
                 SensorBoundUpperMargin = new Thickness(area.Left, area.Top, 0, 0);
@@ -766,6 +781,20 @@ namespace SRHWiscMano.App.ViewModels
 
                 SensorBoundHeight = MainPlotModel.PlotArea.Height + 8;
                 SensorBoundWidth = area.Width;
+            }
+            else
+            {
+                if (heatMapSeries != null)
+                {
+                    // LinearAxis 에 의해서 위치가 변경되었으므로, Series 에서도 데이터를 해당 위치에 출력하도록 한다.
+                    mainYAxis.Minimum = MinSensorBound;
+                    mainYAxis.Maximum = MaxSensorBound;
+
+                    heatMapSeries.Y0 = (int)mainYAxis.ActualMinimum;
+                    heatMapSeries.Y1 = (int)mainYAxis.ActualMaximum;
+
+                    MainPlotModel.InvalidatePlot(true);
+                }
             }
         }
 
