@@ -124,8 +124,7 @@
                     <StackPanel.Resources>
                         <Style BasedOn="{StaticResource MahApps.Styles.CheckBox.Win10}" TargetType="{x:Type CheckBox}">
                             <Setter Property="IsHitTestVisible" Value="False"/>
-                            <Setter Property="Focusable" Value="False"/>
-                            <Setter Property="Margin" Value="-2" /> 
+                            <Setter Property="Margin" Value="2 0 0 -5" /> 
                         </Style>
                     </StackPanel.Resources>
                     <CheckBox mah:CheckBoxHelper.CheckCornerRadius="2" Content="VP"/>
@@ -138,9 +137,9 @@
 
                 <StackPanel Grid.Row="1" Orientation="Vertical">
                     <Button Content="Inspect" Margin="2" Command="{Binding InspectFrameCommand}"/>
-                    <Button Content="Auto-Click" Margin="2" Command="{Binding AutoInspectFrameCommand}" IsHitTestVisible="False"/>
-                    <Button Content="Reset" Margin="2" Command="{Binding ResetInspectCommand}" IsHitTestVisible="False"/>
-                    <Button Content="Undo" Margin="2" Command="{Binding UndoInspectCommand}" IsHitTestVisible="False"/>
+                    <Button Content="Auto-Click" Margin="2" Command="{Binding AutoInspectFrameCommand}"/>
+                    <Button Content="Reset" Margin="2" Command="{Binding ResetInspectCommand}"/>
+                    <Button Content="Undo" Margin="2" Command="{Binding UndoInspectCommand}"/>
                 </StackPanel>
             </Grid>
 
