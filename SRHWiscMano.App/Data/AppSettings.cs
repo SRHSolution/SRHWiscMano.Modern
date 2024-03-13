@@ -28,6 +28,9 @@ namespace SRHWiscMano.App.Data
 
         public List<string>? RecentFiles { get; set; }
 
+        public double MinSensorBound { get; set; } = 0;
+        public double MaxSensorBound { get; set; } = 36;
+
         /// <summary>
         /// 
         /// </summary>

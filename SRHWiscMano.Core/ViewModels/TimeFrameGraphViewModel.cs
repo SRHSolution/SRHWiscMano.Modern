@@ -15,9 +15,9 @@ using SRHWiscMano.Core.Models;
 namespace SRHWiscMano.Core.ViewModels
 {
     /// <summary>
-    /// 센서 데이터에서 분석을 위한 Snapshot 을 지정하고 이를 Heatmap View 표기하기 위한 ViewModel
+    /// 센서 데이터에서 분석을 위한 Snapshot 을 지정하고 이를 Graph View로 표기하기 위한 ViewModel
     /// </summary>
-    public partial class TimeFrameViewModel : ViewModelBase
+    public partial class TimeFrameGraphViewModel : ViewModelBase
     {
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
@@ -50,12 +50,13 @@ namespace SRHWiscMano.Core.ViewModels
         [ObservableProperty] private bool isSelected;
 
         [ObservableProperty] private bool isEditing = false;
-        
+
+        public int SensorRange { get; private set; } = 10;
 
         public Instant Time { get; private set; }
 
 
-        public TimeFrameViewModel(ITimeFrame data)
+        public TimeFrameGraphViewModel(ITimeFrame data)
         {
             this.Data = data;
             this.Id = data.Id;
@@ -71,45 +72,53 @@ namespace SRHWiscMano.Core.ViewModels
             }
 
             var plotModel = new PlotModel();
-            PlotDataUtils.AddHeatmapSeries(plotModel, data.PlotData);
             AddAxes(plotModel, data.PlotData.GetLength(0), data.PlotData.GetLength(1));
+            AddLineSeries(plotModel, data.PlotData);
             FramePlotModel = plotModel;
-
-            WeakReferenceMessenger.Default.Register<PaletteChangedMessageMessage>(this, OnPaletteChange);
         }
 
-
-        private void OnPaletteChange(object recipient, PaletteChangedMessageMessage arg)
+        /// <summary>
+        /// Sensor 데이터를 Graph Series 로 그리는 함수
+        /// </summary>
+        /// <param name="model"></param>
+        /// <param name="plotData"></param>
+        private void AddLineSeries(PlotModel model, double[,] plotData)
         {
-            SelectedPalette = arg.Value.palette;
+            var frameCount = plotData.GetLength(0) - 1;
+            var sensorCount = plotData.GetLength(1) - 1;
 
-            var mainColorAxis = FramePlotModel.Axes.OfType<LinearColorAxis>().FirstOrDefault();
-            mainColorAxis.Palette = arg.Value.palette;
-            mainColorAxis.Minimum = arg.Value.Minimum; // 최소 limit 값
-            mainColorAxis.Maximum = arg.Value.Maximum; // 최대 limit 값
-            mainColorAxis.HighColor = arg.Value.HighColor; // OxyColors.White,
-            mainColorAxis.LowColor = arg.Value.LowColor;
+            var valueRange = plotData.Max2D() - plotData.Min2D();
+            var valueScale = SensorRange / valueRange;
 
-            FramePlotModel.InvalidatePlot(false);
+            for (int colId = 0; colId < sensorCount; colId++)
+            {
+                var lineSeries = new LineSeries();
+                lineSeries.LineStyle = LineStyle.Solid;
+                lineSeries.StrokeThickness = 1;
+                lineSeries.Color = OxyColors.Gray;
+
+                for (int rowId = 0; rowId < frameCount; rowId++)
+                {
+                    lineSeries.Points.Add(new OxyPlot.DataPoint(rowId, (colId * SensorRange) + plotData[rowId, colId]* valueScale*2));
+                }
+
+                model.Series.Add(lineSeries);
+            }
         }
 
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="model">그릴 Model</param>
+        /// <param name="xSize">Time frames</param>
+        /// <param name="ySize">센서 갯수</param>
+        /// <param name="sensorRange">Y축 센서에서 값을 표시 하기 위한 Range 값, 입력된 값의 크기만큼 하나의 센서의 데이터를 표현하도록 한다</param>
         private void AddAxes(PlotModel model, int xSize, int ySize)
         {
             foreach (var axis in model.Axes)
             {
                 model.Axes.Remove(axis);
             }
-
-            model.Axes.Add(new LinearColorAxis
-            {
-                Position = AxisPosition.None,
-                Palette = SelectedPalette,
-                RenderAsImage = false,
-                AbsoluteMinimum = -5,
-                AbsoluteMaximum = 200,
-                Tag = "Color"
-            });
 
             model.Axes.Add(new LinearAxis()
             {
@@ -119,9 +128,9 @@ namespace SRHWiscMano.Core.ViewModels
                 MaximumPadding = 0,
                 MinimumPadding = 0,
                 Minimum = 0, // 초기 시작값
-                Maximum = ySize - 1, // 초기 최대값
+                Maximum = (ySize * SensorRange) - 1, // 초기 최대값
                 AbsoluteMinimum = 0, // Panning 최소값
-                AbsoluteMaximum = ySize - 1, // Panning 최대값
+                AbsoluteMaximum = (ySize * SensorRange) - 1, // Panning 최대값
                 IsAxisVisible = false,
                 Tag = "Y"
             });

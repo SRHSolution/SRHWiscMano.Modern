@@ -40,6 +40,28 @@ namespace SRHWiscMano.Core.Helpers
         }
 
         /// <summary>
+        /// 주어진 데이터를 그대로 line으로 표시하는 함수
+        /// </summary>
+        /// <param name="model"></param>
+        /// <param name="plotData"></param>
+        public static void AddLineSeries(PlotModel model, double[,] plotData)
+        {
+            var frameCount = plotData.GetLength(0) - 1;
+            var sensorCount = plotData.GetLength(1) - 1;
+
+            for (int colId = 0; colId < sensorCount; colId++)
+            {
+                var lineSeries = new LineSeries();
+                for (int rowId = 0; rowId < frameCount; rowId++)
+                {
+                    lineSeries.Points.Add(new DataPoint(rowId, colId));
+                }
+
+                model.Series.Add(lineSeries);
+            }
+        }
+
+        /// <summary>
         /// 입력받은 originalArray 에서 Row, Column range 영역의 데이터만을 갖는 array 로 반환한다.
         /// </summary>
         /// <param name="originalArray"></param>

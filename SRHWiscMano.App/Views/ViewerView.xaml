@@ -23,6 +23,12 @@
         <converters:FavoritePaletteConverter x:Key="FavoritePaletteConverter" />
 
     </UserControl.Resources>
+    <b:Interaction.Triggers>
+        <b:EventTrigger EventName="SizeChanged">
+            <b:InvokeCommandAction Command="{Binding WindowSizeChangedCommand}"
+                                   PassEventArgsToCommand="True" />
+        </b:EventTrigger>
+    </b:Interaction.Triggers>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="36" />
@@ -30,77 +36,129 @@
             <!-- <RowDefinition Height="30" /> -->
             <RowDefinition Height="180" />
         </Grid.RowDefinitions>
-        <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
 
-            <!-- Zoom Out Button -->
-            <Button Width="32"
-                    Height="32 "
-                    Margin="2"
-                    Foreground="{DynamicResource MahApps.Brushes.Accent}"
-                    Style="{StaticResource MahApps.Styles.Button.Circle}"
-                    Command="{Binding FitToScreenCommand}" ToolTip="Fit to screen heatmap">
+                <!-- Zoom Out Button -->
+                <Button Width="32"
+                        Height="32 "
+                        Margin="2"
+                        Foreground="{DynamicResource MahApps.Brushes.Accent}"
+                        Style="{StaticResource MahApps.Styles.Button.Circle}"
+                        Command="{Binding FitToScreenCommand}" ToolTip="Fit to screen heatmap">
 
-                <Button.ContentTemplate>
-                    <DataTemplate>
-                        <iconPacks:PackIconMaterial Kind="FitToScreen" />
-                    </DataTemplate>
-                </Button.ContentTemplate>
-            </Button>
-            <Button Width="32"
-                    Height="32 "
-                    Margin="2"
-                    Foreground="{DynamicResource MahApps.Brushes.Accent}"
-                    Style="{StaticResource MahApps.Styles.Button.Circle}" ToolTip="Zoom out heatmap">
-                <b:Interaction.Triggers>
-                    <b:EventTrigger EventName="Click">
-                        <b:InvokeCommandAction Command="{Binding ZoomInOutCommand}"
-                                               CommandParameter="{Binding Source='100', Converter={StaticResource StringToDoubleConverter}}" />
-                    </b:EventTrigger>
-                </b:Interaction.Triggers>
-                <Button.ContentTemplate>
-                    <DataTemplate>
-                        <iconPacks:PackIconRemixIcon Kind="ZoomOutLine" />
-                    </DataTemplate>
-                </Button.ContentTemplate>
-            </Button>
-            <Button Width="32"
-                    Height="32 "
-                    Margin="2"
-                    Foreground="{DynamicResource MahApps.Brushes.Accent}"
-                    Style="{StaticResource MahApps.Styles.Button.Circle}" ToolTip="Zoom in heatmap">
-                <b:Interaction.Triggers>
-                    <b:EventTrigger EventName="Click">
-                        <b:InvokeCommandAction Command="{Binding ZoomInOutCommand}"
-                                               CommandParameter="{Binding Source='-100', Converter={StaticResource StringToDoubleConverter}}" />
-                    </b:EventTrigger>
-                </b:Interaction.Triggers>
-                <Button.ContentTemplate>
-                    <DataTemplate>
-                        <iconPacks:PackIconRemixIcon Kind="ZoomInLine" />
-                    </DataTemplate>
-                </Button.ContentTemplate>
-            </Button>
-            <!-- Zoom Level Text Box -->
-            <TextBox x:Name="zoomlevel" Text="{Binding TimeDuration, StringFormat='{}{0}'}" Width="50" Margin="5"
-                     HorizontalAlignment="Right" VerticalContentAlignment="Center" HorizontalContentAlignment="Right"
-                     GotFocus="Zoomlevel_OnGotFocus" PreviewMouseLeftButtonDown="Zoomlevel_PreviewMouseLeftButtonDown"/>
+                    <Button.ContentTemplate>
+                        <DataTemplate>
+                            <iconPacks:PackIconMaterial Kind="FitToScreen" />
+                        </DataTemplate>
+                    </Button.ContentTemplate>
+                </Button>
+                <Button Width="32"
+                        Height="32 "
+                        Margin="2"
+                        Foreground="{DynamicResource MahApps.Brushes.Accent}"
+                        Style="{StaticResource MahApps.Styles.Button.Circle}" ToolTip="Zoom out heatmap">
+                    <b:Interaction.Triggers>
+                        <b:EventTrigger EventName="Click">
+                            <b:InvokeCommandAction Command="{Binding ZoomInOutCommand}"
+                                                   CommandParameter="{Binding Source='100', Converter={StaticResource StringToDoubleConverter}}" />
+                        </b:EventTrigger>
+                    </b:Interaction.Triggers>
+                    <Button.ContentTemplate>
+                        <DataTemplate>
+                            <iconPacks:PackIconRemixIcon Kind="ZoomOutLine" />
+                        </DataTemplate>
+                    </Button.ContentTemplate>
+                </Button>
+                <Button Width="32"
+                        Height="32 "
+                        Margin="2"
+                        Foreground="{DynamicResource MahApps.Brushes.Accent}"
+                        Style="{StaticResource MahApps.Styles.Button.Circle}" ToolTip="Zoom in heatmap">
+                    <b:Interaction.Triggers>
+                        <b:EventTrigger EventName="Click">
+                            <b:InvokeCommandAction Command="{Binding ZoomInOutCommand}"
+                                                   CommandParameter="{Binding Source='-100', Converter={StaticResource StringToDoubleConverter}}" />
+                        </b:EventTrigger>
+                    </b:Interaction.Triggers>
+                    <Button.ContentTemplate>
+                        <DataTemplate>
+                            <iconPacks:PackIconRemixIcon Kind="ZoomInLine" />
+                        </DataTemplate>
+                    </Button.ContentTemplate>
+                </Button>
+                <!-- Zoom Level Text Box -->
+                <TextBox x:Name="zoomlevel" Text="{Binding TimeDuration, StringFormat='{}{0}'}" Width="50" Margin="5"
+                         HorizontalAlignment="Right" VerticalContentAlignment="Center"
+                         HorizontalContentAlignment="Right"
+                         GotFocus="Zoomlevel_OnGotFocus"
+                         PreviewMouseLeftButtonDown="Zoomlevel_PreviewMouseLeftButtonDown" />
 
-            <Button Width="32"
-                    Height="32 "
-                    Margin="2"
-                    Foreground="{DynamicResource MahApps.Brushes.Accent}"
-                    Style="{StaticResource MahApps.Styles.Button.Circle}" ToolTip="Navigate to explorer view"
-                    Command="{Binding NavigateToExplorerCommand}">
-                <Button.ContentTemplate>
-                    <DataTemplate>
-                        <iconPacks:PackIconIonicons Kind="ListBoxMD" />
-                    </DataTemplate>
-                </Button.ContentTemplate>
-            </Button>
-            <CheckBox Margin="10,0,0,0" Content="Update"
-                      HorizontalAlignment="Left"
-                      VerticalAlignment="Center" IsChecked="{Binding UpdateSubRange}"/>
-        </StackPanel>
+                <Button Width="32"
+                        Height="32 "
+                        Margin="2"
+                        Foreground="{DynamicResource MahApps.Brushes.Accent}"
+                        Style="{StaticResource MahApps.Styles.Button.Circle}" ToolTip="Navigate to explorer view"
+                        Command="{Binding NavigateToExplorerCommand}">
+                    <Button.ContentTemplate>
+                        <DataTemplate>
+                            <iconPacks:PackIconIonicons Kind="ListBoxMD" />
+                        </DataTemplate>
+                    </Button.ContentTemplate>
+                </Button>
+                <CheckBox Margin="10,0,0,0" Content="Update"
+                          HorizontalAlignment="Left"
+                          VerticalAlignment="Center" IsChecked="{Binding UpdateSubRange}" />
+            </StackPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <Button Width="32"
+                        Height="32 "
+                        Margin="2"
+                        Foreground="{DynamicResource MahApps.Brushes.Accent}"
+                        Style="{StaticResource MahApps.Styles.Button.Circle}" ToolTip="Zoom out heatmap">
+                    <b:Interaction.Triggers>
+                        <b:EventTrigger EventName="Click">
+                            <b:InvokeCommandAction Command="{Binding PrevFrameNoteCommand}"/>
+                        </b:EventTrigger>
+                    </b:Interaction.Triggers>
+                    <Button.ContentTemplate>
+                        <DataTemplate>
+                            <iconPacks:PackIconUnicons Kind="AngleLeft" />
+                        </DataTemplate>
+                    </Button.ContentTemplate>
+                </Button>
+                <Separator Width="10" Visibility="Hidden"/>
+                <Button Width="32"
+                        Height="32 "
+                        Margin="2"
+                        Foreground="{DynamicResource MahApps.Brushes.Accent}"
+                        Style="{StaticResource MahApps.Styles.Button.Circle}" ToolTip="Zoom out heatmap">
+                    <b:Interaction.Triggers>
+                        <b:EventTrigger EventName="Click">
+                            <b:InvokeCommandAction Command="{Binding NextFrameNoteCommand}"/>
+                        </b:EventTrigger>
+                    </b:Interaction.Triggers>
+                    <Button.ContentTemplate>
+                        <DataTemplate>
+                            <iconPacks:PackIconUnicons Kind="AngleRight" />
+                        </DataTemplate>
+                    </Button.ContentTemplate>
+                </Button>
+
+            </StackPanel>
+            <DockPanel  Grid.Column="2" HorizontalAlignment="Right">
+                <mah:ToggleSwitch x:Name="editToggle" OffContent="Edit Bounds"
+                                  OnContent="Editing Bounds"
+                                  Command="{Binding  ToggleSensorBoundsCommand}"
+                                  CommandParameter="{Binding ElementName=editToggle, Path=IsOn}" />
+            </DockPanel>
+        </Grid>
+
         <Grid Row="1" VerticalAlignment="Stretch" Margin="0, 20, 0, 0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="125" />
@@ -233,6 +291,69 @@
                 <oxyWpf:PlotView x:Name="mainPlot" Model="{Binding MainPlotModel}"
                                  Controller="{Binding MainPlotController}" />
             </ScrollViewer>
+            
+            <Rectangle Grid.Column="1" Fill="DarkGray" VerticalAlignment="Top" HorizontalAlignment="Left" Opacity="0.5"
+                       Margin="{Binding  SensorBoundUpperMargin}" Width="{Binding SensorBoundWidth}"
+                       Height="{Binding SensorBoundUpperHeight}">
+                <Rectangle.Style>
+                    <Style TargetType="Rectangle">
+                        <Setter Property="Visibility" Value="Collapsed" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding PickingSensorBounds}" Value="True">
+                                <Setter Property="Visibility" Value="Visible" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Rectangle.Style>
+            </Rectangle>
+            <Rectangle Grid.Column="1" Fill="DarkGray" VerticalAlignment="Bottom" HorizontalAlignment="Left"
+                       Opacity="0.5" Margin="{Binding  SensorBoundLowerMargin}" Width="{Binding SensorBoundWidth}"
+                       Height="{Binding SensorBoundLowerHeight}">
+                <Rectangle.Style>
+                    <Style TargetType="Rectangle">
+                        <Setter Property="Visibility" Value="Collapsed" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding PickingSensorBounds}" Value="True">
+                                <Setter Property="Visibility" Value="Visible" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Rectangle.Style>
+            </Rectangle>
+            <mah:RangeSlider Grid.Column="1" x:Name="sensorBoundSlider" Margin="{Binding  SensorBoundsSliderMargin}"
+                             mah:SliderHelper.EnableMouseWheel="MouseHover"
+                             AutoToolTipPlacement="None" HorizontalAlignment="Left" VerticalAlignment="Top"
+                 
+                             LargeChange="10"
+                             IsSnapToTickEnabled=" True"
+                             LowerValue="{Binding MinSensorBound}"
+                             UpperValue="{Binding MaxSensorBound}"
+                             Maximum="{Binding ExamSensorSize}"
+                             Minimum="0" MinRangeWidth="0" 
+                             Orientation="Vertical"
+                             SmallChange="0.1" Height="{Binding SensorBoundHeight}">
+                <b:Interaction.Triggers>
+                    <b:EventTrigger EventName="UpperValueChanged">
+                        <b:InvokeCommandAction Command="{Binding SensorBoundsChangedCommand}"/>
+                    </b:EventTrigger>
+                    <b:EventTrigger EventName="LowerValueChanged">
+                        <b:InvokeCommandAction Command="{Binding SensorBoundsChangedCommand}"/>
+                    </b:EventTrigger>
+                    <b:EventTrigger EventName="CentralThumbDragCompleted">
+                        <b:InvokeCommandAction Command="{Binding SensorBoundsChangedCommand}"/>
+                    </b:EventTrigger>
+                </b:Interaction.Triggers>
+                <mah:RangeSlider.Style>
+                    <Style TargetType="mah:RangeSlider">
+                        <Setter Property="Visibility" Value="Collapsed" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding PickingSensorBounds}" Value="True">
+                                <Setter Property="Visibility" Value="Visible" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </mah:RangeSlider.Style>
+            </mah:RangeSlider>
         </Grid>
 
         <ScrollViewer Grid.Row="2" Margin="5">

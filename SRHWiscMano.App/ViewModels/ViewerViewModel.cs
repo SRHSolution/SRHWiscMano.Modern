@@ -5,9 +5,12 @@ using System.ComponentModel;
 using System.DirectoryServices.ActiveDirectory;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Runtime.Serialization;
 using System.Security.Cryptography.Xml;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -60,9 +63,27 @@ namespace SRHWiscMano.App.ViewModels
         [ObservableProperty] private double maxSensorData;
         [ObservableProperty] private double minSensorRange = 0;
         [ObservableProperty] private double maxSensorRange = 100;
+
         [ObservableProperty] private double timeDuration = 2000;
         [ObservableProperty] private OxyPalette selectedPalette = OxyPalettes.Hue64;
-        [ObservableProperty] private double interpolateSensorScale = 10;
+
+        [ObservableProperty] private double examSensorSize;
+
+        // Sensor Bound Properties
+        [ObservableProperty] private bool pickingSensorBounds = false;
+        [ObservableProperty] private Thickness sensorBoundUpperMargin;
+        [ObservableProperty] private Thickness sensorBoundLowerMargin;
+        [ObservableProperty] private Thickness sensorBoundsSliderMargin;
+
+        [ObservableProperty] private double minSensorBound;
+        [ObservableProperty] private double maxSensorBound;
+
+
+        [ObservableProperty] private double sensorBoundWidth;
+        [ObservableProperty] private double sensorBoundHeight;
+        [ObservableProperty] private double sensorBoundUpperHeight;
+        [ObservableProperty] private double sensorBoundLowerHeight;
+
 
         private bool updateSubRange = true;
 
@@ -150,6 +171,10 @@ namespace SRHWiscMano.App.ViewModels
 
             UpdateSubRange = this.settings.UpdateSubRange;
 
+            minSensorBound = this.settings.MinSensorBound;
+            maxSensorBound = this.settings.MaxSensorBound;
+            SensorBoundsChanged();
+
             WeakReferenceMessenger.Default.Register<AppBaseThemeChangedMessage>(this, ThemeChanged);
         }
 
@@ -174,7 +199,10 @@ namespace SRHWiscMano.App.ViewModels
         private IDisposable axisChangeObserver = null;
         private readonly SourceCache<ITimeFrame, int> timeFrames;
 
-
+        /// <summary>
+        /// SharedService의 TimeFrames에 등록된 데이터를 View에 binding 작업을 수행한다.
+        /// </summary>
+        /// <param name="changeSet"></param>
         private void HandleTimeFrames(IChangeSet<ITimeFrame, int> changeSet)
         {
             foreach (var change in changeSet)
@@ -191,10 +219,12 @@ namespace SRHWiscMano.App.ViewModels
                     }
                     case ChangeReason.Remove:
                     {
-                        var mainAnno = MainPlotModel.Annotations.OfType<LineAnnotation>().Single(item => (int) item.Tag == change.Current.Id);
+                        var mainAnno = MainPlotModel.Annotations.OfType<LineAnnotation>()
+                            .Single(item => (int)item.Tag == change.Current.Id);
                         MainPlotModel.Annotations.Remove(mainAnno);
 
-                        var overAnno = OverviewPlotModel.Annotations.OfType<LineAnnotation>().Single(item => (int) item.Tag == change.Current.Id);
+                        var overAnno = OverviewPlotModel.Annotations.OfType<LineAnnotation>()
+                            .Single(item => (int)item.Tag == change.Current.Id);
                         OverviewPlotModel.Annotations.Remove(overAnno);
 
                         logger.LogTrace($"Removed: {change.Current.Text}");
@@ -205,12 +235,14 @@ namespace SRHWiscMano.App.ViewModels
                     case ChangeReason.Update:
                     {
                         var msec = change.Current.Time.ToMillisecondsFromEpoch() / 10;
-                        var mainAnno = MainPlotModel.Annotations.OfType<LineAnnotation>().Single(item => (int) item.Tag == change.Current.Id);
+                        var mainAnno = MainPlotModel.Annotations.OfType<LineAnnotation>()
+                            .Single(item => (int)item.Tag == change.Current.Id);
                         mainAnno.Text = change.Current.Text;
                         mainAnno.X = msec;
                         MainPlotModel.InvalidatePlot(false);
 
-                        var overAnno = OverviewPlotModel.Annotations.OfType<LineAnnotation>().Single(item => (int) item.Tag == change.Current.Id);
+                        var overAnno = OverviewPlotModel.Annotations.OfType<LineAnnotation>()
+                            .Single(item => (int)item.Tag == change.Current.Id);
                         overAnno.Text = change.Current.Text;
                         overAnno.X = msec;
                         OverviewPlotModel.InvalidatePlot(false);
@@ -258,7 +290,7 @@ namespace SRHWiscMano.App.ViewModels
                 // Handle mouse movements (note: this is only called when the mousedown event was handled)
                 la.MouseMove += (s, e) =>
                 {
-                    la.X = (long) la.InverseTransform(e.Position).X;
+                    la.X = (long)la.InverseTransform(e.Position).X;
                     model.InvalidatePlot(false);
                     e.Handled = true;
                 };
@@ -268,8 +300,8 @@ namespace SRHWiscMano.App.ViewModels
                     la.StrokeThickness /= 5;
                     model.InvalidatePlot(false);
 
-                    la.X = (long) la.InverseTransform(e.Position).X;
-                    timeFrame.UpdateTime(Instant.FromUnixTimeMilliseconds((long) la.X * 10));
+                    la.X = (long)la.InverseTransform(e.Position).X;
+                    timeFrame.UpdateTime(Instant.FromUnixTimeMilliseconds((long)la.X * 10));
                     timeFrames.AddOrUpdate(timeFrame);
 
                     e.Handled = true;
@@ -288,8 +320,9 @@ namespace SRHWiscMano.App.ViewModels
         private void LoadExamDataImpl()
         {
             var examData = sharedService.ExamData;
-            var sensorCount = (int) (examData.SensorCount() * InterpolateSensorScale);
+            var sensorCount = (int)(examData.SensorCount() * settings.InterpolateSensorScale);
             var frameCount = examData.Samples.Count;
+            ExamSensorSize = sensorCount;
 
             fullExamData = examData.PlotData;
 
@@ -332,10 +365,10 @@ namespace SRHWiscMano.App.ViewModels
                 var range = xAxis.ActualMaximum - xAxis.ActualMinimum;
                 var delta = a.Delta > 0 ? -50 : 50;
                 var newRange = range + delta;
-                var scale =  range/ newRange;
+                var scale = range / newRange;
                 var current = xAxis.InverseTransform(a.Position.X);
                 xAxis.ZoomAt(scale, current);
-                
+
                 // update view
                 var newActualRange = Math.Round(xAxis.ActualMaximum - xAxis.ActualMinimum);
                 MainPlotModel.InvalidatePlot(true);
@@ -407,8 +440,9 @@ namespace SRHWiscMano.App.ViewModels
             var xAxis = MainPlotModel.Axes.FirstOrDefault(a => a.Position == AxisPosition.Bottom);
             if (xAxis != null)
             {
-                double[,] newData = PlotDataUtils.CreateSubRange(fullExamData, (int) xAxis.ActualMinimum,
-                    (int) xAxis.ActualMaximum, 0, fullExamData.GetLength(1) - 1);
+                // TODO : WiscMono 처럼 fullExamData를 Load시에 모두 interpolation 하고 사용하는 것이 아니라, 원본 데이터는 그대로 현재의 view에 넣을 데이터만 interpolation 을 수행해서 업데이트 하는 방식을 도입하는 것을 고려하자.
+                double[,] newData = PlotDataUtils.CreateSubRange(fullExamData, (int)xAxis.ActualMinimum,
+                    (int)xAxis.ActualMaximum, 0, fullExamData.GetLength(1) - 1);
 
                 var axisRange = xAxis.ActualMaximum - xAxis.ActualMinimum;
                 if (axisRange < 1000)
@@ -419,14 +453,14 @@ namespace SRHWiscMano.App.ViewModels
                 {
                     xAxis.MajorStep = 1000;
                 }
-                
+
                 var heatMapSeries = MainPlotModel.Series.OfType<HeatMapSeries>().FirstOrDefault();
                 if (heatMapSeries != null)
                 {
                     heatMapSeries.Data = newData;
                     // LinearAxis 에 의해서 위치가 변경되었으므로, Series 에서도 데이터를 해당 위치에 출력하도록 한다.
-                    heatMapSeries.X0 = (int) xAxis.ActualMinimum;
-                    heatMapSeries.X1 = (int) xAxis.ActualMaximum;
+                    heatMapSeries.X0 = (int)xAxis.ActualMinimum;
+                    heatMapSeries.X1 = (int)xAxis.ActualMaximum;
                 }
             }
 
@@ -506,6 +540,7 @@ namespace SRHWiscMano.App.ViewModels
                 Tag = "Color"
             });
 
+            // Y-Axiss
             model.Axes.Add(new LinearAxis()
             {
                 IsPanEnabled = false,
@@ -516,7 +551,7 @@ namespace SRHWiscMano.App.ViewModels
                 Minimum = 0, // 초기 시작값
                 Maximum = ySize - 1, // 초기 최대값
                 AbsoluteMinimum = 0, // Panning 최소값
-                AbsoluteMaximum = ySize * InterpolateSensorScale - 1, // Panning 최대값
+                AbsoluteMaximum = ySize * settings.InterpolateSensorScale - 1, // Panning 최대값
                 IsAxisVisible = false,
                 Tag = "Y"
             });
@@ -543,8 +578,8 @@ namespace SRHWiscMano.App.ViewModels
         private void ZoomInOut(double zoomVal)
         {
             TimeDuration += zoomVal;
-            var mainX = MainPlotModel.Axes.First(ax => (string) ax.Tag == "X");
-            mainX.Zoom(mainX.ActualMinimum, mainX.ActualMinimum+TimeDuration);
+            var mainX = MainPlotModel.Axes.First(ax => (string)ax.Tag == "X");
+            mainX.Zoom(mainX.ActualMinimum, mainX.ActualMinimum + TimeDuration);
             MainPlotModel.InvalidatePlot(true);
             // OverviewPlotModel.InvalidatePlot(false);
             logger.LogTrace($"Zoom Timeduration : {TimeDuration}");
@@ -555,7 +590,7 @@ namespace SRHWiscMano.App.ViewModels
             TimeDuration += zoomVal;
             var mainX = MainPlotModel.Axes.First(ax => (string)ax.Tag == "X");
             var mainY = MainPlotModel.Axes.First(ax => (string)ax.Tag == "Y");
-            var xPos = mainX.InverseTransform(pos.X, pos.Y, mainY ).X;
+            var xPos = mainX.InverseTransform(pos.X, pos.Y, mainY).X;
             var minX = (xPos - TimeDuration / 2);
             var maxX = (xPos + TimeDuration / 2);
             mainX.Zoom(minX, maxX);
@@ -567,7 +602,7 @@ namespace SRHWiscMano.App.ViewModels
         private void FitToScreen()
         {
             sharedService.TimeFrames.Refresh();
-            var overviewX = OverviewPlotModel.Axes.First(ax => (string) ax.Tag == "X");
+            var overviewX = OverviewPlotModel.Axes.First(ax => (string)ax.Tag == "X");
             overviewX.Zoom(overviewX.AbsoluteMinimum, overviewX.AbsoluteMaximum);
             OverviewPlotModel.InvalidatePlot(false);
         }
@@ -655,6 +690,32 @@ namespace SRHWiscMano.App.ViewModels
         [RelayCommand]
         private void PrevFrameNote()
         {
+            var xAxis = MainPlotModel.Axes.First(ax => ax.Tag == "X");
+            var axisHalfWidth = (xAxis.ActualMaximum - xAxis.ActualMinimum) / 2;
+            try
+            {
+                var posX = (double)timeFrames.KeyValues.Where(kv =>
+                        (double)kv.Value.Time.ToUnixTimeMilliseconds() / 10 < (xAxis.ActualMinimum + axisHalfWidth)-1)
+                    .Select(kv => kv.Value.Time.ToUnixTimeMilliseconds()).Last() / 10;
+
+                var newMinimum = 0.0;
+                // Center 위치를 지정할 수 있음
+                if (posX - axisHalfWidth >= 0)
+                {
+                    newMinimum = posX - axisHalfWidth;
+                }
+                else
+                {
+                    newMinimum = 0;
+                }
+
+                var delta = (xAxis.ActualMinimum - newMinimum) * xAxis.Scale;
+                xAxis.Pan(delta);
+                MainPlotModel.InvalidatePlot(false);
+            }
+            catch (Exception)
+            {
+            }
         }
 
         /// <summary>
@@ -664,6 +725,111 @@ namespace SRHWiscMano.App.ViewModels
         [RelayCommand]
         private void NextFrameNote()
         {
+            var xAxis = MainPlotModel.Axes.First(ax => ax.Tag == "X");
+            var axisHalfWidth = (xAxis.ActualMaximum - xAxis.ActualMinimum) / 2;
+
+            try
+            {
+                var posX = (double)timeFrames.KeyValues.Where(kv =>
+                        kv.Value.Time.ToUnixTimeMilliseconds() / 10 > (xAxis.ActualMinimum + axisHalfWidth)+1)
+                    .Select(kv => kv.Value.Time.ToUnixTimeMilliseconds()).First() / 10;
+
+                var newMinimum = 0.0;
+                // Center 위치를 지정할 수 있음
+                if (posX - axisHalfWidth >= 0)
+                {
+                    newMinimum = posX - axisHalfWidth;
+                }
+                else
+                {
+                    newMinimum = 0;
+                }
+
+                var delta = (xAxis.ActualMinimum - newMinimum) * xAxis.Scale;
+                xAxis.Pan(delta);
+                MainPlotModel.InvalidatePlot(false);
+            }
+            catch (Exception)
+            {
+            }
+        }
+
+
+        
+        [RelayCommand]
+        private void ToggleSensorBounds(bool sender)
+        {
+            PickingSensorBounds = sender;
+            var heatMapSeries = MainPlotModel.Series.OfType<HeatMapSeries>().FirstOrDefault();
+            var mainYAxis = MainPlotModel.Axes.First(ax => ax.Tag == "Y");
+
+            // TODO : 이전에 Sensor 범위가 전체 범위가 아닌 경우에는 먼저 복구한 모습에서 Bounds를 설정할 수 있어야한다.
+            if (PickingSensorBounds)
+            {
+                if (heatMapSeries != null)
+                {
+                    // LinearAxis 에 의해서 위치가 변경되었으므로, Series 에서도 데이터를 해당 위치에 출력하도록 한다.
+                    mainYAxis.Minimum = mainYAxis.AbsoluteMinimum;
+                    mainYAxis.Maximum = mainYAxis.AbsoluteMaximum;
+
+                    heatMapSeries.Y0 = (int)mainYAxis.ActualMinimum;
+                    heatMapSeries.Y1 = (int)mainYAxis.ActualMaximum;
+
+                    MainPlotModel.InvalidatePlot(true);
+                }
+
+                var area = MainPlotModel.PlotArea;
+
+                SensorBoundUpperMargin = new Thickness(area.Left, area.Top, 0, 0);
+                SensorBoundLowerMargin = new Thickness(area.Left, 0, 0, MainPlotModel.Height - area.Bottom);
+                SensorBoundsSliderMargin = new Thickness(area.Left - 12, area.Top - 4, 0, 0);
+
+                SensorBoundHeight = MainPlotModel.PlotArea.Height + 8;
+                SensorBoundWidth = area.Width;
+            }
+            else
+            {
+                if (heatMapSeries != null)
+                {
+                    // LinearAxis 에 의해서 위치가 변경되었으므로, Series 에서도 데이터를 해당 위치에 출력하도록 한다.
+                    mainYAxis.Minimum = MinSensorBound;
+                    mainYAxis.Maximum = MaxSensorBound;
+
+                    heatMapSeries.Y0 = (int)mainYAxis.ActualMinimum;
+                    heatMapSeries.Y1 = (int)mainYAxis.ActualMaximum;
+
+                    MainPlotModel.InvalidatePlot(true);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Sensor Bounds의 upper/lower 값을 변경할 때 표시할 높이를 변경한다
+        /// </summary>
+        [RelayCommand]
+        private void SensorBoundsChanged()
+        {
+            var minPos = MinSensorBound / (ExamSensorSize) * (MainPlotModel.PlotArea.Height - 8);
+            var maxPos = (ExamSensorSize - MaxSensorBound) * (MainPlotModel.PlotArea.Height - 8) / ExamSensorSize;
+            SensorBoundLowerHeight = minPos;
+            SensorBoundUpperHeight = maxPos;
+
+            settings.MinSensorBound = MinSensorBound;
+            settings.MaxSensorBound = MaxSensorBound;
+        }
+
+        /// <summary>
+        /// WindowSize가 변경되면 SensorBounds 관련 control을 업데이트 한다.
+        /// </summary>
+        /// <param name="sender"></param>
+        [RelayCommand]
+        private void WindowSizeChanged(object sender)
+        {
+            if (PickingSensorBounds)
+            {
+                ToggleSensorBounds(true);
+                SensorBoundsChanged();
+            }
         }
     }
 }
