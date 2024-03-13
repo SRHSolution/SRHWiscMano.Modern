@@ -43,6 +43,7 @@ namespace SRHWiscMano.App.ViewModels
 
         public ObservableCollection<TimeFrameViewModel> TimeFrameViewModels { get; } = new();
 
+
         public AnalyzerViewModel(ILogger<AnalyzerViewModel> logger, SharedService sharedService,
             IOptions<AppSettings> settings)
         {
@@ -55,8 +56,11 @@ namespace SRHWiscMano.App.ViewModels
         }
 
 
+        /// <summary>
+        /// 
+        /// </summary>
         [RelayCommand]
-        private void ViewIsLoaded()
+        private void ListItemsLoaded()
         {
             if (timeFrames.Count > 0 && SelectedIndexOfTimeFrameViewModel < 0)
             {
@@ -142,6 +146,10 @@ namespace SRHWiscMano.App.ViewModels
             }
         }
 
+        /// <summary>
+        /// TimeFrame 리스트에서 이전 item을 선택한다.
+        /// </summary>
+        /// <param name="selectedIndex"></param>
         [RelayCommand]
         private void PreviousTimeFrame(int selectedIndex)
         {
@@ -149,11 +157,51 @@ namespace SRHWiscMano.App.ViewModels
                 SelectedIndexOfTimeFrameViewModel -= 1;
         }
 
+        /// <summary>
+        /// TimeFrame 리스트에서 다음 item을 선택한다.
+        /// </summary>
+        /// <param name="selectedIndex"></param>
         [RelayCommand]
         private void NextTimeFrame(int selectedIndex)
         {
             if (selectedIndex < TimeFrameViewModels.Count - 1)
                 SelectedIndexOfTimeFrameViewModel += 1;
+        }
+
+        /// <summary>
+        /// TimeFrame 에서의 데이터를 분석한다
+        /// </summary>
+        [RelayCommand]
+        private void InspectFrame()
+        {
+
+        }
+
+        /// <summary>
+        /// 이전 TimeFrame에서 선택한 조건에 맞춰 모든 TimeFrame에 대해 자동으로 Inspect를 수행한다
+        /// </summary>
+        [RelayCommand]
+        private void AutoInspectFrame()
+        {
+
+        }
+
+        /// <summary>
+        /// Inspect 결과를 초기화한다
+        /// </summary>
+        [RelayCommand]
+        private void ResetInspect()
+        {
+
+        }
+
+        /// <summary>
+        /// Inspect를 Undo 한다
+        /// </summary>
+        [RelayCommand]
+        private void UndoInspect()
+        {
+
         }
     }
 }
