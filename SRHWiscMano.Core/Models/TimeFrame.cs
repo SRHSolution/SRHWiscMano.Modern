@@ -17,10 +17,14 @@ namespace SRHWiscMano.Core.Models
         
         public Instant Time { get; private set; }
         
+        /// <summary>
+        /// PlotData가 포함할 시간크기
+        /// </summary>
         public double TimeDuration { get; }
 
-        public double TimeTimeDuration { get; }
-
+        /// <summary>
+        /// Plot을 그리기 위한 실제 데이터
+        /// </summary>
         public double[,] PlotData { get; private set; }
 
         [Obsolete("ManoViewer 의 origin 구성")]
@@ -61,21 +65,27 @@ namespace SRHWiscMano.Core.Models
             PlotData = plotData;
         }
 
+
         public TimeFrame(string text, Instant time, double timeDuration, double[,] examPlotData)
         {
             Id = Interlocked.Increment(ref GuidId);
             Text = text;
             Time = time;
-            TimeTimeDuration = timeDuration;
+            TimeDuration = timeDuration;
             this.examPlotData = examPlotData;
             
             UpdateTime(Time);
         }
 
+        /// <summary>
+        /// TimeFrame 의 지정된 시간을 변경한다.
+        /// 지정된 시간에서 +/- duration 의 간격에 대해 PlotData를 업데이트 한다.
+        /// </summary>
+        /// <param name="newTime"></param>
         public void UpdateTime(Instant newTime)
         {
-            var startRow = (int)Math.Round(newTime.ToUnixTimeMilliseconds() - TimeTimeDuration / 2) / 10;
-            var endRow = (int)Math.Round(newTime.ToUnixTimeMilliseconds() + TimeTimeDuration / 2) / 10;
+            var startRow = (int)Math.Round(newTime.ToUnixTimeMilliseconds() - TimeDuration / 2) / 10;
+            var endRow = (int)Math.Round(newTime.ToUnixTimeMilliseconds() + TimeDuration / 2) / 10;
             PlotData = PlotDataUtils.CreateSubRange(examPlotData, startRow, endRow-1, 0, examPlotData.GetLength(1)-1);
             Time = newTime;
         }

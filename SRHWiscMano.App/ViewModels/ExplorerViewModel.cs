@@ -55,6 +55,10 @@ namespace SRHWiscMano.App.ViewModels
             sharedService.ExamDataLoaded += SharedService_ExamDataLoaded;
         }
 
+        /// <summary>
+        /// SharedService의 TimeFrames에 등록된 데이터를 View에 binding 작업을 수행한다.
+        /// </summary>
+        /// <param name="changeSet"></param>
         private void HandleTimeFrames(IChangeSet<ITimeFrame, int> changeSet)
         {
             foreach (var change in changeSet)

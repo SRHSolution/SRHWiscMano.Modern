@@ -54,6 +54,12 @@ namespace SRHWiscMano.App.ViewModels
             timeFrames.Connect().Subscribe(HandleTimeFrames);
         }
 
+
+
+        /// <summary>
+        /// SharedService의 TimeFrames에 등록된 데이터를 View에 binding 작업을 수행한다.
+        /// </summary>
+        /// <param name="changeSet"></param>
         private void HandleTimeFrames(IChangeSet<ITimeFrame, int> changeSet)
         {
             foreach (var change in changeSet)
@@ -105,6 +111,10 @@ namespace SRHWiscMano.App.ViewModels
             }
         }
 
+        /// <summary>
+        /// View의 TimeFrames listview 에서 선택된 item 객체를 받는다.
+        /// </summary>
+        /// <param name="selectedItem"></param>
         [RelayCommand]
         private void SelectionChanged(object selectedItem)
         {

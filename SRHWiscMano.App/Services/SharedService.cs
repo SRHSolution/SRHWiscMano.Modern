@@ -20,10 +20,17 @@ namespace SRHWiscMano.App.Services
     {
         private readonly ILogger<SharedService> logger;
         private readonly AppSettings settings;
+
+        /// <summary>
+        /// 분석할 TimeSample 및 TimeNote 데이터를 갖고 있는 객체, 모든 viewmodel에 연동됨.
+        /// </summary>
         public IExamination? ExamData { get; private set; }
 
         public IExamMetaData? ExamMetaData { get; private set; }
 
+        /// <summary>
+        /// Notes 정보를 기준으로 일정 영역을 분리하여 볼 수 있도록 하는 데이터
+        /// </summary>
         public SourceCache<ITimeFrame, int> TimeFrames { get; } = new SourceCache<ITimeFrame, int>(item => item.Id);
 
         public event EventHandler? ExamDataLoaded;

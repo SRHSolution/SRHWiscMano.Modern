@@ -199,7 +199,10 @@ namespace SRHWiscMano.App.ViewModels
         private IDisposable axisChangeObserver = null;
         private readonly SourceCache<ITimeFrame, int> timeFrames;
 
-
+        /// <summary>
+        /// SharedService의 TimeFrames에 등록된 데이터를 View에 binding 작업을 수행한다.
+        /// </summary>
+        /// <param name="changeSet"></param>
         private void HandleTimeFrames(IChangeSet<ITimeFrame, int> changeSet)
         {
             foreach (var change in changeSet)
@@ -752,6 +755,7 @@ namespace SRHWiscMano.App.ViewModels
         }
 
 
+        
         [RelayCommand]
         private void ToggleSensorBounds(bool sender)
         {
@@ -759,6 +763,7 @@ namespace SRHWiscMano.App.ViewModels
             var heatMapSeries = MainPlotModel.Series.OfType<HeatMapSeries>().FirstOrDefault();
             var mainYAxis = MainPlotModel.Axes.First(ax => ax.Tag == "Y");
 
+            // TODO : 이전에 Sensor 범위가 전체 범위가 아닌 경우에는 먼저 복구한 모습에서 Bounds를 설정할 수 있어야한다.
             if (PickingSensorBounds)
             {
                 if (heatMapSeries != null)
