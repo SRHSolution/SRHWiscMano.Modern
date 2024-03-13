@@ -93,9 +93,13 @@ namespace SRHWiscMano.Core.ViewModels
             for (int colId = 0; colId < sensorCount; colId++)
             {
                 var lineSeries = new LineSeries();
+                lineSeries.LineStyle = LineStyle.Solid;
+                lineSeries.StrokeThickness = 1;
+                lineSeries.Color = OxyColors.Gray;
+
                 for (int rowId = 0; rowId < frameCount; rowId++)
                 {
-                    lineSeries.Points.Add(new OxyPlot.DataPoint(rowId, (colId * SensorRange) + plotData[rowId, colId]* valueScale));
+                    lineSeries.Points.Add(new OxyPlot.DataPoint(rowId, (colId * SensorRange) + plotData[rowId, colId]* valueScale*2));
                 }
 
                 model.Series.Add(lineSeries);

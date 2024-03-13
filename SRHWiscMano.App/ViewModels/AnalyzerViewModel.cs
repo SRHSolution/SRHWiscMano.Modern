@@ -39,7 +39,7 @@ namespace SRHWiscMano.App.ViewModels
 
         [ObservableProperty] private string statusMessage = "Test status message";
 
-        [ObservableProperty] private int selectedIndexOfTimeFrameViewModel = 0;
+        [ObservableProperty] private int selectedIndexOfTimeFrameViewModel = -1;
 
         public ObservableCollection<TimeFrameViewModel> TimeFrameViewModels { get; } = new();
 
@@ -55,6 +55,15 @@ namespace SRHWiscMano.App.ViewModels
         }
 
 
+        [RelayCommand]
+        private void ViewIsLoaded()
+        {
+            if (timeFrames.Count > 0 && SelectedIndexOfTimeFrameViewModel < 0)
+            {
+                SelectedIndexOfTimeFrameViewModel = 0;
+            }
+        }
+
 
         /// <summary>
         /// SharedService의 TimeFrames에 등록된 데이터를 View에 binding 작업을 수행한다.
@@ -69,7 +78,8 @@ namespace SRHWiscMano.App.ViewModels
                     case ChangeReason.Add:
                     {
                         var insertIdx = timeFrames.Items.Index()
-                            .FirstOrDefault(itm => itm.Value.Time > change.Current.Time, new(TimeFrameViewModels.Count, null)).Key;
+                            .FirstOrDefault(itm => itm.Value.Time > change.Current.Time,
+                                new(TimeFrameViewModels.Count, null)).Key;
                         var viewmodel = new TimeFrameViewModel(change.Current);
                         viewmodel.FramePlotController = new PlotController();
                         viewmodel.FramePlotController.UnbindAll();
@@ -137,14 +147,12 @@ namespace SRHWiscMano.App.ViewModels
         {
             if (selectedIndex > 0)
                 SelectedIndexOfTimeFrameViewModel -= 1;
-
-            
         }
 
         [RelayCommand]
         private void NextTimeFrame(int selectedIndex)
         {
-            if (selectedIndex < TimeFrameViewModels.Count-1)
+            if (selectedIndex < TimeFrameViewModels.Count - 1)
                 SelectedIndexOfTimeFrameViewModel += 1;
         }
     }

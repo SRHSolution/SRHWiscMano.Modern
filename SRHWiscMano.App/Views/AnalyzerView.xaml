@@ -60,6 +60,9 @@
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
             <b:Interaction.Triggers>
+                <b:EventTrigger EventName="Loaded">
+                    <b:InvokeCommandAction Command="{Binding ViewIsLoadedCommand}"/>
+                </b:EventTrigger>
                 <b:EventTrigger EventName="SelectionChanged">
                     <b:InvokeCommandAction Command="{Binding SelectionChangedCommand}"
                                            CommandParameter="{Binding SelectedItem, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBox}}}" />
