@@ -123,6 +123,8 @@ namespace SRHWiscMano.App.ViewModels
                 var timeFrameData = (selectedItem as TimeFrameViewModel).Data;
                 var timeFrameClone = new TimeFrameViewModel(timeFrameData);
                 MainPlotModel = timeFrameClone.FramePlotModel;
+                var timeFrameGraph = new TimeFrameGraphViewModel(timeFrameData);
+                GraphPlotModel = timeFrameGraph.FramePlotModel;
             }
             catch
             {
