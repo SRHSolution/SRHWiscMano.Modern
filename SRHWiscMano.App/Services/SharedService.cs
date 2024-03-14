@@ -64,7 +64,7 @@ namespace SRHWiscMano.App.Services
         public TimeFrame CreateTimeFrame(string text, Instant time)
         {
             ExamData.ShouldNotBeNull("Examdata should be loaded first");
-            return new TimeFrame(text, time, settings.TimeFrameDurationInMillisecond, ExamData.PlotData);
+            return new TimeFrame(text, time, settings.TimeFrameDurationInMillisecond, ExamData.PlotData, settings.InterpolateSensorScale);
         }
 
 

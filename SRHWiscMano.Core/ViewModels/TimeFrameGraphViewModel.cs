@@ -58,7 +58,8 @@ namespace SRHWiscMano.Core.ViewModels
 
         public TimeFrameGraphViewModel(ITimeFrame data)
         {
-            this.Data = data;
+
+            this.Data = (ITimeFrame)data.Clone();
             this.Id = data.Id;
             this.Time = data.Time;
             this.Label = data.Text;
@@ -72,8 +73,11 @@ namespace SRHWiscMano.Core.ViewModels
             }
 
             var plotModel = new PlotModel();
-            AddAxes(plotModel, data.PlotData.GetLength(0), data.PlotData.GetLength(1));
-            AddLineSeries(plotModel, data.PlotData);
+            (this.Data as TimeFrame).InterpolateScale = 1;
+            this.Data.UpdateTime(data.Time);
+
+            AddAxes(plotModel, this.Data.PlotData.GetLength(0), this.Data.PlotData.GetLength(1));
+            AddLineSeries(plotModel, Data.PlotData);
             FramePlotModel = plotModel;
         }
 

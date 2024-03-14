@@ -11,7 +11,7 @@ namespace SRHWiscMano.Core.Models
         private static int GuidId = 0;
         public int Id { get; }
 
-        private readonly double[,] examPlotData;
+        public double[,] ExamData { get; private set; }
 
         public string Text { get; set; }
         
@@ -21,6 +21,8 @@ namespace SRHWiscMano.Core.Models
         /// PlotData가 포함할 시간크기
         /// </summary>
         public double TimeDuration { get; }
+
+        public int InterpolateScale { get; set; }
 
         /// <summary>
         /// Plot을 그리기 위한 실제 데이터
@@ -66,13 +68,14 @@ namespace SRHWiscMano.Core.Models
         }
 
 
-        public TimeFrame(string text, Instant time, double timeDuration, double[,] examPlotData)
+        public TimeFrame(string text, Instant time, double timeDuration, double[,] examData, int interpolateScale)
         {
             Id = Interlocked.Increment(ref GuidId);
             Text = text;
             Time = time;
             TimeDuration = timeDuration;
-            this.examPlotData = examPlotData;
+            InterpolateScale = interpolateScale;
+            this.ExamData = examData;
             
             UpdateTime(Time);
         }
@@ -86,8 +89,13 @@ namespace SRHWiscMano.Core.Models
         {
             var startRow = (int)Math.Round(newTime.ToUnixTimeMilliseconds() - TimeDuration / 2) / 10;
             var endRow = (int)Math.Round(newTime.ToUnixTimeMilliseconds() + TimeDuration / 2) / 10;
-            PlotData = PlotDataUtils.CreateSubRange(examPlotData, startRow, endRow-1, 0, examPlotData.GetLength(1)-1);
+            PlotData = PlotDataUtils.CreateSubRange(this.ExamData, startRow, endRow-1, 0, this.ExamData.GetLength(1)-1, this.InterpolateScale);
             Time = newTime;
+        }
+
+        public object Clone()
+        {
+            return new TimeFrame(this.Text, this.Time, this.TimeDuration, (double[,])ExamData.Clone(), InterpolateScale);
         }
     }
 }
