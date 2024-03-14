@@ -8,6 +8,13 @@ namespace SRHWiscMano.Core.Helpers
 {
     public static class Interpolators
     {
+
+        /// <summary>
+        /// 입력받은 Array 데이터를 newLength의 크기로 다시 분할하여 interpolation한다
+        /// </summary>
+        /// <param name="originalArray"></param>
+        /// <param name="newLength"></param>
+        /// <returns></returns>
         public static double[] LinearInterpolate(double[] originalArray, int newLength)
         {
             double[] interpolatedArray = new double[newLength];

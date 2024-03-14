@@ -4,6 +4,7 @@ using SRHWiscMano.Core.Helpers;
 using SRHWiscMano.Core.Models;
 using SRHWiscMano.Core.Services;
 using System.Reflection;
+using SRHWiscMano.App.Services;
 
 namespace SRHWiscMano.Test
 {
@@ -18,6 +19,7 @@ namespace SRHWiscMano.Test
 
             var services = new ServiceCollection();
             SRHWiscMano.Core.ServiceRegistration.ConfigureServices(services);
+            SRHWiscMano.App.ServiceRegistration.ConfigureServices(services);
             provider = services.BuildServiceProvider();
         }
 
@@ -53,6 +55,28 @@ namespace SRHWiscMano.Test
             Console.WriteLine($"Called {this.GetType().Namespace}.{MethodBase.GetCurrentMethod().Name} : {fileName}");
             var examImporter = provider.GetService<IImportService<IExamination>>();
             var examData = examImporter.ReadFromFile(LoadTestData(fileName));
+
+            Console.WriteLine($"Sensor Range : {examData.SensorCount()}");
+            Console.WriteLine($"Tick Amount  : {examData.TickAmount()}");
+            Console.WriteLine($"Total Interval : {examData.TotalTime()}");
+            Console.WriteLine($"Total Duration : {examData.TotalDuration()}");
+        }
+
+
+        [TestCase("100.txt")]
+        public void TestExamDataInterpolation(string fileName)
+        {
+            Console.WriteLine($"Called {this.GetType().Namespace}.{MethodBase.GetCurrentMethod().Name} : {fileName}");
+            var examImporter = provider.GetService<IImportService<IExamination>>();
+            var examData = examImporter.ReadFromFile(LoadTestData(fileName));
+            var sharedService = provider.GetService<SharedService>();
+
+            PerfBenchmark bench = new PerfBenchmark("Loading ExamData");
+            bench.Start();
+            sharedService.SetExamData(examData);
+            bench.Stop();
+            Console.WriteLine(bench.GetCheckPointsInfos().ToStringJoin("\r\n"));
+
 
             Console.WriteLine($"Sensor Range : {examData.SensorCount()}");
             Console.WriteLine($"Tick Amount  : {examData.TickAmount()}");

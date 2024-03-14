@@ -132,6 +132,8 @@ namespace SRHWiscMano.App.ViewModels
         [RelayCommand]
         private void SelectionChanged(object selectedItem)
         {
+            if (selectedItem == null) return;
+
             try
             {
                 var timeFrameData = (selectedItem as TimeFrameViewModel).Data;
@@ -153,6 +155,7 @@ namespace SRHWiscMano.App.ViewModels
         [RelayCommand]
         private void PreviousTimeFrame(int selectedIndex)
         {
+            logger.LogTrace("Go to previous timeframe");
             if (selectedIndex > 0)
                 SelectedIndexOfTimeFrameViewModel -= 1;
         }
@@ -164,6 +167,7 @@ namespace SRHWiscMano.App.ViewModels
         [RelayCommand]
         private void NextTimeFrame(int selectedIndex)
         {
+            logger.LogTrace("Go to next timeframe");
             if (selectedIndex < TimeFrameViewModels.Count - 1)
                 SelectedIndexOfTimeFrameViewModel += 1;
         }
@@ -174,7 +178,7 @@ namespace SRHWiscMano.App.ViewModels
         [RelayCommand]
         private void InspectFrame()
         {
-
+            logger.LogTrace("Clicked");
         }
 
         /// <summary>
@@ -183,7 +187,7 @@ namespace SRHWiscMano.App.ViewModels
         [RelayCommand]
         private void AutoInspectFrame()
         {
-
+            logger.LogTrace("Clicked");
         }
 
         /// <summary>
@@ -192,7 +196,7 @@ namespace SRHWiscMano.App.ViewModels
         [RelayCommand]
         private void ResetInspect()
         {
-
+            logger.LogTrace("Clicked");
         }
 
         /// <summary>
@@ -201,7 +205,7 @@ namespace SRHWiscMano.App.ViewModels
         [RelayCommand]
         private void UndoInspect()
         {
-
+            logger.LogTrace("Clicked");
         }
     }
 }

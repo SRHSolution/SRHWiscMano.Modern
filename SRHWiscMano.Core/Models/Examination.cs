@@ -18,7 +18,7 @@ namespace SRHWiscMano.Core.Models
             this.Notes = notes.ToImmutableList();
         }
 
-        public Task UpdatePlotData(int interpolateScale)
+        public Task UpdatePlotData(int interpolateScale = 1)
         {
             this.InterpolationScale = interpolateScale;
             return Task.Run(() => { UpdatePlotDataImp(interpolateScale); });
@@ -31,17 +31,24 @@ namespace SRHWiscMano.Core.Models
             var frameCount = Samples.Count;
             
             PlotData = new double[frameCount, sensorCount];
-
-            for (int i = 0; i < frameCount; i++)
+            Parallel.For(0, frameCount, i =>
             {
-                var scaledSensorValues =
-                    Interpolators.LinearInterpolate(Samples[i].Values.ToArray(), sensorCount);
-
+                double[] scaledSensorValues = {};
+                if (interpolateScale != 1)
+                {
+                    scaledSensorValues =
+                        Interpolators.LinearInterpolate(Samples[i].Values.ToArray(), sensorCount);
+                }
+                else
+                {
+                    scaledSensorValues = Samples[i].Values.ToArray();
+                }
+            
                 for (int j = 0; j < sensorCount; j++)
                 {
                     PlotData[i, j] = scaledSensorValues[sensorCount - 1 - j];
                 }
-            }
+            });
         }
 
         public override string ToString()

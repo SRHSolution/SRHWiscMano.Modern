@@ -70,21 +70,38 @@ namespace SRHWiscMano.Core.Helpers
         /// <param name="startColumn">Y축 sensor start index</param>
         /// <param name="endColumn">Y축 sensor end index</param>
         /// <returns></returns>
-        public static double[,] CreateSubRange(double[,] originalArray, int startRow, int endRow, int startColumn, int endColumn)
+        public static double[,] CreateSubRange(double[,] originalArray, int startRow, int endRow, int startColumn, int endColumn, int interpolateScale = 1)
         {
             int numRows = endRow - startRow+1;
             int numCols = endColumn - startColumn+1;
-            double[,] subArray = new double[numRows, numCols];
+            var scaledCols = numCols * interpolateScale;
+            double[,] plotArray = new double[numRows, scaledCols];
 
-            for (int i = startRow; i <= endRow; i++)
+            try
             {
-                for (int j = startColumn; j <= endColumn; j++)
+                for (int i = startRow; i <= endRow; i++)
                 {
-                    subArray[i - startRow, j - startColumn] = originalArray[i, j];
+                    var colArray = new double[numCols];
+
+                    for (int j = startColumn; j <= endColumn; j++)
+                    {
+                        colArray[j - startColumn] = originalArray[i, j];
+                    }
+
+                    var scaledSensorValues =
+                        Interpolators.LinearInterpolate(colArray, scaledCols);
+
+                    for (int j = 0; j < scaledCols; j++)
+                    {
+                        plotArray[i - startRow, j] = scaledSensorValues[j];
+                    }
                 }
             }
-
-            return subArray;
+            catch (Exception ex)
+            {
+                ;
+            }
+            return plotArray;
         }
 
     }

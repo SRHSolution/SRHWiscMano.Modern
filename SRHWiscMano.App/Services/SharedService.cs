@@ -42,12 +42,12 @@ namespace SRHWiscMano.App.Services
             this.settings = settings.Value;
         }
 
-        public async Task SetExamData(IExamination data)
+        public async Task SetExamData(IExamination data, double interpolateScale = 1)
         {
             logger.LogInformation("New ExamData is registered");
 
             this.ExamData = data;
-            await ExamData.UpdatePlotData(settings.InterpolateSensorScale);
+            await ExamData.UpdatePlotData(1);
 
             TimeFrames.Clear();
             // TimeFrames.Refresh();

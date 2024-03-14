@@ -320,7 +320,7 @@ namespace SRHWiscMano.App.ViewModels
         private void LoadExamDataImpl()
         {
             var examData = sharedService.ExamData;
-            var sensorCount = (int)(examData.SensorCount() * settings.InterpolateSensorScale);
+            var sensorCount = examData.SensorCount();
             var frameCount = examData.Samples.Count;
             ExamSensorSize = sensorCount;
 
@@ -340,12 +340,12 @@ namespace SRHWiscMano.App.ViewModels
             if (UpdateSubRange)
             {
                 examPlotData = PlotDataUtils.CreateSubRange(fullExamData, 0, settings.MainViewFrameRange - 1, 0,
-                    sensorCount - 1);
+                    sensorCount - 1, settings.InterpolateSensorScale);
             }
 
             PlotDataUtils.AddHeatmapSeries(mainModel, examPlotData);
 
-            AddAxesOnMain(mainModel, frameCount, sensorCount);
+            AddAxesOnMain(mainModel, frameCount, examPlotData.GetLength(1));
 
             // SubRange 업데이트 기능을 위한 이벤트 등록
             var xAxis = mainModel.Axes.First(ax => ax.Tag == "X");
@@ -442,7 +442,7 @@ namespace SRHWiscMano.App.ViewModels
             {
                 // TODO : WiscMono 처럼 fullExamData를 Load시에 모두 interpolation 하고 사용하는 것이 아니라, 원본 데이터는 그대로 현재의 view에 넣을 데이터만 interpolation 을 수행해서 업데이트 하는 방식을 도입하는 것을 고려하자.
                 double[,] newData = PlotDataUtils.CreateSubRange(fullExamData, (int)xAxis.ActualMinimum,
-                    (int)xAxis.ActualMaximum, 0, fullExamData.GetLength(1) - 1);
+                    (int)xAxis.ActualMaximum, 0, fullExamData.GetLength(1) - 1, settings.InterpolateSensorScale);
 
                 var axisRange = xAxis.ActualMaximum - xAxis.ActualMinimum;
                 if (axisRange < 1000)
@@ -551,7 +551,7 @@ namespace SRHWiscMano.App.ViewModels
                 Minimum = 0, // 초기 시작값
                 Maximum = ySize - 1, // 초기 최대값
                 AbsoluteMinimum = 0, // Panning 최소값
-                AbsoluteMaximum = ySize * settings.InterpolateSensorScale - 1, // Panning 최대값
+                AbsoluteMaximum = ySize - 1, // Panning 최대값
                 IsAxisVisible = false,
                 Tag = "Y"
             });
