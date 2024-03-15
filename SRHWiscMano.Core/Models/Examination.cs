@@ -7,6 +7,9 @@ namespace SRHWiscMano.Core.Models
 {
     public class Examination : IExamination
     {
+        /// <summary>
+        /// TimeSample 전체를 포함하는 통합데이터
+        /// </summary>
         public IReadOnlyList<TimeSample> Samples { get; }
         public IReadOnlyList<FrameNote> Notes { get; }
         public int InterpolationScale { get; private set; }

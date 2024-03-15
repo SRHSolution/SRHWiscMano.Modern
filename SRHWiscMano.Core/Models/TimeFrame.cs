@@ -6,6 +6,10 @@ using SRHWiscMano.Core.ViewModels;
 
 namespace SRHWiscMano.Core.Models
 {
+
+    /// <summary>
+    /// Duration 시간동안에 저장된 TimeSample을을 갖는 클래스
+    /// </summary>
     public class TimeFrame : ITimeFrame
     {
         private static int GuidId = 0;
