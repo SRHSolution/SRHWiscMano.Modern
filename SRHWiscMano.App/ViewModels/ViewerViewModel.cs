@@ -196,6 +196,8 @@ namespace SRHWiscMano.App.ViewModels
         }
 
         private double[,] fullExamData;
+        private double[,] plotSampleData;
+
         private IDisposable axisChangeObserver = null;
         private readonly SourceCache<ITimeFrame, int> timeFrames;
 
@@ -212,7 +214,7 @@ namespace SRHWiscMano.App.ViewModels
                     case ChangeReason.Add:
                     {
                         var item = change.Current;
-                        var msec = item.Time.ToMillisecondsFromEpoch() / 10;
+                        var msec = item.Time.ToMillisecondsFromEpoch();
                         CreateVLineAnnotation(item, true, MainPlotModel);
                         CreateVLineAnnotation(item, false, OverviewPlotModel);
                         break;
@@ -234,7 +236,7 @@ namespace SRHWiscMano.App.ViewModels
                         break;
                     case ChangeReason.Update:
                     {
-                        var msec = change.Current.Time.ToMillisecondsFromEpoch() / 10;
+                        var msec = change.Current.Time.ToMillisecondsFromEpoch();
                         var mainAnno = MainPlotModel.Annotations.OfType<LineAnnotation>()
                             .Single(item => (int)item.Tag == change.Current.Id);
                         mainAnno.Text = change.Current.Text;
@@ -324,28 +326,34 @@ namespace SRHWiscMano.App.ViewModels
             var frameCount = examData.Samples.Count;
             ExamSensorSize = sensorCount;
 
-            fullExamData = examData.PlotData;
+            
 
-            // 입력받은 Exam 데이터에서 최소 최대 값을 얻어 RangeSlider의 최소/최대 값을 변경한다
-            MinSensorData = Math.Floor(fullExamData.Cast<double>().Min());
-            MaxSensorData = Math.Ceiling(fullExamData.Cast<double>().Max());
-
+            
             // 기존의 PlotView를 clear 한 후 ExamData에 대한 PlotModel을 생성해서 입력한다.
             // ((IPlotModel)this.MainPlotModel)?.AttachPlotView(null);
 
             //Mainview plotmodel, controller 설정
             var mainModel = MainPlotModel;
-            var examPlotData = fullExamData;
+            fullExamData = sharedService.InterpolatedSamples.ConvertToDoubleArray();
+            
+            // 입력받은 Exam 데이터에서 최소 최대 값을 얻어 RangeSlider의 최소/최대 값을 변경한다
+            MinSensorData = Math.Floor(fullExamData.Cast<double>().Min());
+            MaxSensorData = Math.Ceiling(fullExamData.Cast<double>().Max());
+
             // AddFrameNotes(mainModel, examData.Notes.t);
             if (UpdateSubRange)
             {
-                examPlotData = PlotDataUtils.CreateSubRange(fullExamData, 0, settings.MainViewFrameRange - 1, 0,
-                    sensorCount - 1, settings.InterpolateSensorScale);
+                plotSampleData = sharedService.InterpolatedSamples.GetSubSamples(Instant.FromUnixTimeMilliseconds(0),
+                    Instant.FromUnixTimeMilliseconds(settings.MainViewFrameRange)).ConvertToDoubleArray();
+            }
+            else
+            {
+                plotSampleData = fullExamData;
             }
 
-            PlotDataUtils.AddHeatmapSeries(mainModel, examPlotData);
+            PlotDataUtils.AddHeatmapSeries(mainModel, plotSampleData);
 
-            AddAxesOnMain(mainModel, frameCount, examPlotData.GetLength(1));
+            AddAxesOnMain(mainModel, frameCount, plotSampleData.GetLength(1));
 
             // SubRange 업데이트 기능을 위한 이벤트 등록
             var xAxis = mainModel.Axes.First(ax => ax.Tag == "X");
@@ -373,7 +381,7 @@ namespace SRHWiscMano.App.ViewModels
                 var newActualRange = Math.Round(xAxis.ActualMaximum - xAxis.ActualMinimum);
                 MainPlotModel.InvalidatePlot(true);
                 settings.MainViewFrameRange = (int)newActualRange;
-                TimeDuration = (int)newActualRange;
+                TimeDuration = (int)newActualRange*10;
             }));
 
             // LineAnnotation을 Panning 하는 MouseManipulator Command를 추가한다.
@@ -390,7 +398,7 @@ namespace SRHWiscMano.App.ViewModels
             // ((IPlotModel)this.OverviewPlotModel)?.AttachPlotView(null);
             var overviewModel = OverviewPlotModel;
             PlotDataUtils.AddHeatmapSeries(overviewModel, fullExamData);
-            AddAxesOnOverview(overviewModel, frameCount, sensorCount);
+            AddAxesOnOverview(overviewModel, frameCount, plotSampleData.GetLength(1));
             // AddFrameNotes(overviewModel, examData.Notes.ToList());
             OverviewPlotModel = overviewModel;
 
@@ -441,8 +449,12 @@ namespace SRHWiscMano.App.ViewModels
             if (xAxis != null)
             {
                 // TODO : WiscMono 처럼 fullExamData를 Load시에 모두 interpolation 하고 사용하는 것이 아니라, 원본 데이터는 그대로 현재의 view에 넣을 데이터만 interpolation 을 수행해서 업데이트 하는 방식을 도입하는 것을 고려하자.
-                double[,] newData = PlotDataUtils.CreateSubRange(fullExamData, (int)xAxis.ActualMinimum,
-                    (int)xAxis.ActualMaximum, 0, fullExamData.GetLength(1) - 1, settings.InterpolateSensorScale);
+                // double[,] newData = PlotDataUtils.CreateSubRange(fullExamData, (int)xAxis.ActualMinimum,
+                //     (int)xAxis.ActualMaximum, 0, fullExamData.GetLength(1) - 1, settings.InterpolateSensorScale);
+
+                var newData = sharedService.InterpolatedSamples.GetSubSamples(
+                    Instant.FromUnixTimeMilliseconds((long)xAxis.ActualMinimum*10),
+                    Instant.FromUnixTimeMilliseconds((long)xAxis.ActualMaximum*10)).ConvertToDoubleArray();
 
                 var axisRange = xAxis.ActualMaximum - xAxis.ActualMinimum;
                 if (axisRange < 1000)
@@ -507,13 +519,13 @@ namespace SRHWiscMano.App.ViewModels
             model.Axes.Add(new LinearAxis()
             {
                 // IsZoomEnabled = false,
-                LabelFormatter = value => $"{(value / 1000).ToString()}",
+                LabelFormatter = value => $"{(value / 100).ToString()}",
                 Position = AxisPosition.Bottom,
                 MinimumPadding = 0,
                 Minimum = 0,
-                Maximum = settings.MainViewFrameRange - 1, // xSize - 1,
-                MajorStep = 1000,
-                MinorStep = 100, // 최대 범위를 입력하여 MinorStep 이 표시되지 않도록 한다
+                Maximum = plotSampleData.GetLength(0) - 1, // xSize - 1,
+                MajorStep = 5000,
+                MinorStep = 1000, // 최대 범위를 입력하여 MinorStep 이 표시되지 않도록 한다
                 MajorTickSize = 4,
                 MinorTickSize = 2,
                 AbsoluteMinimum = 0,
@@ -559,7 +571,7 @@ namespace SRHWiscMano.App.ViewModels
             // X-Axis
             model.Axes.Add(new LinearAxis()
             {
-                LabelFormatter = value => $"{(value / 1000).ToString()} sec",
+                LabelFormatter = value => $"{(value / 100).ToString()} sec",
                 Position = AxisPosition.Bottom,
                 MinimumPadding = 0,
                 Minimum = 0,
@@ -579,10 +591,10 @@ namespace SRHWiscMano.App.ViewModels
         {
             TimeDuration += zoomVal;
             var mainX = MainPlotModel.Axes.First(ax => (string)ax.Tag == "X");
-            mainX.Zoom(mainX.ActualMinimum, mainX.ActualMinimum + TimeDuration);
+            mainX.Zoom(mainX.ActualMinimum, mainX.ActualMinimum + TimeDuration/10);
             MainPlotModel.InvalidatePlot(true);
             // OverviewPlotModel.InvalidatePlot(false);
-            logger.LogTrace($"Zoom Timeduration : {TimeDuration}");
+            logger.LogTrace($"Zoom Timeduration : {TimeDuration/1000}sec");
         }
 
         private void ZoomInOutAt(double zoomVal, ScreenPoint pos)
@@ -591,11 +603,11 @@ namespace SRHWiscMano.App.ViewModels
             var mainX = MainPlotModel.Axes.First(ax => (string)ax.Tag == "X");
             var mainY = MainPlotModel.Axes.First(ax => (string)ax.Tag == "Y");
             var xPos = mainX.InverseTransform(pos.X, pos.Y, mainY).X;
-            var minX = (xPos - TimeDuration / 2);
-            var maxX = (xPos + TimeDuration / 2);
+            var minX = (xPos - TimeDuration/10 / 2);
+            var maxX = (xPos + TimeDuration/10 / 2);
             mainX.Zoom(minX, maxX);
             MainPlotModel.InvalidatePlot(true);
-            logger.LogTrace($"Zoom Timeduration : {TimeDuration}");
+            logger.LogTrace($"Zoom Timeduration : {TimeDuration/1000} sec");
         }
 
         [RelayCommand(CanExecute = "IsDataLoaded")]

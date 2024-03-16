@@ -176,11 +176,11 @@ namespace SRHWiscMano.Core.ViewModels
                 return;
 
             var heatmap = framePlotModel.Series.OfType<HeatMapSeries>().FirstOrDefault();
-            heatmap.Data = Data.PlotData;
+            heatmap.Data = Data.FrameSamples.ConvertToDoubleArray();
             heatmap.X0 = 0;
-            heatmap.X1 = Data.PlotData.GetLength(0) - 1;
+            heatmap.X1 = Data.FrameSamples.Count - 1;
             heatmap.Y0 = 0;
-            heatmap.Y1 = Data.PlotData.GetLength(1) - 1;
+            heatmap.Y1 = Data.FrameSamples.First().DataSize - 1;
             framePlotModel.InvalidatePlot(true);
 
             this.Time = Data.Time;
