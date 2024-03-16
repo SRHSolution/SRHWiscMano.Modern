@@ -10,9 +10,5 @@ namespace SRHWiscMano.Core.Models
         IReadOnlyList<FrameNote> Notes { get; }
 
         int InterpolationScale { get; }
-
-        double[,] PlotData { get; }
-
-        Task UpdatePlotData(int interpolateScale);
     }
 }

@@ -54,7 +54,7 @@ namespace SRHWiscMano.Core.ViewModels
 
         public Instant Time { get; private set; }
 
-
+        
         public TimeFrameViewModel(ITimeFrame data)
         {
             this.Data = data;
@@ -71,8 +71,10 @@ namespace SRHWiscMano.Core.ViewModels
             }
 
             var plotModel = new PlotModel();
-            PlotDataUtils.AddHeatmapSeries(plotModel, data.PlotData);
-            AddAxes(plotModel, data.PlotData.GetLength(0), data.PlotData.GetLength(1));
+            var plotData = Data.FrameSamples.ConvertToDoubleArray(true);
+            //TODO : data.PlotData를 TimeFrame 에서 얻어와서 직접 생성한다, TimeFrameViewModel을 호출하는 Target view에 맞춰서.
+            PlotDataUtils.AddHeatmapSeries(plotModel, plotData);
+            AddAxes(plotModel, plotData.GetLength(0), plotData.GetLength(1));
             FramePlotModel = plotModel;
 
             WeakReferenceMessenger.Default.Register<PaletteChangedMessageMessage>(this, OnPaletteChange);

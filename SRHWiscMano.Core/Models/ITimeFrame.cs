@@ -10,14 +10,12 @@ namespace SRHWiscMano.Core.Models
         Instant Time { get; }
         double TimeDuration { get; }
 
-        /// <summary>
-        /// 분석을 위해 입력된 원본 데이터
-        /// </summary>
-        double[,] ExamData { get; }
+        public IReadOnlyList<TimeSample> FrameSamples { get; }
 
         /// <summary>
         /// Plot 을 위한 ExamData에서 Scale 이 적용된 데이터
         /// </summary>
+        [Obsolete]
         double[,] PlotData { get; }
 
         void UpdateTime(Instant newTime);

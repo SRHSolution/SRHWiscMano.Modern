@@ -15,22 +15,20 @@ namespace SRHWiscMano.Core.Models
         private static int GuidId = 0;
         public int Id { get; }
 
-        public double[,] ExamData { get; private set; }
+        public IReadOnlyList<TimeSample> OwnerSamples { get; set; }
+        public IReadOnlyList<TimeSample> FrameSamples { get; private set; }
 
         public string Text { get; set; }
         
         public Instant Time { get; private set; }
         
         /// <summary>
-        /// PlotData가 포함할 시간크기
+        /// Samples 포함할 시간크기
         /// </summary>
         public double TimeDuration { get; }
 
         public int InterpolateScale { get; set; }
 
-        /// <summary>
-        /// Plot을 그리기 위한 실제 데이터
-        /// </summary>
         public double[,] PlotData { get; private set; }
 
         [Obsolete("ManoViewer 의 origin 구성")]
@@ -63,24 +61,15 @@ namespace SRHWiscMano.Core.Models
         }
 
 
-        public TimeFrame(string text, Instant time, double[,] plotData)
-        {
-            Id = Interlocked.Increment(ref GuidId);
-            Text = text;
-            Time = time;
-            PlotData = plotData;
-        }
 
 
-        public TimeFrame(string text, Instant time, double timeDuration, double[,] examData, int interpolateScale)
+        public TimeFrame(string text, Instant time, double timeDuration, IReadOnlyList<TimeSample> ownerSamples)
         {
             Id = Interlocked.Increment(ref GuidId);
             Text = text;
             Time = time;
             TimeDuration = timeDuration;
-            InterpolateScale = interpolateScale;
-            this.ExamData = examData;
-            
+            OwnerSamples = ownerSamples;
             UpdateTime(Time);
         }
 
@@ -91,15 +80,15 @@ namespace SRHWiscMano.Core.Models
         /// <param name="newTime"></param>
         public void UpdateTime(Instant newTime)
         {
-            var startRow = (int)Math.Round(newTime.ToUnixTimeMilliseconds() - TimeDuration / 2) / 10;
-            var endRow = (int)Math.Round(newTime.ToUnixTimeMilliseconds() + TimeDuration / 2) / 10;
-            PlotData = PlotDataUtils.CreateSubRange(this.ExamData, startRow, endRow-1, 0, this.ExamData.GetLength(1)-1, this.InterpolateScale);
+            var startTime = newTime.Plus(-Duration.FromMilliseconds(TimeDuration) / 2);
+            var endTime = newTime.Plus(Duration.FromMilliseconds(TimeDuration) / 2);
+            FrameSamples = OwnerSamples.GetSubSamples(startTime, endTime);
             Time = newTime;
         }
 
         public object Clone()
         {
-            return new TimeFrame(this.Text, this.Time, this.TimeDuration, (double[,])ExamData.Clone(), InterpolateScale);
+            return new TimeFrame(Text, Time, TimeDuration, OwnerSamples);
         }
     }
 }
