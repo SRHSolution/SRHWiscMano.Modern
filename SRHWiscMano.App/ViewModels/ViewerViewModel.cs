@@ -64,7 +64,7 @@ namespace SRHWiscMano.App.ViewModels
         [ObservableProperty] private double minSensorRange = 0;
         [ObservableProperty] private double maxSensorRange = 100;
 
-        [ObservableProperty] private double timeDuration = 2000;
+        [ObservableProperty] private long timeDuration = 2000;
         [ObservableProperty] private OxyPalette selectedPalette = OxyPalettes.Hue64;
 
         [ObservableProperty] private double examSensorSize;
@@ -380,8 +380,7 @@ namespace SRHWiscMano.App.ViewModels
                 // update view
                 var newActualRange = Math.Round(xAxis.ActualMaximum - xAxis.ActualMinimum);
                 MainPlotModel.InvalidatePlot(true);
-                settings.MainViewFrameRange = (int)newActualRange;
-                TimeDuration = (int)newActualRange*10;
+                settings.MainViewFrameRange = TimeDuration = (long)newActualRange*10;
             }));
 
             // LineAnnotation을 Panning 하는 MouseManipulator Command를 추가한다.
@@ -519,6 +518,7 @@ namespace SRHWiscMano.App.ViewModels
             model.Axes.Add(new LinearAxis()
             {
                 // IsZoomEnabled = false,
+                // X축 데이터가 10msec 단위이므로 100으로 나누면 sec 가 된다.
                 LabelFormatter = value => $"{(value / 100).ToString()}",
                 Position = AxisPosition.Bottom,
                 MinimumPadding = 0,
@@ -571,6 +571,7 @@ namespace SRHWiscMano.App.ViewModels
             // X-Axis
             model.Axes.Add(new LinearAxis()
             {
+                // X축 데이터가 10msec 단위이므로 100으로 나누면 sec 가 된다.
                 LabelFormatter = value => $"{(value / 100).ToString()} sec",
                 Position = AxisPosition.Bottom,
                 MinimumPadding = 0,
@@ -589,7 +590,7 @@ namespace SRHWiscMano.App.ViewModels
         [RelayCommand]
         private void ZoomInOut(double zoomVal)
         {
-            TimeDuration += zoomVal;
+            TimeDuration += (long)zoomVal;
             var mainX = MainPlotModel.Axes.First(ax => (string)ax.Tag == "X");
             mainX.Zoom(mainX.ActualMinimum, mainX.ActualMinimum + TimeDuration/10);
             MainPlotModel.InvalidatePlot(true);
@@ -599,7 +600,7 @@ namespace SRHWiscMano.App.ViewModels
 
         private void ZoomInOutAt(double zoomVal, ScreenPoint pos)
         {
-            TimeDuration += zoomVal;
+            TimeDuration += (long)zoomVal;
             var mainX = MainPlotModel.Axes.First(ax => (string)ax.Tag == "X");
             var mainY = MainPlotModel.Axes.First(ax => (string)ax.Tag == "Y");
             var xPos = mainX.InverseTransform(pos.X, pos.Y, mainY).X;

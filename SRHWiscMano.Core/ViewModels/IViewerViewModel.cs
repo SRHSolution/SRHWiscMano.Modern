@@ -37,7 +37,7 @@ namespace SRHWiscMano.Core.ViewModels
         PlotController OverviewPlotController { get; }
 
 
-        double TimeDuration { get; set; }
+        long TimeDuration { get; set; }
 
         IRelayCommand SensorRangeChangedCommand { get; }
         IRelayCommand<double> ZoomInOutCommand { get; }
