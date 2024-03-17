@@ -12,6 +12,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MoreLinq;
 using NodaTime;
+using OxyPlot;
+using OxyPlot.Annotations;
 using ReactiveUI;
 using SRHWiscMano.App.Data;
 using SRHWiscMano.App.Services;
@@ -49,7 +51,7 @@ namespace SRHWiscMano.App.ViewModels
             this.sharedService = sharedService;
             this.paletteManager = paletteManager;
             this.settings = settings.Value;
-            timeFrames = sharedService.TimeFrames; 
+            timeFrames = sharedService.TimeFrames;
             // 이전에 있던 데이터를 connect로 연결해서 등록되어 있던 item에 대해 모두 call 될수 있도록 한다
             timeFrames.Connect().Subscribe(HandleTimeFrames);
         }
@@ -67,23 +69,36 @@ namespace SRHWiscMano.App.ViewModels
                     case ChangeReason.Add:
                     {
                         var insertIdx = timeFrames.Items.Index()
-                            .FirstOrDefault(itm => itm.Value.Time > change.Current.Time, new (TimeFrameViewModels.Count, null)).Key;
+                            .FirstOrDefault(itm => itm.Value.Time > change.Current.Time,
+                                new(TimeFrameViewModels.Count, null)).Key;
 
                         // TimeFrame -> TimeFrameViewModel을 생성한다.
                         var viewmodel = new TimeFrameViewModel(change.Current);
+                        var framePlotModel = viewmodel.FramePlotModel;
+                        var axisCenter = framePlotModel.Axes.First(ax => ax.Tag == "X").GetCenter();
+                        var lineAnno = new LineAnnotation
+                        {
+                            Type = LineAnnotationType.Vertical,
+                            X = axisCenter,
+                            LineStyle = LineStyle.Solid,
+                            Color = OxyColors.Gray,
+                            ClipByYAxis = true,
+                            Tag = change.Current.Id
+                        };
+                        viewmodel.FramePlotModel.Annotations.Add(lineAnno);
                         TimeFrameViewModels.Insert(insertIdx, viewmodel);
 
                         // TimeFrameViewModels에서 Label property 가 변경될 경우 이에 대한 Update 이벤트를 발생하도록 한다.
                         Observable.FromEvent<PropertyChangedEventHandler, PropertyChangedEventArgs>(
-                            handler => (sender, e) => handler(e),
-                            handler => viewmodel.PropertyChanged += handler,
-                            handler => viewmodel.PropertyChanged -= handler)
-                        .Where(x => x.PropertyName == nameof(viewmodel.Label)).Subscribe(
-                            (arg) =>
-                            {
-                                change.Current.Text = viewmodel.Label;
-                                timeFrames.AddOrUpdate(change.Current);
-                            });
+                                handler => (sender, e) => handler(e),
+                                handler => viewmodel.PropertyChanged += handler,
+                                handler => viewmodel.PropertyChanged -= handler)
+                            .Where(x => x.PropertyName == nameof(viewmodel.Label)).Subscribe(
+                                (arg) =>
+                                {
+                                    change.Current.Text = viewmodel.Label;
+                                    timeFrames.AddOrUpdate(change.Current);
+                                });
                         break;
                     }
                     case ChangeReason.Remove:
@@ -94,7 +109,7 @@ namespace SRHWiscMano.App.ViewModels
                     }
                     case ChangeReason.Moved:
                         break;
-                    
+
                     // 다른 view에서 변경하는 것은 Time 밖에 없으므로 PlotData를 update한다.
                     case ChangeReason.Update:
                         var updItem = TimeFrameViewModels.SingleOrDefault(item => item.Id == change.Current.Id);
@@ -102,7 +117,7 @@ namespace SRHWiscMano.App.ViewModels
                         break;
 
                     case ChangeReason.Refresh:
-                        
+
                         break;
                 }
             }
@@ -113,7 +128,7 @@ namespace SRHWiscMano.App.ViewModels
         {
             TimeFrameViewModels.ForEach(tf => tf.IsSelected = true);
             TimeFrameViewModels.ToList().ForEach(sn => sn.IsSelected = true);
-            
+
             logger.LogTrace($"SelectAll");
         }
 
@@ -122,7 +137,7 @@ namespace SRHWiscMano.App.ViewModels
         {
             TimeFrameViewModels.ForEach(tf => tf.IsSelected = false);
             TimeFrameViewModels.ToList().ForEach(sn => sn.IsSelected = false);
-            
+
             logger.LogTrace($"UnselectAll");
         }
 
@@ -130,7 +145,7 @@ namespace SRHWiscMano.App.ViewModels
         private void NavigateToDetailView()
         {
             logger.LogTrace($"Request navigate to Explorer view");
-            
+
             WeakReferenceMessenger.Default.Send(new TabIndexChangeMessage(2));
         }
 
@@ -155,7 +170,5 @@ namespace SRHWiscMano.App.ViewModels
             viewmodel.AdjustTimeInMs(100);
             timeFrames.AddOrUpdate(viewmodel.Data);
         }
-
-
     }
 }

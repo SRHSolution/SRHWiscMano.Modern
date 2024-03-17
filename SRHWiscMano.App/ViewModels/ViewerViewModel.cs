@@ -261,7 +261,7 @@ namespace SRHWiscMano.App.ViewModels
 
         private void CreateVLineAnnotation(ITimeFrame timeFrame, bool draggable, PlotModel model)
         {
-            var msec = timeFrame.Time.ToMillisecondsFromEpoch() / 10;
+            var msec = timeFrame.Time.ToMillisecondsFromEpoch()/10;
             var la = new LineAnnotation
             {
                 Type = LineAnnotationType.Vertical,
@@ -269,6 +269,7 @@ namespace SRHWiscMano.App.ViewModels
                 LineStyle = LineStyle.Solid,
                 ClipByYAxis = true,
                 Text = timeFrame.Text,
+                TextColor = OxyColors.White,
                 TextOrientation = AnnotationTextOrientation.Horizontal,
                 Tag = timeFrame.Id
             };
@@ -326,16 +327,13 @@ namespace SRHWiscMano.App.ViewModels
             var frameCount = examData.Samples.Count;
             ExamSensorSize = sensorCount;
 
-            
-
-            
             // 기존의 PlotView를 clear 한 후 ExamData에 대한 PlotModel을 생성해서 입력한다.
             // ((IPlotModel)this.MainPlotModel)?.AttachPlotView(null);
 
             //Mainview plotmodel, controller 설정
             var mainModel = MainPlotModel;
             fullExamData = sharedService.InterpolatedSamples.ConvertToDoubleArray();
-            
+
             // 입력받은 Exam 데이터에서 최소 최대 값을 얻어 RangeSlider의 최소/최대 값을 변경한다
             MinSensorData = Math.Floor(fullExamData.Cast<double>().Min());
             MaxSensorData = Math.Ceiling(fullExamData.Cast<double>().Max());
@@ -352,7 +350,6 @@ namespace SRHWiscMano.App.ViewModels
             }
 
             PlotDataUtils.AddHeatmapSeries(mainModel, plotSampleData);
-
             AddAxesOnMain(mainModel, frameCount, plotSampleData.GetLength(1));
 
             // SubRange 업데이트 기능을 위한 이벤트 등록
@@ -365,13 +362,34 @@ namespace SRHWiscMano.App.ViewModels
                 handler => xAxis.AxisChanged += handler,
                 handler => xAxis.AxisChanged -= handler).Subscribe(OnMainViewAxisChanged);
 
+            MainPlotController = BuildMainController(xAxis);
+
+            //Overview plotmodel, controller 설정
+            // ((IPlotModel)this.OverviewPlotModel)?.AttachPlotView(null);
+            var overviewModel = OverviewPlotModel;
+            PlotDataUtils.AddHeatmapSeries(overviewModel, fullExamData);
+            AddAxesOnOverview(overviewModel, frameCount, plotSampleData.GetLength(1));
+            // AddFrameNotes(overviewModel, examData.Notes.ToList());
+            OverviewPlotModel = overviewModel;
+
+            OverviewPlotController = BuildOverviewController();
+
+            ApplyThemeToOxyPlots();
+
+            SelectedPaletteKey = paletteManager.SelectedPaletteKey;
+
+            IsDataLoaded = true;
+        }
+
+        private PlotController BuildMainController(Axis xAxis)
+        {
             var mainController = new PlotController();
 
             // Bind 하게 되면 기존의 MouseWheel(zoom) 이 삭제된다.
             mainController.BindMouseWheel(new DelegatePlotCommand<OxyMouseWheelEventArgs>((v, c, a) =>
             {
                 var range = xAxis.ActualMaximum - xAxis.ActualMinimum;
-                var delta = a.Delta > 0 ? -50 : 50;
+                var delta = a.Delta > 0 ? -100 : 100;
                 var newRange = range + delta;
                 var scale = range / newRange;
                 var current = xAxis.InverseTransform(a.Position.X);
@@ -380,7 +398,7 @@ namespace SRHWiscMano.App.ViewModels
                 // update view
                 var newActualRange = Math.Round(xAxis.ActualMaximum - xAxis.ActualMinimum);
                 MainPlotModel.InvalidatePlot(true);
-                settings.MainViewFrameRange = TimeDuration = (long)newActualRange*10;
+                settings.MainViewFrameRange = TimeDuration = (long)newActualRange * 10;
             }));
 
             // LineAnnotation을 Panning 하는 MouseManipulator Command를 추가한다.
@@ -391,16 +409,11 @@ namespace SRHWiscMano.App.ViewModels
                     IsVertical = true,
                 }, args));
             mainController.BindMouseDown(OxyMouseButton.Left, lineAnnotPan);
-            MainPlotController = mainController;
+            return mainController;
+        }
 
-            //Overview plotmodel, controller 설정
-            // ((IPlotModel)this.OverviewPlotModel)?.AttachPlotView(null);
-            var overviewModel = OverviewPlotModel;
-            PlotDataUtils.AddHeatmapSeries(overviewModel, fullExamData);
-            AddAxesOnOverview(overviewModel, frameCount, plotSampleData.GetLength(1));
-            // AddFrameNotes(overviewModel, examData.Notes.ToList());
-            OverviewPlotModel = overviewModel;
-
+        private PlotController BuildOverviewController()
+        {
             var overviewController = new PlotController();
             var overviewTrackAt = new DelegatePlotCommand<OxyMouseDownEventArgs>((view, controller, args) =>
             {
@@ -408,37 +421,40 @@ namespace SRHWiscMano.App.ViewModels
                 var posX = overviewXAxis.InverseTransform(args.Position.X);
 
                 var xAxis = MainPlotModel.Axes.First(ax => ax.Tag == "X");
+                // MainView의 중심을 찾기 위한 Width/2 를 구한다
                 var axisHalfWidth = (xAxis.ActualMaximum - xAxis.ActualMinimum) / 2;
 
                 var newMinimum = 0.0;
-                // Center 위치를 지정할 수 있음
+                // Center 위치를 지정할 수 있음, MainView 전체를 이동할 수 있는 경우
                 if (posX - axisHalfWidth >= 0)
                 {
                     newMinimum = posX - axisHalfWidth;
                 }
+                // Width의 절반 위치가 시작점안에 포함되는 경우는 시작을 0으로 설정
                 else
                 {
                     newMinimum = 0;
                 }
 
+                //관심있는 위치로 이동을 하기 위한 delta 값을 계산한다, scale을 적용한다
                 var delta = (xAxis.ActualMinimum - newMinimum) * xAxis.Scale;
                 xAxis.Pan(delta);
+
                 MainPlotModel.InvalidatePlot(false);
             });
+
             overviewController.UnbindAll();
             overviewController.BindMouseDown(OxyMouseButton.Left, OxyModifierKeys.Control, overviewTrackAt);
             overviewController.BindMouseDown(OxyMouseButton.Right, OxyModifierKeys.None, PlotCommands.PanAt);
             overviewController.BindMouseWheel(PlotCommands.ZoomWheel);
 
-            OverviewPlotController = overviewController;
-
-            ApplyThemeToOxyPlots();
-
-            SelectedPaletteKey = paletteManager.SelectedPaletteKey;
-
-            IsDataLoaded = true;
+            return overviewController;
         }
 
+        /// <summary>
+        /// X Axis의 AxisChanged 이벤트 동작에 따른 처리를 수행하는 함수
+        /// </summary>
+        /// <param name="e"></param>
         private void OnMainViewAxisChanged(AxisChangedEventArgs e)
         {
             if (UpdateSubRange == false)
@@ -447,13 +463,9 @@ namespace SRHWiscMano.App.ViewModels
             var xAxis = MainPlotModel.Axes.FirstOrDefault(a => a.Position == AxisPosition.Bottom);
             if (xAxis != null)
             {
-                // TODO : WiscMono 처럼 fullExamData를 Load시에 모두 interpolation 하고 사용하는 것이 아니라, 원본 데이터는 그대로 현재의 view에 넣을 데이터만 interpolation 을 수행해서 업데이트 하는 방식을 도입하는 것을 고려하자.
-                // double[,] newData = PlotDataUtils.CreateSubRange(fullExamData, (int)xAxis.ActualMinimum,
-                //     (int)xAxis.ActualMaximum, 0, fullExamData.GetLength(1) - 1, settings.InterpolateSensorScale);
-
                 var newData = sharedService.InterpolatedSamples.GetSubSamples(
-                    Instant.FromUnixTimeMilliseconds((long)xAxis.ActualMinimum*10),
-                    Instant.FromUnixTimeMilliseconds((long)xAxis.ActualMaximum*10)).ConvertToDoubleArray();
+                    Instant.FromUnixTimeMilliseconds((long)xAxis.ActualMinimum * 10),
+                    Instant.FromUnixTimeMilliseconds((long)xAxis.ActualMaximum * 10)).ConvertToDoubleArray();
 
                 var axisRange = xAxis.ActualMaximum - xAxis.ActualMinimum;
                 if (axisRange < 1000)
@@ -592,10 +604,10 @@ namespace SRHWiscMano.App.ViewModels
         {
             TimeDuration += (long)zoomVal;
             var mainX = MainPlotModel.Axes.First(ax => (string)ax.Tag == "X");
-            mainX.Zoom(mainX.ActualMinimum, mainX.ActualMinimum + TimeDuration/10);
+            mainX.Zoom(mainX.ActualMinimum, mainX.ActualMinimum + TimeDuration / 10);
             MainPlotModel.InvalidatePlot(true);
             // OverviewPlotModel.InvalidatePlot(false);
-            logger.LogTrace($"Zoom Timeduration : {TimeDuration/1000}sec");
+            logger.LogTrace($"Zoom Timeduration : {TimeDuration / 1000}sec");
         }
 
         private void ZoomInOutAt(double zoomVal, ScreenPoint pos)
@@ -604,11 +616,11 @@ namespace SRHWiscMano.App.ViewModels
             var mainX = MainPlotModel.Axes.First(ax => (string)ax.Tag == "X");
             var mainY = MainPlotModel.Axes.First(ax => (string)ax.Tag == "Y");
             var xPos = mainX.InverseTransform(pos.X, pos.Y, mainY).X;
-            var minX = (xPos - TimeDuration/10 / 2);
-            var maxX = (xPos + TimeDuration/10 / 2);
+            var minX = (xPos - TimeDuration / 10 / 2);
+            var maxX = (xPos + TimeDuration / 10 / 2);
             mainX.Zoom(minX, maxX);
             MainPlotModel.InvalidatePlot(true);
-            logger.LogTrace($"Zoom Timeduration : {TimeDuration/1000} sec");
+            logger.LogTrace($"Zoom Timeduration : {TimeDuration / 1000} sec");
         }
 
         [RelayCommand(CanExecute = "IsDataLoaded")]
@@ -708,7 +720,7 @@ namespace SRHWiscMano.App.ViewModels
             try
             {
                 var posX = (double)timeFrames.KeyValues.Where(kv =>
-                        (double)kv.Value.Time.ToUnixTimeMilliseconds() / 10 < (xAxis.ActualMinimum + axisHalfWidth)-1)
+                        (double)kv.Value.Time.ToUnixTimeMilliseconds() / 10 < (xAxis.ActualMinimum + axisHalfWidth) - 1)
                     .Select(kv => kv.Value.Time.ToUnixTimeMilliseconds()).Last() / 10;
 
                 var newMinimum = 0.0;
@@ -744,7 +756,7 @@ namespace SRHWiscMano.App.ViewModels
             try
             {
                 var posX = (double)timeFrames.KeyValues.Where(kv =>
-                        kv.Value.Time.ToUnixTimeMilliseconds() / 10 > (xAxis.ActualMinimum + axisHalfWidth)+1)
+                        kv.Value.Time.ToUnixTimeMilliseconds() / 10 > (xAxis.ActualMinimum + axisHalfWidth) + 1)
                     .Select(kv => kv.Value.Time.ToUnixTimeMilliseconds()).First() / 10;
 
                 var newMinimum = 0.0;
@@ -768,7 +780,6 @@ namespace SRHWiscMano.App.ViewModels
         }
 
 
-        
         [RelayCommand]
         private void ToggleSensorBounds(bool sender)
         {

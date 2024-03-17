@@ -43,6 +43,10 @@ namespace SRHWiscMano.App.ViewModels
 
         public ObservableCollection<TimeFrameViewModel> TimeFrameViewModels { get; } = new();
 
+        public AnalyzerViewModel()
+        {
+            
+        }
 
         public AnalyzerViewModel(ILogger<AnalyzerViewModel> logger, SharedService sharedService,
             IOptions<AppSettings> settings)
