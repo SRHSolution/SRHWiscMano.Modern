@@ -32,6 +32,8 @@ namespace SRHWiscMano.Core.ViewModels
 
         public int Id { get; }
 
+        private double[,] plotData;
+
         /// <summary>
         /// TimeFrame의 메인 Label
         /// </summary>
@@ -73,11 +75,9 @@ namespace SRHWiscMano.Core.ViewModels
             }
 
             var plotModel = new PlotModel();
-            (this.Data as TimeFrame).InterpolateScale = 1;
-            this.Data.UpdateTime(data.Time);
-
-            AddAxes(plotModel, this.Data.PlotData.GetLength(0), this.Data.PlotData.GetLength(1));
-            AddLineSeries(plotModel, Data.PlotData);
+            plotData = Data.FrameSamples.ConvertToDoubleArray(true);
+            AddAxes(plotModel, plotData.GetLength(0), plotData.GetLength(1));
+            AddLineSeries(plotModel, plotData);
             FramePlotModel = plotModel;
         }
 
@@ -88,8 +88,8 @@ namespace SRHWiscMano.Core.ViewModels
         /// <param name="plotData"></param>
         private void AddLineSeries(PlotModel model, double[,] plotData)
         {
-            var frameCount = plotData.GetLength(0) - 1;
-            var sensorCount = plotData.GetLength(1) - 1;
+            var frameCount = plotData.GetLength(0);
+            var sensorCount = plotData.GetLength(1);
 
             var valueRange = plotData.Max2D() - plotData.Min2D();
             var valueScale = SensorRange / valueRange;
@@ -143,7 +143,7 @@ namespace SRHWiscMano.Core.ViewModels
             model.Axes.Add(new LinearAxis()
             {
                 // IsZoomEnabled = false,
-                LabelFormatter = value => $"{(value / 1000).ToString()}",
+                LabelFormatter = value => $"{value / 100}",
                 Position = AxisPosition.Bottom,
                 MinimumPadding = 0,
                 Minimum = 0,
@@ -187,11 +187,11 @@ namespace SRHWiscMano.Core.ViewModels
                 return;
 
             var heatmap = framePlotModel.Series.OfType<HeatMapSeries>().FirstOrDefault();
-            heatmap.Data = Data.PlotData;
+            heatmap.Data = plotData;
             heatmap.X0 = 0;
-            heatmap.X1 = Data.PlotData.GetLength(0) - 1;
+            heatmap.X1 = plotData.GetLength(0) - 1;
             heatmap.Y0 = 0;
-            heatmap.Y1 = Data.PlotData.GetLength(1) - 1;
+            heatmap.Y1 = plotData.GetLength(1) - 1;
             framePlotModel.InvalidatePlot(true);
 
             this.Time = Data.Time;

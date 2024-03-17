@@ -32,6 +32,8 @@ namespace SRHWiscMano.Core.ViewModels
 
         public int Id { get; }
 
+        private double[,] plotData;
+
         /// <summary>
         /// TimeFrame의 메인 Label
         /// </summary>
@@ -71,8 +73,7 @@ namespace SRHWiscMano.Core.ViewModels
             }
 
             var plotModel = new PlotModel();
-            var plotData = Data.FrameSamples.ConvertToDoubleArray(true);
-            //TODO : data.PlotData를 TimeFrame 에서 얻어와서 직접 생성한다, TimeFrameViewModel을 호출하는 Target view에 맞춰서.
+            plotData = Data.IntpFrameSamples.ConvertToDoubleArray(true);
             PlotDataUtils.AddHeatmapSeries(plotModel, plotData);
             AddAxes(plotModel, plotData.GetLength(0), plotData.GetLength(1));
             FramePlotModel = plotModel;
@@ -132,7 +133,7 @@ namespace SRHWiscMano.Core.ViewModels
             model.Axes.Add(new LinearAxis()
             {
                 // IsZoomEnabled = false,
-                LabelFormatter = value => $"{(value / 1000).ToString()}",
+                LabelFormatter = value => $"{(value / 100).ToString()}",
                 Position = AxisPosition.Bottom,
                 MinimumPadding = 0,
                 Minimum = 0,
@@ -176,11 +177,11 @@ namespace SRHWiscMano.Core.ViewModels
                 return;
 
             var heatmap = framePlotModel.Series.OfType<HeatMapSeries>().FirstOrDefault();
-            heatmap.Data = Data.FrameSamples.ConvertToDoubleArray();
+            heatmap.Data = Data.IntpFrameSamples.ConvertToDoubleArray();
             heatmap.X0 = 0;
-            heatmap.X1 = Data.FrameSamples.Count - 1;
+            heatmap.X1 = Data.IntpFrameSamples.Count - 1;
             heatmap.Y0 = 0;
-            heatmap.Y1 = Data.FrameSamples.First().DataSize - 1;
+            heatmap.Y1 = Data.IntpFrameSamples.First().DataSize - 1;
             framePlotModel.InvalidatePlot(true);
 
             this.Time = Data.Time;
