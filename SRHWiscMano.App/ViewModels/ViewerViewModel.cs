@@ -59,6 +59,12 @@ namespace SRHWiscMano.App.ViewModels
 
         [ObservableProperty] private PlotController overviewPlotController;
 
+        private double[,] fullExamData;
+        private double[,] plotSampleData;
+
+        private IDisposable axisChangeObserver = null;
+        private readonly SourceCache<ITimeFrame, int> timeFrames;
+
         [ObservableProperty] private double minSensorData;
         [ObservableProperty] private double maxSensorData;
         [ObservableProperty] private double minSensorRange = 0;
@@ -195,11 +201,9 @@ namespace SRHWiscMano.App.ViewModels
             OverviewPlotModel.ApplyTheme(pvBackColor, pvForeColor);
         }
 
-        private double[,] fullExamData;
-        private double[,] plotSampleData;
+        
 
-        private IDisposable axisChangeObserver = null;
-        private readonly SourceCache<ITimeFrame, int> timeFrames;
+
 
         /// <summary>
         /// SharedService의 TimeFrames에 등록된 데이터를 View에 binding 작업을 수행한다.
@@ -258,7 +262,12 @@ namespace SRHWiscMano.App.ViewModels
             }
         }
 
-
+        /// <summary>
+        /// TimeFrame 에 대한 Vertical Line Annotation 을 그리고 Drag를 이용한 제어에 대한 이벤트를 등록한다
+        /// </summary>
+        /// <param name="timeFrame"></param>
+        /// <param name="draggable"></param>
+        /// <param name="model"></param>
         private void CreateVLineAnnotation(ITimeFrame timeFrame, bool draggable, PlotModel model)
         {
             var msec = timeFrame.Time.ToMillisecondsFromEpoch()/10;
@@ -696,6 +705,7 @@ namespace SRHWiscMano.App.ViewModels
                 LowColor = SelectedPalette.Colors.First(),
             };
 
+            //Pallette 가 변경되었음을 메시지로 전송한다.
             WeakReferenceMessenger.Default.Send(new PaletteChangedMessageMessage(changedArg));
         }
 

@@ -129,6 +129,28 @@ namespace SRHWiscMano.App.ViewModels
             }
         }
 
+        private PlotController BuildPlotcontroller()
+        {
+            var plotController = new PlotController();
+            var overviewTrackAt = new DelegatePlotCommand<OxyMouseDownEventArgs>((view, controller, args) =>
+            {
+                var viewXAxis = view.ActualModel.Axes.First(ax => ax.Tag == "X");
+                var posFrame = viewXAxis.InverseTransform(args.Position.X);
+                
+                var viewYAxis = view.ActualModel.Axes.First(ax => ax.Tag == "Y");
+                var posSensor = viewYAxis.InverseTransform(args.Position.Y);
+
+                logger.LogDebug($"Clicked pos {posFrame:F2}, {posSensor:F2}");
+            });
+
+            plotController.UnbindAll();
+            plotController.BindMouseDown(OxyMouseButton.Left, OxyModifierKeys.None, overviewTrackAt);
+            plotController.BindMouseDown(OxyMouseButton.Right, OxyModifierKeys.None, PlotCommands.PanAt);
+
+            return plotController;
+        }
+
+
         /// <summary>
         /// View의 TimeFrames listview 에서 선택된 item 객체를 받는다.
         /// </summary>
@@ -143,8 +165,10 @@ namespace SRHWiscMano.App.ViewModels
                 var timeFrameData = (selectedItem as TimeFrameViewModel).Data;
                 var timeFrameClone = new TimeFrameViewModel(timeFrameData);
                 MainPlotModel = timeFrameClone.FramePlotModel;
+                MainPlotController = BuildPlotcontroller();
                 var timeFrameGraph = new TimeFrameGraphViewModel(timeFrameData);
                 GraphPlotModel = timeFrameGraph.FramePlotModel;
+                GraphPlotController = BuildPlotcontroller();
             }
             catch
             {

@@ -81,7 +81,11 @@ namespace SRHWiscMano.Core.ViewModels
             WeakReferenceMessenger.Default.Register<PaletteChangedMessageMessage>(this, OnPaletteChange);
         }
 
-
+        /// <summary>
+        /// PlotModel을 그리기 위한 Palette가 변경된 이벤트를 처리한다
+        /// </summary>
+        /// <param name="recipient"></param>
+        /// <param name="arg"></param>
         private void OnPaletteChange(object recipient, PaletteChangedMessageMessage arg)
         {
             SelectedPalette = arg.Value.palette;
