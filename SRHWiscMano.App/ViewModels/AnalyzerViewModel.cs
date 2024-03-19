@@ -143,9 +143,10 @@ namespace SRHWiscMano.App.ViewModels
                 logger.LogDebug($"Clicked pos {posFrame:F2}, {posSensor:F2}");
             });
 
-            plotController.UnbindAll();
+            // plotController.UnbindAll();
             plotController.BindMouseDown(OxyMouseButton.Left, OxyModifierKeys.None, overviewTrackAt);
             plotController.BindMouseDown(OxyMouseButton.Right, OxyModifierKeys.None, PlotCommands.PanAt);
+            plotController.BindMouseEnter(PlotCommands.HoverTrack);
 
             return plotController;
         }
