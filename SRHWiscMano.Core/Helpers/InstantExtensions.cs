@@ -51,5 +51,64 @@ namespace SRHWiscMano.Core.Helpers
             double ticks2 = duration.TotalTicks;
             return ticks1 / ticks2;
         }
+
+        /// <summary>
+        /// 입력된 시간을 중심으로 interval를 생성하되, bounds 영역밖은 잘라낸다
+        /// </summary>
+        /// <param name="time"></param>
+        /// <param name="duration"></param>
+        /// <param name="bounds"></param>
+        /// <returns></returns>
+        public static Interval AtCenterOfDuration(
+            this Instant time,
+            Duration duration,
+            Interval bounds)
+        {
+            Duration duration1 = duration / 2L;
+            return new Interval(time - duration1, time + duration1).Clip(bounds);
+        }
+
+        /// <summary>
+        /// 입력된 시간을 시작으로 duration 을 갖는 interval 를 계산하며, bounds의 end 영역을 clip 한다 
+        /// </summary>
+        /// <param name="time"></param>
+        /// <param name="duration"></param>
+        /// <param name="bounds"></param>
+        /// <returns></returns>
+        public static Interval AtStartOfDuration(
+            this Instant time,
+            Duration duration,
+            Interval bounds)
+        {
+            Instant end = Instant.Min(time + duration, bounds.End);
+            return new Interval(time, end);
+        }
+
+        /// <summary>
+        /// interval 의 center를 계산한다
+        /// </summary>
+        /// <param name="interval"></param>
+        /// <returns></returns>
+        public static Instant Center(this Interval interval)
+        {
+            Duration duration = interval.Duration / 2L;
+            return interval.Start + duration;
+        }
+
+        /// <summary>
+        /// interval 이 bound 를 넘어갈 경우 min,max로 자른다
+        /// </summary>
+        /// <param name="interval"></param>
+        /// <param name="bounds"></param>
+        /// <returns></returns>
+        public static Interval Clip(this Interval interval, Interval bounds)
+        {
+            return new Interval(Instant.Max(interval.Start, bounds.Start), Instant.Min(interval.End, bounds.End));
+        }
+
+        public static Duration AbsoluteValue(this Duration duration)
+        {
+            return !(duration < Duration.Zero) ? duration : -duration;
+        }
     }
 }

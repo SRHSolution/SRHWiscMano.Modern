@@ -11,9 +11,11 @@ namespace SRHWiscMano.Core.Models
         /// TimeSample 전체를 포함하는 통합데이터
         /// </summary>
         public IReadOnlyList<TimeSample> Samples { get; }
+
+        public IReadOnlyList<TimeSample> InterpolatedSamples { get; private set; }
+
         public IReadOnlyList<FrameNote> Notes { get; }
         public int InterpolationScale { get; private set; }
-        public double[,] PlotData { get; private set; }
 
         public Examination(IList<TimeSample> samples, IList<FrameNote> notes)
         {
@@ -21,6 +23,10 @@ namespace SRHWiscMano.Core.Models
             this.Notes = notes.ToImmutableList();
         }
 
+        public void UpdateInterpolation(int interpolateScale)
+        {
+            InterpolatedSamples = Samples.InterpolateSamples(interpolateScale);
+        }
         
 
         public override string ToString()

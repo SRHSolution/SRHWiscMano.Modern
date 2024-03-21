@@ -25,5 +25,47 @@
         public static double PercentOf(this Range<long> range, long value) => (double)(value - range.Start) / (double)range.Span();
 
         public static IEnumerable<int> AsEnumerable(this Range<int> range) => Enumerable.Range(range.Start, range.Span());
+
+        public static int ValueAt(this Range<int> range, double percent)
+        {
+            return range.Start + (int)(range.Span() * percent);
+        }
+
+        public static double ValueAt(this Range<double> range, double percent)
+        {
+            return range.Start + range.Span() * percent;
+        }
+
+        public static int TranslateFrom(
+            this Range<int> targetDomain,
+            Range<int> sourceDomain,
+            int valueInSourceDomain)
+        {
+            return targetDomain.ValueAt(sourceDomain.PercentOf(valueInSourceDomain));
+        }
+
+        public static double TranslateFrom(
+            this Range<double> targetDomain,
+            Range<double> sourceDomain,
+            double valueInSourceDomain)
+        {
+            return targetDomain.ValueAt(sourceDomain.PercentOf(valueInSourceDomain));
+        }
+
+        public static Range<double> CompressBy(this Range<double> range, double percent)
+        {
+            double num = 1.0 - percent;
+            return Range.Create(range.Start * num, range.End * num);
+        }
+
+        public static double Center(this Range<double> range)
+        {
+            return range.Start + range.Span() / 2.0;
+        }
+
+        public static Range<int> SetSpan(this Range<int> range, int newSpan)
+        {
+            return Range.Create(range.Start, range.Start + newSpan);
+        }
     }
 }

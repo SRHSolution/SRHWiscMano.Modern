@@ -25,7 +25,8 @@ namespace SRHWiscMano.App.Services
         /// 분석할 TimeSample 및 TimeNote 데이터를 갖고 있는 객체, 모든 viewmodel에 연동됨.
         /// </summary>
         public IExamination? ExamData { get; private set; }
-        public List<TimeSample> InterpolatedSamples { get; private set; }
+
+        public IReadOnlyList<TimeSample> InterpolatedSamples => ExamData.InterpolatedSamples;
 
         public IExamMetaData? ExamMetaData { get; private set; }
 
@@ -48,7 +49,7 @@ namespace SRHWiscMano.App.Services
             logger.LogInformation("New ExamData is registered");
 
             this.ExamData = data;
-            await Task.Run(() => InterpolatedSamples = ExamData.Samples.InterpolateSamples(settings.InterpolateSensorScale));
+            await Task.Run(() => ExamData.UpdateInterpolation(settings.InterpolateSensorScale));
 
             TimeFrames.Clear();
 
@@ -64,7 +65,7 @@ namespace SRHWiscMano.App.Services
         public TimeFrame CreateTimeFrame(string text, Instant time)
         {
             ExamData.ShouldNotBeNull("Examdata should be loaded first");
-            return new TimeFrame(text, time, settings.TimeFrameDurationInMillisecond, ExamData.Samples, InterpolatedSamples);
+            return new TimeFrame(text, time, settings.TimeFrameDurationInMillisecond, ExamData);
         }
 
 

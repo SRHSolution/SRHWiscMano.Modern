@@ -350,7 +350,7 @@ namespace SRHWiscMano.App.ViewModels
             // AddFrameNotes(mainModel, examData.Notes.t);
             if (UpdateSubRange)
             {
-                plotSampleData = sharedService.InterpolatedSamples.GetSubSamples(Instant.FromUnixTimeMilliseconds(0),
+                plotSampleData = sharedService.InterpolatedSamples.SamplesInTimeRange(Instant.FromUnixTimeMilliseconds(0),
                     Instant.FromUnixTimeMilliseconds(settings.MainViewFrameRange)).ConvertToDoubleArray();
             }
             else
@@ -472,7 +472,7 @@ namespace SRHWiscMano.App.ViewModels
             var xAxis = MainPlotModel.Axes.FirstOrDefault(a => a.Position == AxisPosition.Bottom);
             if (xAxis != null)
             {
-                var newData = sharedService.InterpolatedSamples.GetSubSamples(
+                var newData = sharedService.InterpolatedSamples.SamplesInTimeRange(
                     Instant.FromUnixTimeMilliseconds((long)xAxis.ActualMinimum * 10),
                     Instant.FromUnixTimeMilliseconds((long)xAxis.ActualMaximum * 10)).ConvertToDoubleArray();
 

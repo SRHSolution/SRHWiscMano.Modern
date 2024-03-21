@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MathNet.Numerics.Interpolation;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -40,6 +41,22 @@ namespace SRHWiscMano.Core.Helpers
             }
 
             return interpolatedArray;
+        }
+
+        public static IEnumerable<double> InterpolateTo(this double[] source, int targetSize)
+        {
+            if (targetSize == source.Length)
+                return source;
+            if (source.Length == 1)
+                return Enumerable.Repeat(source[0], targetSize);
+            LinearSpline spline = LinearSpline.InterpolateSorted(XValues(source.Length).ToArray(), source);
+            return XValues(targetSize).Select(x => spline.Interpolate(x));
+        }
+
+        private static IEnumerable<double> XValues(int count)
+        {
+            double sourceStep = 1.0 / (count - 1.0);
+            return Enumerable.Range(0, count).Select(i => i * sourceStep);
         }
     }
 }

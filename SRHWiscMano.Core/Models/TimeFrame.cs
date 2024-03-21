@@ -12,10 +12,15 @@ namespace SRHWiscMano.Core.Models
     public class TimeFrame : ITimeFrame
     {
         private static int GuidId = 0;
+
+        public IExamination Data { get; private set; }
+
         public int Id { get; }
 
         public IReadOnlyList<TimeSample> OwnerSamples { get; set; }
         public IReadOnlyList<TimeSample> IntpSamples { get; private set; }
+
+        public IReadOnlyList<IRegion> Regions { get; private set; }
 
         public IReadOnlyList<TimeSample> FrameSamples { get; private set; }
         public IReadOnlyList<TimeSample> IntpFrameSamples { get; private set; }
@@ -42,6 +47,17 @@ namespace SRHWiscMano.Core.Models
             UpdateTime(Time);
         }
 
+        public TimeFrame(string text, Instant time, double timeDuration, IExamination data)
+        {
+            Data = data;
+            Id = Interlocked.Increment(ref GuidId);
+            Text = text;
+            Time = time;
+            TimeDuration = timeDuration;
+            OwnerSamples = data.Samples;
+            IntpSamples = data.InterpolatedSamples;
+            UpdateTime(Time);
+        }
 
         /// <summary>
         /// TimeFrame 의 지정된 시간을 변경한다.
@@ -52,15 +68,15 @@ namespace SRHWiscMano.Core.Models
         {
             var startTime = newTime.Plus(-Duration.FromMilliseconds(TimeDuration) / 2);
             var endTime = newTime.Plus(Duration.FromMilliseconds(TimeDuration) / 2);
-            FrameSamples = OwnerSamples.GetSubSamples(startTime, endTime);
-            IntpFrameSamples = IntpSamples.GetSubSamples(startTime, endTime);
+            FrameSamples = OwnerSamples.SamplesInTimeRange(startTime, endTime);
+            IntpFrameSamples = IntpSamples.SamplesInTimeRange(startTime, endTime);
 
             Time = newTime;
         }
 
         public object Clone()
         {
-            return new TimeFrame(Text, Time, TimeDuration, OwnerSamples, IntpSamples);
+            return new TimeFrame(Text, Time, TimeDuration, Data);
         }
 
 

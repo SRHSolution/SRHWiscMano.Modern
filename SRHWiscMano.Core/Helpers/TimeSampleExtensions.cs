@@ -3,9 +3,11 @@ using OxyPlot;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NLog;
 using NodaTime;
 using SRHWiscMano.Core.Models;
 
@@ -41,7 +43,8 @@ namespace SRHWiscMano.Core.Helpers
                 // Additional check to ensure that the sensor data matches the expected DataSize
                 if (sensors.Count != sensorCount)
                 {
-                    throw new InvalidOperationException($"Inconsistent DataSize at frame {frmId}. Expected {sensorCount}, got {sensors.Count}.");
+                    throw new InvalidOperationException(
+                        $"Inconsistent DataSize at frame {frmId}. Expected {sensorCount}, got {sensors.Count}.");
                 }
 
                 for (int senId = 0; senId < sensorCount; senId++)
@@ -53,40 +56,6 @@ namespace SRHWiscMano.Core.Helpers
             return plotData;
         }
 
-        /// <summary>
-        /// Samples을 Interpolate 한뒤 결과를 반환한다.
-        /// </summary>
-        /// <param name="samples"></param>
-        /// <param name="interpolateScale"></param>
-        /// <returns></returns>
-        public static List<TimeSample> InterpolateSamplesOld(this IEnumerable<TimeSample> samples, int interpolateScale = 1)
-        {
-            var sampleList = samples.ToList();
-            if (sampleList.Count == 0)
-                return null;
-
-            var sensorCount = (int)(sampleList.First().DataSize * interpolateScale);
-            var frameCount = sampleList.Count();
-
-            var interpolateSamples = new List<TimeSample>();
-            Parallel.For(0, frameCount, i =>
-            {
-                double[] scaledSensorValues = { };
-                if (interpolateScale != 1)
-                {
-                    scaledSensorValues =
-                        Interpolators.LinearInterpolate(sampleList[i].Values.ToArray(), sensorCount);
-                }
-                else
-                {
-                    scaledSensorValues = sampleList[i].Values.ToArray();
-                }
-
-                interpolateSamples.Add(new TimeSample(sampleList[i].Time, scaledSensorValues.ToList().AsReadOnly()));
-            });
-
-            return interpolateSamples;
-        }
 
         /// <summary>
         /// Samples을 Interpolate 한뒤 결과를 반환한다.
@@ -94,7 +63,8 @@ namespace SRHWiscMano.Core.Helpers
         /// <param name="samples"></param>
         /// <param name="interpolateScale"></param>
         /// <returns></returns>
-        public static List<TimeSample> InterpolateSamples(this IEnumerable<TimeSample> samples, int interpolateScale = 1)
+        public static List<TimeSample> InterpolateSamples(this IEnumerable<TimeSample> samples,
+            int interpolateScale = 1)
         {
             var sampleList = samples.ToList();
             if (!sampleList.Any())
@@ -105,12 +75,25 @@ namespace SRHWiscMano.Core.Helpers
             // Use a concurrent collection to store results temporarily
             var tempResults = new ConcurrentBag<(int Index, TimeSample Sample)>();
 
+            // var benchOld = new PerfBenchmarkActions();
+            // var benchNew = new PerfBenchmarkActions();
+
             Parallel.For(0, sampleList.Count, i =>
             {
                 double[] scaledSensorValues;
                 if (interpolateScale != 1)
                 {
-                    scaledSensorValues = Interpolators.LinearInterpolate(sampleList[i].Values.ToArray(), sensorCount);
+                    // using (benchOld.AddAction())
+                    {
+                        scaledSensorValues =
+                            Interpolators.LinearInterpolate(sampleList[i].Values.ToArray(), sensorCount);
+                    }
+
+                    // using(benchNew.AddAction())
+                    // {
+                    //     var values = sampleList[i].Values.ToArray().InterpolateTo(sensorCount);
+                    //     scaledSensorValues = values.ToArray();
+                    // }
                 }
                 else
                 {
@@ -121,11 +104,43 @@ namespace SRHWiscMano.Core.Helpers
                 tempResults.Add((i, interpolatedSample));
             });
 
+            // Debug.WriteLine($"InterpolateOld : {benchOld.CalcStatistics().Mean:F2}, {benchOld.CalcStatistics().StandardDeviation:F2}");
+            //
+            // Debug.WriteLine($"InterpolateNew : {benchNew.CalcStatistics().Mean:F2}, {benchNew.CalcStatistics().StandardDeviation:F2}");
+
             // Ensure the order of samples is preserved
             var orderedResults = tempResults.OrderBy(result => result.Index).Select(result => result.Sample).ToList();
             return orderedResults;
         }
 
+        public static IEnumerable<double> ValuesForSensorInTimeRange(
+            this IExamination data,
+            Interval timeRange,
+            int sensorIndex)
+        {
+            return data.Samples.SamplesInTimeRange(timeRange).Select((Func<TimeSample, double>)(s => s.Values[sensorIndex]));
+        }
+
+        public static IEnumerable<Tuple<TimeSample, double>> SampleValuesForSensorInTimeRange(
+            this IExamination data,
+            Interval timeRange,
+            int sensorIndex)
+        {
+            return data.Samples.SamplesInTimeRange(timeRange)
+                .Select((Func<TimeSample, Tuple<TimeSample, double>>)(s => Tuple.Create(s, s.Values[sensorIndex])));
+        }
+
+        /// <summary>
+        /// Time 간격에 대한 데이터를 추출하여 반환한다.
+        /// </summary>
+        /// <param name="samples"></param>
+        /// <param name="interval"></param>
+        /// <returns></returns>
+        public static IReadOnlyList<TimeSample> SamplesInTimeRange(this IEnumerable<TimeSample> samples,
+            Interval interval)
+        {
+            return samples.SamplesInTimeRange(interval.Start, interval.End);
+        }
 
         /// <summary>
         /// Time 간격에 대한 데이터를 추출하여 반환한다.
@@ -134,7 +149,8 @@ namespace SRHWiscMano.Core.Helpers
         /// <param name="startTime"></param>
         /// <param name="endTime"></param>
         /// <returns></returns>
-        public static IReadOnlyList<TimeSample> GetSubSamples(this IEnumerable<TimeSample> samples, Instant startTime, Instant endTime)
+        public static IReadOnlyList<TimeSample> SamplesInTimeRange(this IEnumerable<TimeSample> samples,
+            Instant startTime, Instant endTime)
         {
             var subSamples = samples.Where(s => s.Time >= startTime && s.Time <= endTime);
             return subSamples.ToList().AsReadOnly();

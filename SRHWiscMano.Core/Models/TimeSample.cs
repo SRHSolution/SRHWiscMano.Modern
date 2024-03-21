@@ -24,7 +24,7 @@ namespace SRHWiscMano.Core.Models
 
         public Instant Time => time;
 
-        public double TimeInSeconds => (time - InstantExtensions.Epoch).ToTimeSpan().TotalSeconds;
+        public double TimeInSeconds => (time - InstantExtensions.Epoch).TotalSeconds;
 
         public IReadOnlyList<double> Values => values;
 
