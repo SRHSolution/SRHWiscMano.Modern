@@ -16,11 +16,15 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MoreLinq.Extensions;
 using OxyPlot;
+using OxyPlot.Axes;
+using OxyPlot.Series;
 using SRHWiscMano.App.Data;
 using SRHWiscMano.App.Services;
 using SRHWiscMano.Core.Helpers;
 using SRHWiscMano.Core.Models;
+using SRHWiscMano.Core.Services.Detection;
 using SRHWiscMano.Core.ViewModels;
+
 
 namespace SRHWiscMano.App.ViewModels
 {
@@ -29,6 +33,7 @@ namespace SRHWiscMano.App.ViewModels
         private readonly ILogger<AnalyzerViewModel> logger;
         private readonly SharedService sharedService;
         private readonly IOptions<AppSettings> settings;
+        private readonly IRegionFinder regionFinder;
         private readonly SourceCache<ITimeFrame, int> timeFrames;
 
         [ObservableProperty] private PlotModel mainPlotModel;
@@ -42,18 +47,23 @@ namespace SRHWiscMano.App.ViewModels
         [ObservableProperty] private int selectedIndexOfTimeFrameViewModel = -1;
 
         public ObservableCollection<TimeFrameViewModel> TimeFrameViewModels { get; } = new();
-
+        
+        /// <summary>
+        /// Heatmap clicked 이벤트에 대한 delegate를 등록하는 변수
+        /// </summary>
+        public DelegatePlotCommand<OxyMouseDownEventArgs> HeatmapClicked { get; set; }
         public AnalyzerViewModel()
         {
             
         }
 
         public AnalyzerViewModel(ILogger<AnalyzerViewModel> logger, SharedService sharedService,
-            IOptions<AppSettings> settings)
+            IOptions<AppSettings> settings, IRegionFinder regionFinder)
         {
             this.logger = logger;
             this.sharedService = sharedService;
             this.settings = settings;
+            this.regionFinder = regionFinder;
 
             timeFrames = sharedService.TimeFrames;
             timeFrames.Connect().Subscribe(HandleTimeFrames);
@@ -120,6 +130,11 @@ namespace SRHWiscMano.App.ViewModels
                     case ChangeReason.Update:
                         var updItem = TimeFrameViewModels.SingleOrDefault(item => item.Id == change.Current.Id);
                         updItem.RefreshPlotData();
+                        // TODO : ListBox내의 item 은 업데이트 되지만, 하단의 mainplotmodel, graphmodel은 업데이트도 필요함
+                        if (SelectedIndexOfTimeFrameViewModel == change.Current.Id)
+                        {
+                            // MainViewmodel, GraphPlotModel UPDATE
+                        }
                         break;
 
                     case ChangeReason.Refresh:
@@ -132,23 +147,32 @@ namespace SRHWiscMano.App.ViewModels
         private PlotController BuildPlotcontroller()
         {
             var plotController = new PlotController();
-            var overviewTrackAt = new DelegatePlotCommand<OxyMouseDownEventArgs>((view, controller, args) =>
-            {
-                var viewXAxis = view.ActualModel.Axes.First(ax => ax.Tag == "X");
-                var posFrame = viewXAxis.InverseTransform(args.Position.X);
-                
-                var viewYAxis = view.ActualModel.Axes.First(ax => ax.Tag == "Y");
-                var posSensor = viewYAxis.InverseTransform(args.Position.Y);
-
-                logger.LogDebug($"Clicked pos {posFrame:F2}, {posSensor:F2}");
-            });
-
             // plotController.UnbindAll();
-            plotController.BindMouseDown(OxyMouseButton.Left, OxyModifierKeys.None, overviewTrackAt);
+            HeatmapClicked =
+                new DelegatePlotCommand<OxyMouseDownEventArgs>((view, controller, args) =>
+                    HeatmapClickedCommand(view, args));
+
+            // plotController.BindMouseDown(OxyMouseButton.Left, OxyModifierKeys.None, HeatmapClicked);
+            plotController.BindMouseDown(OxyMouseButton.Left, OxyModifierKeys.None, PlotCommands.SnapTrack);
             plotController.BindMouseDown(OxyMouseButton.Right, OxyModifierKeys.None, PlotCommands.PanAt);
-            plotController.BindMouseEnter(PlotCommands.HoverTrack);
+            // plotController.BindMouseEnter(PlotCommands.HoverTrack);
 
             return plotController;
+        }
+
+
+        private void HeatmapClickedCommand(IPlotView view, OxyMouseDownEventArgs args)
+        {
+            var viewXAxis = view.ActualModel.Axes.First(ax => ax.Tag == "X");
+            var posFrame = viewXAxis.InverseTransform(args.Position.X);
+
+            var viewYAxis = view.ActualModel.Axes.First(ax => ax.Tag == "Y");
+            var posSensor = viewYAxis.InverseTransform(args.Position.Y);
+
+            // SamplePoint dataPoint = new SamplePoint(posF)
+            // regionFinder.Find(RegionType.VP, CurrentTimeFrameVM.Data, 
+
+            logger.LogDebug($"Clicked pos {posFrame:F2}, {posSensor:F2}");
         }
 
 
@@ -164,11 +188,19 @@ namespace SRHWiscMano.App.ViewModels
             try
             {
                 var timeFrameData = (selectedItem as TimeFrameViewModel).Data;
-                var timeFrameClone = new TimeFrameViewModel(timeFrameData);
-                MainPlotModel = timeFrameClone.FramePlotModel;
+                CurrentTimeFrameVM = new TimeFrameViewModel(timeFrameData);
+                MainPlotModel = CurrentTimeFrameVM.FramePlotModel;
+                
+                var heatmap = MainPlotModel.Series.OfType<HeatMapSeries>().FirstOrDefault();
+                heatmap.TrackerFormatString = "{6:0.00}";
+;                Observable.FromEvent<EventHandler<TrackerEventArgs>, TrackerEventArgs>(
+                    handler => (sender, e) => handler(e),
+                    handler => MainPlotModel.TrackerChanged += handler,
+                    handler => MainPlotModel.TrackerChanged -= handler).Subscribe(HandleTrackerChanged);
                 MainPlotController = BuildPlotcontroller();
-                var timeFrameGraph = new TimeFrameGraphViewModel(timeFrameData);
-                GraphPlotModel = timeFrameGraph.FramePlotModel;
+                
+                currentTimeFrameGraphVM = new TimeFrameGraphViewModel(timeFrameData);
+                GraphPlotModel = currentTimeFrameGraphVM.FramePlotModel;
                 GraphPlotController = BuildPlotcontroller();
             }
             catch
@@ -176,6 +208,21 @@ namespace SRHWiscMano.App.ViewModels
                 logger.LogError("Selecting timeframe viewmodel got error");
             }
         }
+
+        private void HandleTrackerChanged(TrackerEventArgs args)
+        {
+            if (args.HitResult == null)
+                return;
+            
+            // PlotView에서 Tracker 가 표시되지 않도록 한다
+            MainPlotModel.PlotView.HideTracker();
+            var datapoint = args.HitResult.DataPoint;
+            StatusMessage = $"DataPoint : {datapoint.X}, {datapoint.Y}, value = {args.HitResult.Text}";
+        }
+
+        public TimeFrameGraphViewModel currentTimeFrameGraphVM { get; private set; }
+
+        public TimeFrameViewModel CurrentTimeFrameVM { get; private set; }
 
         /// <summary>
         /// TimeFrame 리스트에서 이전 item을 선택한다.

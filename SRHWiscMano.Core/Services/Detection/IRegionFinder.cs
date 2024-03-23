@@ -7,7 +7,7 @@ namespace SRHWiscMano.Core.Services.Detection
         Region Find(
             RegionType type,
             ITimeFrame state,
-            DataPoint click,
+            SamplePoint click,
             RegionFinderConfig config,
             IDetectionDiagnostics diagnostics);
     }

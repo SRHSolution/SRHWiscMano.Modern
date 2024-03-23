@@ -65,7 +65,7 @@ namespace SRHWiscMano.Core.Services.Detection
         {
             TimeSample sample = region.SampleWithMaximumOnClickedSensor();
             return region.ChangeTime(new Interval(sample.Time - timeBefore, sample.Time + timeAfter),
-                new DataPoint(sample.Time, region.ClickPoint.Sensor));
+                new SamplePoint(sample.Time, region.ClickPoint.Sensor));
         }
 
         // public static Region AdjustToTimeRangeAboveBaseline(
@@ -120,7 +120,7 @@ namespace SRHWiscMano.Core.Services.Detection
         public static Region ChangeTime(
             this Region region,
             Interval timeRange,
-            DataPoint focalPoint)
+            SamplePoint focalPoint)
         {
             return new Region(region.Window, region.SensorRange, region.Type, region.ClickPoint, focalPoint);
         }

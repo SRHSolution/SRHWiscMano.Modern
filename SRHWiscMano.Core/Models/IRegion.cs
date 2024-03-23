@@ -13,8 +13,8 @@ namespace SRHWiscMano.Core.Models
 
         RegionType Type { get; }
 
-        DataPoint ClickPoint { get; }
+        SamplePoint ClickPoint { get; }
 
-        DataPoint FocalPoint { get; }
+        SamplePoint FocalPoint { get; }
     }
 }

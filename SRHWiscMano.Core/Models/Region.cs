@@ -9,7 +9,7 @@ namespace SRHWiscMano.Core.Models
             ITimeFrame window,
             Range<int> sensorRange,
             RegionType type,
-            DataPoint clickPoint)
+            SamplePoint clickPoint)
         {
             Window = window;
             SensorRange = sensorRange;
@@ -21,8 +21,8 @@ namespace SRHWiscMano.Core.Models
             ITimeFrame window,
             Range<int> sensorRange,
             RegionType type,
-            DataPoint clickPoint,
-            DataPoint focalPoint)
+            SamplePoint clickPoint,
+            SamplePoint focalPoint)
             : this(window, sensorRange, type, clickPoint)
         {
             FocalPoint = focalPoint;
@@ -36,8 +36,8 @@ namespace SRHWiscMano.Core.Models
 
         public RegionType Type { get; set; }
 
-        public DataPoint ClickPoint { get; set; }
+        public SamplePoint ClickPoint { get; set; }
 
-        public DataPoint FocalPoint { get; set; }
+        public SamplePoint FocalPoint { get; set; }
     }
 }

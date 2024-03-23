@@ -14,7 +14,7 @@ namespace SRHWiscMano.Core.Services.Detection
         public Region Find(
             RegionType type,
             ITimeFrame state,
-            DataPoint click,
+            SamplePoint click,
             RegionFinderConfig config,
             IDetectionDiagnostics diagnostics)
         {
@@ -43,7 +43,7 @@ namespace SRHWiscMano.Core.Services.Detection
 
         private static Region FindVP(
             ITimeFrame state,
-            DataPoint click,
+            SamplePoint click,
             RegionFinderConfig config,
             IDetectionDiagnostics diagnostics)
         {
@@ -57,7 +57,7 @@ namespace SRHWiscMano.Core.Services.Detection
                 configForRegion.Algorithm,new DiagnosticsContext(diagnostics, RegionType.VP));
         }
 
-        private static Region FindPreUES(ITimeFrame state, DataPoint click)
+        private static Region FindPreUES(ITimeFrame state, SamplePoint click)
         {
             return null;
 
@@ -67,7 +67,7 @@ namespace SRHWiscMano.Core.Services.Detection
             //     .ExtendTimeLeft(Duration.FromMilliseconds(1000L));
         }
 
-        private static Region FindPostUES(ITimeFrame state, DataPoint click)
+        private static Region FindPostUES(ITimeFrame state, SamplePoint click)
         {
             return null;
             // if (!state.UesLowerBound.HasValue)
@@ -77,7 +77,7 @@ namespace SRHWiscMano.Core.Services.Detection
             //     .AdjustToPeakChangeLeft(Duration.FromMilliseconds(500L));
         }
 
-        private static Region FindUES(ITimeFrame state, DataPoint click)
+        private static Region FindUES(ITimeFrame state, SamplePoint click)
         {
             IRegion regionOrThrow1 =
                 FindRegionOrThrow(state, RegionType.PreUES, "PreUES must be determined before UES");
@@ -93,7 +93,7 @@ namespace SRHWiscMano.Core.Services.Detection
 
         private static Region FindTB(
             ITimeFrame state,
-            DataPoint click,
+            SamplePoint click,
             RegionFinderConfig config,
             IDetectionDiagnostics diagnostics)
         {
@@ -120,7 +120,7 @@ namespace SRHWiscMano.Core.Services.Detection
 
         private static Region FindHP(
             ITimeFrame state,
-            DataPoint click,
+            SamplePoint click,
             RegionFinderConfig config,
             IDetectionDiagnostics diagnostics)
         {
@@ -141,7 +141,7 @@ namespace SRHWiscMano.Core.Services.Detection
                     // new DiagnosticsContext(diagnostics, RegionType.HP));
         }
 
-        private static Region FindMP(ITimeFrame state, DataPoint click)
+        private static Region FindMP(ITimeFrame state, SamplePoint click)
         {
             IRegion regionOrThrow1 = FindRegionOrThrow(state, RegionType.VP, "VP must be determined before MP");
             IRegion regionOrThrow2 =
@@ -159,7 +159,7 @@ namespace SRHWiscMano.Core.Services.Detection
 
         private static Region CreateRegionWithRelativeSensors(
             ITimeFrame window,
-            DataPoint click,
+            SamplePoint click,
             int sensorsAbove,
             int sensorsBelow,
             RegionType type)
@@ -172,7 +172,7 @@ namespace SRHWiscMano.Core.Services.Detection
 
         private static Region CreateRegionWithSensorsFromVPLine(
             ITimeFrame window,
-            DataPoint click,
+            SamplePoint click,
             int vpUpperBound,
             int sensorsBelow,
             RegionType type)
@@ -184,7 +184,7 @@ namespace SRHWiscMano.Core.Services.Detection
 
         private static Region CreateRegionWithSensorsDownToUesLine(
             ITimeFrame window,
-            DataPoint click,
+            SamplePoint click,
             RegionType type)
         {
             // return CreateRegionWithRelativeSensors(window, click, 0, uesLowerBound - click.Sensor, type);
@@ -193,7 +193,7 @@ namespace SRHWiscMano.Core.Services.Detection
 
         private static Region CreateRegionWithSensors(
             ITimeFrame window,
-            DataPoint click,
+            SamplePoint click,
             int sensorTop,
             int sensorBottom,
             RegionType type)
