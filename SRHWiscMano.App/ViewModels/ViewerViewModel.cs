@@ -477,7 +477,11 @@ namespace SRHWiscMano.App.ViewModels
                     Instant.FromUnixTimeMilliseconds((long)xAxis.ActualMaximum * 10)).ConvertToDoubleArray();
 
                 var axisRange = xAxis.ActualMaximum - xAxis.ActualMinimum;
-                if (axisRange < 1000)
+                if (axisRange < 500)
+                {
+                    xAxis.MajorStep = 100;
+                }
+                else if (axisRange < 1000)
                 {
                     xAxis.MajorStep = 500;
                 }
@@ -545,8 +549,8 @@ namespace SRHWiscMano.App.ViewModels
                 MinimumPadding = 0,
                 Minimum = 0,
                 Maximum = plotSampleData.GetLength(0) - 1, // xSize - 1,
-                MajorStep = 5000,
-                MinorStep = 1000, // 최대 범위를 입력하여 MinorStep 이 표시되지 않도록 한다
+                MajorStep = 500,
+                MinorStep = 100, // 최대 범위를 입력하여 MinorStep 이 표시되지 않도록 한다
                 MajorTickSize = 4,
                 MinorTickSize = 2,
                 AbsoluteMinimum = 0,
