@@ -91,6 +91,15 @@ namespace SRHWiscMano.Core.Services.Detection
             return CreateRegionWithSensors(state, click, sensorTop, sensorBottom, RegionType.UES).ChangeTime(timeRange);
         }
 
+        /// <summary>
+        /// 센서의 크기는 VP - PostUES 간격의 센서 크기에서 상위 절반은 TB, 하위 절반은 HP로 한다. 갯수가 홀수일 경우엔 TB가 한개더 적다
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="click"></param>
+        /// <param name="config"></param>
+        /// <param name="diagnostics"></param>
+        /// <returns></returns>
+        /// <exception cref="RegionFinderException"></exception>
         private static Region FindTB(
             ITimeFrame state,
             SamplePoint click,
@@ -118,6 +127,15 @@ namespace SRHWiscMano.Core.Services.Detection
             //         new DiagnosticsContext(diagnostics, RegionType.TB));
         }
 
+        /// <summary>
+        /// 센서의 크기는 VP - PostUES 간격의 센서 크기에서 상위 절반은 TB, 하위 절반은 HP로 한다. 갯수가 홀수일 경우엔 TB가 한개더 적다
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="click"></param>
+        /// <param name="config"></param>
+        /// <param name="diagnostics"></param>
+        /// <returns></returns>
+        /// <exception cref="RegionFinderException"></exception>
         private static Region FindHP(
             ITimeFrame state,
             SamplePoint click,
