@@ -52,10 +52,8 @@ namespace SRHWiscMano.Core.ViewModels
         [ObservableProperty] private bool isSelected;
 
         [ObservableProperty] private bool isEditing = false;
-        
 
         public Instant Time { get; private set; }
-
         
         public TimeFrameViewModel(ITimeFrame data)
         {
@@ -179,16 +177,24 @@ namespace SRHWiscMano.Core.ViewModels
         public void RefreshPlotData()
         {
             // 이전과 동일하면 skip
-            if (Time.Equals(Data.Time))
-                return;
+            // if (Time.Equals(Data.Time))
+            //     return;
 
             var heatmap = framePlotModel.Series.OfType<HeatMapSeries>().FirstOrDefault();
+            var yAxis = framePlotModel.Axes.First(ax => ax.Tag == "Y");
             heatmap.Data = Data.IntpFrameSamples.ConvertToDoubleArray();
+
+            var sensorIntpScale = Data.IntpFrameSamples[0].DataSize / Data.FrameSamples[0].DataSize;
+
+            // Sensor Bounds 영역만을 표시하도록 한다
+            yAxis.Minimum = Data.MinSensorBound * sensorIntpScale;
+            yAxis.Maximum = Data.MaxSensorBound * sensorIntpScale - 1;
+
             heatmap.X0 = 0;
             heatmap.X1 = Data.IntpFrameSamples.Count - 1;
             heatmap.Y0 = 0;
             heatmap.Y1 = Data.IntpFrameSamples.First().DataSize - 1;
-            framePlotModel.InvalidatePlot(true);
+            framePlotModel.InvalidatePlot(false);
 
             this.Time = Data.Time;
         }

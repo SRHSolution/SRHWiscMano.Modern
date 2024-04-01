@@ -31,7 +31,7 @@ namespace SRHWiscMano.Core.Helpers
                 X0 = 0,
                 X1 = (double)frameCount,
                 Y0 = 0,
-                Y1 = sensorCount, //plotData.GetLength(1),
+                Y1 = sensorCount, 
                 Data = plotData /* Your 2D data array */,
                 Interpolate = true,
                 RenderMethod = HeatMapRenderMethod.Bitmap,

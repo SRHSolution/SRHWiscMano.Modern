@@ -68,6 +68,18 @@ namespace SRHWiscMano.App.Services
             return new TimeFrame(text, time, settings.TimeFrameDurationInMillisecond, ExamData);
         }
 
+        public void ChangeSensorBounds(double minSensor, double maxSensor)
+        {
+            foreach (var item in TimeFrames.Items)
+            {
+                TimeFrames.Edit(updater =>
+                {
+                    item.UpdateSensorBounds(minSensor, maxSensor);
+                    updater.AddOrUpdate(item);
+                });
+            }
+           
+        }
 
         public void SetExamMetaData(IExamMetaData data)
         {

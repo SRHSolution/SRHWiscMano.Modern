@@ -32,9 +32,9 @@ namespace SRHWiscMano.App.Data
         public double MaxSensorBound { get; set; } = 36;
 
         /// <summary>
-        /// 
+        /// TimeFrame의 시간간격
         /// </summary>
-        public double TimeFrameDurationInMillisecond { get; set; } = 3000;
+        public double TimeFrameDurationInMillisecond { get; set; } = 2000;
 
         public string SelectedPaletteKey { get; set; } = "Mid";
     }

@@ -27,6 +27,8 @@ namespace SRHWiscMano.Core.Models
 
         public string Text { get; set; }
 
+        public double MinSensorBound { get; private set; }
+        public double MaxSensorBound { get; private set; }
         public Instant Time { get; private set; }
 
         /// <summary>
@@ -72,6 +74,12 @@ namespace SRHWiscMano.Core.Models
             IntpFrameSamples = IntpSamples.SamplesInTimeRange(startTime, endTime);
 
             Time = newTime;
+        }
+
+        public void UpdateSensorBounds(double minBound, double maxBound)
+        {
+            MinSensorBound = minBound;
+            MaxSensorBound = maxBound;
         }
 
         public object Clone()
