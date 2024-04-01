@@ -34,7 +34,7 @@ namespace SRHWiscMano.App.Data
         /// <summary>
         /// TimeFrame의 시간간격
         /// </summary>
-        public double TimeFrameDurationInMillisecond { get; set; } = 2000;
+        public double TimeFrameDurationInMillisecond { get; set; } = 3000;
 
         public string SelectedPaletteKey { get; set; } = "Mid";
     }

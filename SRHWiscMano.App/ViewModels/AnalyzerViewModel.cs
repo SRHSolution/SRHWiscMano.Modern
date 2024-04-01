@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Windows.Markup;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using DynamicData;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -20,6 +21,7 @@ using OxyPlot.Axes;
 using OxyPlot.Series;
 using SRHWiscMano.App.Data;
 using SRHWiscMano.App.Services;
+using SRHWiscMano.Core.Data;
 using SRHWiscMano.Core.Helpers;
 using SRHWiscMano.Core.Models;
 using SRHWiscMano.Core.Services.Detection;
@@ -67,7 +69,11 @@ namespace SRHWiscMano.App.ViewModels
 
             timeFrames = sharedService.TimeFrames;
             timeFrames.Connect().Subscribe(HandleTimeFrames);
+
+            WeakReferenceMessenger.Default.Register<SensorBoundsChangedMessage>(this, SensorBoundsChanged);
         }
+
+        
 
 
         /// <summary>
@@ -130,6 +136,7 @@ namespace SRHWiscMano.App.ViewModels
                     case ChangeReason.Update:
                         var updItem = TimeFrameViewModels.SingleOrDefault(item => item.Id == change.Current.Id);
                         updItem.RefreshPlotData();
+                        
                         // TODO : ListBox내의 item 은 업데이트 되지만, 하단의 mainplotmodel, graphmodel은 업데이트도 필요함
                         if (SelectedIndexOfTimeFrameViewModel == change.Current.Id)
                         {
@@ -197,6 +204,10 @@ namespace SRHWiscMano.App.ViewModels
                     handler => (sender, e) => handler(e),
                     handler => MainPlotModel.TrackerChanged += handler,
                     handler => MainPlotModel.TrackerChanged -= handler).Subscribe(HandleTrackerChanged);
+
+                CurrentTimeFrameVM.Data.UpdateSensorBounds(timeFrameData.MinSensorBound, timeFrameData.MaxSensorBound);
+                CurrentTimeFrameVM.RefreshPlotData();
+
                 MainPlotController = BuildPlotcontroller();
                 
                 currentTimeFrameGraphVM = new TimeFrameGraphViewModel(timeFrameData);
@@ -207,6 +218,14 @@ namespace SRHWiscMano.App.ViewModels
             {
                 logger.LogError("Selecting timeframe viewmodel got error");
             }
+        }
+
+        //TODO : SensorBoundsChanged와 같이 Time changed 에 대한 이벤트에 따른 mainmodel 업데이트 기능 필요
+
+        private void SensorBoundsChanged(object recipient, SensorBoundsChangedMessage message)
+        {
+            CurrentTimeFrameVM.Data.UpdateSensorBounds(message.Value.MinBound, message.Value.MaxBound);
+            CurrentTimeFrameVM.RefreshPlotData();
         }
 
         private void HandleTrackerChanged(TrackerEventArgs args)

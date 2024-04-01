@@ -848,7 +848,8 @@ namespace SRHWiscMano.App.ViewModels
 
                     MainPlotModel.InvalidatePlot(true);
 
-                    sharedService.ChangeSensorBounds(MinSensorBound, MaxSensorBound);
+                    WeakReferenceMessenger.Default.Send(new SensorBoundsChangedMessage(
+                        new SensorBoundsChangedMessageArg() { MinBound = MinSensorBound, MaxBound = MaxSensorBound }));
                 }
             }
         }

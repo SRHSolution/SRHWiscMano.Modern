@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.Messaging;
 using DynamicData;
 using MahApps.Metro.Converters;
 using Microsoft.Extensions.Logging;
@@ -10,6 +11,7 @@ using Microsoft.Extensions.Options;
 using NodaTime;
 using Shouldly;
 using SRHWiscMano.App.Data;
+using SRHWiscMano.Core.Data;
 using SRHWiscMano.Core.Helpers;
 using SRHWiscMano.Core.Models;
 using SRHWiscMano.Core.ViewModels;
@@ -42,7 +44,11 @@ namespace SRHWiscMano.App.Services
         {
             this.logger = logger;
             this.settings = settings.Value;
+
+            WeakReferenceMessenger.Default.Register<SensorBoundsChangedMessage>(this, SensorBoundsChanged);
         }
+
+        
 
         public async Task SetExamData(IExamination data, double interpolateScale = 1)
         {
@@ -68,17 +74,21 @@ namespace SRHWiscMano.App.Services
             return new TimeFrame(text, time, settings.TimeFrameDurationInMillisecond, ExamData);
         }
 
-        public void ChangeSensorBounds(double minSensor, double maxSensor)
+        /// <summary>
+        /// Sensor Bounds를 변경되었을 때 TimeFrames 에도 이를 반영한다.
+        /// </summary>
+        /// <param name="recipient"></param>
+        /// <param name="message"></param>
+        private void SensorBoundsChanged(object recipient, SensorBoundsChangedMessage message)
         {
             foreach (var item in TimeFrames.Items)
             {
                 TimeFrames.Edit(updater =>
                 {
-                    item.UpdateSensorBounds(minSensor, maxSensor);
+                    item.UpdateSensorBounds(message.Value.MinBound, message.Value.MaxBound);
                     updater.AddOrUpdate(item);
                 });
             }
-           
         }
 
         public void SetExamMetaData(IExamMetaData data)
