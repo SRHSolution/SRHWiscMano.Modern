@@ -240,17 +240,17 @@ namespace SRHWiscMano.App.ViewModels
                         break;
                     case ChangeReason.Update:
                     {
-                        var msec = change.Current.Time.ToMillisecondsFromEpoch();
+                        var xPos = change.Current.Time.ToMillisecondsFromEpoch()/10;
                         var mainAnno = MainPlotModel.Annotations.OfType<LineAnnotation>()
                             .Single(item => (int)item.Tag == change.Current.Id);
                         mainAnno.Text = change.Current.Text;
-                        mainAnno.X = msec;
+                        mainAnno.X = xPos;
                         MainPlotModel.InvalidatePlot(false);
 
                         var overAnno = OverviewPlotModel.Annotations.OfType<LineAnnotation>()
                             .Single(item => (int)item.Tag == change.Current.Id);
                         overAnno.Text = change.Current.Text;
-                        overAnno.X = msec;
+                        overAnno.X = xPos;
                         OverviewPlotModel.InvalidatePlot(false);
 
                         logger.LogTrace($"Update: {change.Current.Text}");
@@ -270,11 +270,11 @@ namespace SRHWiscMano.App.ViewModels
         /// <param name="model"></param>
         private void CreateVLineAnnotation(ITimeFrame timeFrame, bool draggable, PlotModel model)
         {
-            var msec = timeFrame.Time.ToMillisecondsFromEpoch()/10;
+            var xPos = timeFrame.Time.ToMillisecondsFromEpoch()/10;
             var la = new LineAnnotation
             {
                 Type = LineAnnotationType.Vertical,
-                X = msec,
+                X = xPos,
                 LineStyle = LineStyle.Solid,
                 ClipByYAxis = true,
                 Text = timeFrame.Text,
@@ -313,7 +313,7 @@ namespace SRHWiscMano.App.ViewModels
                     model.InvalidatePlot(false);
 
                     la.X = (long)la.InverseTransform(e.Position).X;
-                    timeFrame.UpdateTime(Instant.FromUnixTimeMilliseconds((long)la.X * 10));
+                    timeFrame.UpdateTime(Instant.FromUnixTimeMilliseconds((long)la.X*10));
                     timeFrames.AddOrUpdate(timeFrame);
 
                     e.Handled = true;
