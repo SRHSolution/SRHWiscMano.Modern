@@ -32,6 +32,8 @@ namespace SRHWiscMano.App.ViewModels
 {
     public partial class AnalyzerViewModel : ViewModelBase, IAnalyzerViewModel
     {
+        #region Fields & Properties
+
         private readonly ILogger<AnalyzerViewModel> logger;
         private readonly SharedService sharedService;
         private readonly IOptions<AppSettings> settings;
@@ -44,16 +46,34 @@ namespace SRHWiscMano.App.ViewModels
         [ObservableProperty] private PlotModel graphPlotModel;
         [ObservableProperty] private PlotController graphPlotController;
 
+        
+        /// <summary>
+        /// 현재 선택되어 표시되고 있는 TimeFrame Heatmap ViewModel
+        /// </summary>
+        public TimeFrameViewModel CurrentTimeFrameVM { get; private set; }
+
+        /// <summary>
+        /// 현재 선택되어 표시되고 있는 TimeFrame Lineseries ViewModel
+        /// </summary>
+        public TimeFrameGraphViewModel CurrentTimeFrameGraphVM { get; private set; }
+        
         [ObservableProperty] private string statusMessage = "Test status message";
 
         [ObservableProperty] private int selectedIndexOfTimeFrameViewModel = -1;
 
+        /// <summary>
+        /// View에서 표시할 전체 TimeFrameViewModels 
+        /// </summary>
         public ObservableCollection<TimeFrameViewModel> TimeFrameViewModels { get; } = new();
         
         /// <summary>
         /// Heatmap clicked 이벤트에 대한 delegate를 등록하는 변수
         /// </summary>
         public DelegatePlotCommand<OxyMouseDownEventArgs> HeatmapClicked { get; set; }
+        public DelegatePlotCommand<OxyMouseDownEventArgs> GraphClicked { get; set; }
+
+        #endregion
+
         public AnalyzerViewModel()
         {
             
@@ -68,32 +88,16 @@ namespace SRHWiscMano.App.ViewModels
             this.regionFinder = regionFinder;
 
             timeFrames = sharedService.TimeFrames;
-            timeFrames.Connect().Subscribe(HandleTimeFrames);
+            timeFrames.Connect().Subscribe(HandleBindingTimeFrames);
 
             WeakReferenceMessenger.Default.Register<SensorBoundsChangedMessage>(this, SensorBoundsChanged);
         }
-
-        
-
-
-        /// <summary>
-        /// 
-        /// </summary>
-        [RelayCommand]
-        private void ListItemsLoaded()
-        {
-            if (timeFrames.Count > 0 && SelectedIndexOfTimeFrameViewModel < 0)
-            {
-                SelectedIndexOfTimeFrameViewModel = 0;
-            }
-        }
-
 
         /// <summary>
         /// SharedService의 TimeFrames에 등록된 데이터를 View에 binding 작업을 수행한다.
         /// </summary>
         /// <param name="changeSet"></param>
-        private void HandleTimeFrames(IChangeSet<ITimeFrame, int> changeSet)
+        private void HandleBindingTimeFrames(IChangeSet<ITimeFrame, int> changeSet)
         {
             foreach (var change in changeSet)
             {
@@ -132,15 +136,15 @@ namespace SRHWiscMano.App.ViewModels
                     case ChangeReason.Moved:
                         break;
 
-                    // 다른 view에서 변경하는 것은 Time 밖에 없으므로 PlotData를 update한다.
+                    // Binding 된 TimeFrame의 Time/Sensor Bound를 변경될 시에 각각에 해당하는 viewmodel을 update한다.
                     case ChangeReason.Update:
                         var updItem = TimeFrameViewModels.SingleOrDefault(item => item.Id == change.Current.Id);
                         updItem.RefreshPlotData();
                         
-                        // TODO : ListBox내의 item 은 업데이트 되지만, 하단의 mainplotmodel, graphmodel은 업데이트도 필요함
-                        if (SelectedIndexOfTimeFrameViewModel == change.Current.Id)
+                        if (CurrentTimeFrameVM.Id == change.Current.Id)
                         {
-                            // MainViewmodel, GraphPlotModel UPDATE
+                            CurrentTimeFrameVM.RefreshPlotData();
+                            CurrentTimeFrameGraphVM.RefreshPlotData();
                         }
                         break;
 
@@ -151,35 +155,17 @@ namespace SRHWiscMano.App.ViewModels
             }
         }
 
-        private PlotController BuildPlotcontroller()
+        /// <summary>
+        /// TimeFrameViewModel 이 View에서 load 되었을 때의 이벤트 처리
+        /// 처음에만 한번 0으로 변경한다
+        /// </summary>
+        [RelayCommand]
+        private void ListItemsLoaded()
         {
-            var plotController = new PlotController();
-            // plotController.UnbindAll();
-            HeatmapClicked =
-                new DelegatePlotCommand<OxyMouseDownEventArgs>((view, controller, args) =>
-                    HeatmapClickedCommand(view, args));
-
-            // plotController.BindMouseDown(OxyMouseButton.Left, OxyModifierKeys.None, HeatmapClicked);
-            plotController.BindMouseDown(OxyMouseButton.Left, OxyModifierKeys.None, PlotCommands.SnapTrack);
-            plotController.BindMouseDown(OxyMouseButton.Right, OxyModifierKeys.None, PlotCommands.PanAt);
-            // plotController.BindMouseEnter(PlotCommands.HoverTrack);
-
-            return plotController;
-        }
-
-
-        private void HeatmapClickedCommand(IPlotView view, OxyMouseDownEventArgs args)
-        {
-            var viewXAxis = view.ActualModel.Axes.First(ax => ax.Tag == "X");
-            var posFrame = viewXAxis.InverseTransform(args.Position.X);
-
-            var viewYAxis = view.ActualModel.Axes.First(ax => ax.Tag == "Y");
-            var posSensor = viewYAxis.InverseTransform(args.Position.Y);
-
-            // SamplePoint dataPoint = new SamplePoint(posF)
-            // regionFinder.Find(RegionType.VP, CurrentTimeFrameVM.Data, 
-
-            logger.LogDebug($"Clicked pos {posFrame:F2}, {posSensor:F2}");
+            if (timeFrames.Count > 0 && SelectedIndexOfTimeFrameViewModel < 0)
+            {
+                SelectedIndexOfTimeFrameViewModel = 0;
+            }
         }
 
 
@@ -200,7 +186,7 @@ namespace SRHWiscMano.App.ViewModels
                 
                 var heatmap = MainPlotModel.Series.OfType<HeatMapSeries>().FirstOrDefault();
                 heatmap.TrackerFormatString = "{6:0.00}";
-;                Observable.FromEvent<EventHandler<TrackerEventArgs>, TrackerEventArgs>(
+                ;                Observable.FromEvent<EventHandler<TrackerEventArgs>, TrackerEventArgs>(
                     handler => (sender, e) => handler(e),
                     handler => MainPlotModel.TrackerChanged += handler,
                     handler => MainPlotModel.TrackerChanged -= handler).Subscribe(HandleTrackerChanged);
@@ -208,22 +194,20 @@ namespace SRHWiscMano.App.ViewModels
                 CurrentTimeFrameVM.Data.UpdateSensorBounds(timeFrameData.MinSensorBound, timeFrameData.MaxSensorBound);
                 CurrentTimeFrameVM.RefreshPlotData();
 
-                MainPlotController = BuildPlotcontroller();
+                MainPlotController = BuildMainPlotcontroller();
                 
-                currentTimeFrameGraphVM = new TimeFrameGraphViewModel(timeFrameData);
-                GraphPlotModel = currentTimeFrameGraphVM.FramePlotModel;
+                CurrentTimeFrameGraphVM = new TimeFrameGraphViewModel(timeFrameData);
+                GraphPlotModel = CurrentTimeFrameGraphVM.FramePlotModel;
                 
-                currentTimeFrameGraphVM.Data.UpdateSensorBounds(timeFrameData.MinSensorBound, timeFrameData.MaxSensorBound);
-                // currentTimeFrameGraphVM.RefreshPlotData();
-                GraphPlotController = BuildPlotcontroller();
+                CurrentTimeFrameGraphVM.Data.UpdateSensorBounds(timeFrameData.MinSensorBound, timeFrameData.MaxSensorBound);
+                // CurrentTimeFrameGraphVM.RefreshPlotData();
+                GraphPlotController = BuildMainPlotcontroller();
             }
             catch
             {
                 logger.LogError("Selecting timeframe viewmodel got error");
             }
         }
-
-        //TODO : SensorBoundsChanged와 같이 Time changed 에 대한 이벤트에 따른 mainmodel 업데이트 기능 필요
 
         private void SensorBoundsChanged(object recipient, SensorBoundsChangedMessage message)
         {
@@ -232,10 +216,41 @@ namespace SRHWiscMano.App.ViewModels
                 CurrentTimeFrameVM.Data.UpdateSensorBounds(message.Value.MinBound, message.Value.MaxBound);
                 CurrentTimeFrameVM.RefreshPlotData();
 
-                currentTimeFrameGraphVM.Data.UpdateSensorBounds(message.Value.MinBound, message.Value.MaxBound);
-                currentTimeFrameGraphVM.RefreshPlotData();
+                CurrentTimeFrameGraphVM.Data.UpdateSensorBounds(message.Value.MinBound, message.Value.MaxBound);
+                CurrentTimeFrameGraphVM.RefreshPlotData();
             }
         }
+
+        private PlotController BuildMainPlotcontroller()
+        {
+            var plotController = new PlotController();
+            // plotController.UnbindAll();
+            HeatmapClicked =
+                new DelegatePlotCommand<OxyMouseDownEventArgs>((view, controller, args) =>
+                    HeatmapClickedCommand(view, args));
+
+            // plotController.BindMouseDown(OxyMouseButton.Left, OxyModifierKeys.None, HeatmapClicked);
+            plotController.BindMouseDown(OxyMouseButton.Left, OxyModifierKeys.None, PlotCommands.SnapTrack);
+
+            return plotController;
+        }
+
+        private PlotController BuildGraphPlotcontroller()
+        {
+            var plotController = new PlotController();
+            // plotController.UnbindAll();
+            GraphClicked =
+                new DelegatePlotCommand<OxyMouseDownEventArgs>((view, controller, args) =>
+                    GraphClickedCommand(view, args));
+
+            plotController.BindMouseDown(OxyMouseButton.Left, OxyModifierKeys.None, GraphClicked);
+            plotController.BindMouseDown(OxyMouseButton.Left, OxyModifierKeys.None, PlotCommands.SnapTrack);
+            // plotController.BindMouseDown(OxyMouseButton.Right, OxyModifierKeys.None, PlotCommands.PanAt);
+            // plotController.BindMouseEnter(PlotCommands.HoverTrack);
+
+            return plotController;
+        }
+
 
         private void HandleTrackerChanged(TrackerEventArgs args)
         {
@@ -248,9 +263,35 @@ namespace SRHWiscMano.App.ViewModels
             StatusMessage = $"DataPoint : {datapoint.X}, {datapoint.Y}, value = {args.HitResult.Text}";
         }
 
-        public TimeFrameGraphViewModel currentTimeFrameGraphVM { get; private set; }
+        private void HeatmapClickedCommand(IPlotView view, OxyMouseDownEventArgs args)
+        {
+            var viewXAxis = view.ActualModel.Axes.First(ax => ax.Tag == "X");
+            var posFrame = viewXAxis.InverseTransform(args.Position.X);
 
-        public TimeFrameViewModel CurrentTimeFrameVM { get; private set; }
+            var viewYAxis = view.ActualModel.Axes.First(ax => ax.Tag == "Y");
+            var posSensor = viewYAxis.InverseTransform(args.Position.Y);
+
+            // SamplePoint dataPoint = new SamplePoint(posF)
+            // regionFinder.Find(RegionType.VP, CurrentTimeFrameVM.Data, 
+
+            logger.LogDebug($"Clicked pos {posFrame:F2}, {posSensor:F2}");
+        }
+
+        private void GraphClickedCommand(IPlotView view, OxyMouseDownEventArgs args)
+        {
+            var viewXAxis = view.ActualModel.Axes.First(ax => ax.Tag == "X");
+            var posFrame = viewXAxis.InverseTransform(args.Position.X);
+
+            var viewYAxis = view.ActualModel.Axes.First(ax => ax.Tag == "Y");
+            var posSensor = viewYAxis.InverseTransform(args.Position.Y);
+
+            logger.LogDebug($"Clicked pos {posFrame:F2}, {posSensor:F2}");
+        }
+
+
+        //TODO : SensorBoundsChanged와 같이 Time changed 에 대한 이벤트에 따른 mainmodel 업데이트 기능 필요
+
+        #region 버튼 이벤트
 
         /// <summary>
         /// TimeFrame 리스트에서 이전 item을 선택한다.
@@ -311,5 +352,7 @@ namespace SRHWiscMano.App.ViewModels
         {
             logger.LogTrace("Clicked");
         }
+
+        #endregion
     }
 }

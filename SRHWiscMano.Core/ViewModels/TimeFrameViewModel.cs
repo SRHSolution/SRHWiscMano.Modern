@@ -176,10 +176,6 @@ namespace SRHWiscMano.Core.ViewModels
 
         public void RefreshPlotData()
         {
-            // 이전과 동일하면 skip
-            // if (Time.Equals(Data.Time))
-            //     return;
-
             var heatmap = framePlotModel.Series.OfType<HeatMapSeries>().FirstOrDefault();
             var yAxis = framePlotModel.Axes.First(ax => ax.Tag == "Y");
             heatmap.Data = Data.IntpFrameSamples.ConvertToDoubleArray();

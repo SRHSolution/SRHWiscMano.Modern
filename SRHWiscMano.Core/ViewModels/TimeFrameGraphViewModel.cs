@@ -65,7 +65,7 @@ namespace SRHWiscMano.Core.ViewModels
         public TimeFrameGraphViewModel(ITimeFrame data)
         {
 
-            this.Data = (ITimeFrame)data.Clone();
+            this.Data = data;
             this.Id = data.Id;
             this.Time = data.Time;
             this.Label = data.Text;
