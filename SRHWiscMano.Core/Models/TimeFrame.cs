@@ -58,6 +58,7 @@ namespace SRHWiscMano.Core.Models
             TimeDuration = timeDuration;
             OwnerSamples = data.Samples;
             IntpSamples = data.InterpolatedSamples;
+            
             UpdateTime(Time);
         }
 
@@ -84,7 +85,11 @@ namespace SRHWiscMano.Core.Models
 
         public object Clone()
         {
-            return new TimeFrame(Text, Time, TimeDuration, Data);
+            var newObj = new TimeFrame(Text, Time, TimeDuration, Data);
+            newObj.MinSensorBound = this.MinSensorBound;
+            newObj.MaxSensorBound = this.MaxSensorBound;
+
+            return newObj;
         }
 
 

@@ -212,6 +212,11 @@ namespace SRHWiscMano.App.ViewModels
                 
                 currentTimeFrameGraphVM = new TimeFrameGraphViewModel(timeFrameData);
                 GraphPlotModel = currentTimeFrameGraphVM.FramePlotModel;
+                var lineSeries = GraphPlotModel.Series.OfType<LineSeries>().FirstOrDefault();
+                lineSeries.TrackerFormatString = "{6:0.00}";
+                
+                currentTimeFrameGraphVM.Data.UpdateSensorBounds(timeFrameData.MinSensorBound, timeFrameData.MaxSensorBound);
+                // currentTimeFrameGraphVM.RefreshPlotData();
                 GraphPlotController = BuildPlotcontroller();
             }
             catch
@@ -224,8 +229,11 @@ namespace SRHWiscMano.App.ViewModels
 
         private void SensorBoundsChanged(object recipient, SensorBoundsChangedMessage message)
         {
-            CurrentTimeFrameVM.Data.UpdateSensorBounds(message.Value.MinBound, message.Value.MaxBound);
-            CurrentTimeFrameVM.RefreshPlotData();
+            if(CurrentTimeFrameVM != null)
+            {
+                CurrentTimeFrameVM.Data.UpdateSensorBounds(message.Value.MinBound, message.Value.MaxBound);
+                CurrentTimeFrameVM.RefreshPlotData();
+            }
         }
 
         private void HandleTrackerChanged(TrackerEventArgs args)

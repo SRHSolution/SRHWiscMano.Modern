@@ -1,4 +1,5 @@
-﻿using System.Net.Mime;
+﻿using System;
+using System.Net.Mime;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
@@ -53,7 +54,10 @@ namespace SRHWiscMano.Core.ViewModels
 
         [ObservableProperty] private bool isEditing = false;
 
-        public int SensorRange { get; private set; } = 10;
+        /// <summary>
+        /// Sensor 값을 Plot하기 위한 Resolution 
+        /// </summary>
+        public int SensorResolution { get; private set; } = 10;
 
         public Instant Time { get; private set; }
 
@@ -65,6 +69,7 @@ namespace SRHWiscMano.Core.ViewModels
             this.Id = data.Id;
             this.Time = data.Time;
             this.Label = data.Text;
+            SensorResolution = 1;
             if (Label.Contains("cc"))
             {
                 this.Volume = Label.Trim().Split("cc")[0];
@@ -77,7 +82,8 @@ namespace SRHWiscMano.Core.ViewModels
             var plotModel = new PlotModel();
             plotData = Data.FrameSamples.ConvertToDoubleArray(true);
             AddAxes(plotModel, plotData.GetLength(0), plotData.GetLength(1));
-            AddLineSeries(plotModel, plotData);
+            UpdateLineSeries(plotModel, plotData, Data.MinSensorBound, Data.MaxSensorBound);
+            // AddLineSeries(plotModel, plotData);
             FramePlotModel = plotModel;
         }
 
@@ -88,14 +94,27 @@ namespace SRHWiscMano.Core.ViewModels
         /// <param name="plotData"></param>
         private void AddLineSeries(PlotModel model, double[,] plotData)
         {
+            var sensorCount = plotData.GetLength(1);
+
+            UpdateLineSeries(model, plotData, Data.MinSensorBound, Data.MaxSensorBound);
+        }
+
+        private void UpdateLineSeries(PlotModel model, double[,] plotData, double minBound, double maxBound)
+        {
+            model.Series.Clear();
+
             var frameCount = plotData.GetLength(0);
             var sensorCount = plotData.GetLength(1);
 
             var valueRange = plotData.Max2D() - plotData.Min2D();
-            var valueScale = SensorRange / valueRange;
+            var valueScale = SensorResolution/valueRange;   // 
 
-            for (int colId = 0; colId < sensorCount; colId++)
+            var colId = 0;
+            for (int senId = 0; senId < sensorCount; senId++)
             {
+                // if(senId < minBound ||  senId > maxBound)
+                    // continue;
+
                 var lineSeries = new LineSeries();
                 lineSeries.LineStyle = LineStyle.Solid;
                 lineSeries.StrokeThickness = 1;
@@ -103,11 +122,16 @@ namespace SRHWiscMano.Core.ViewModels
 
                 for (int rowId = 0; rowId < frameCount; rowId++)
                 {
-                    lineSeries.Points.Add(new OxyPlot.DataPoint(rowId, (colId * SensorRange) + plotData[rowId, colId]* valueScale*2));
+                    lineSeries.Points.Add(new OxyPlot.DataPoint(rowId, (colId * SensorResolution) + plotData[rowId, senId] * valueScale * 2));
                 }
 
+                colId++;
                 model.Series.Add(lineSeries);
             }
+            var viewYAxis = model.Axes.First(ax => ax.Tag == "Y");
+            viewYAxis.Minimum = minBound * SensorResolution;
+            viewYAxis.Maximum = maxBound * SensorResolution;
+
         }
 
         /// <summary>
@@ -132,9 +156,9 @@ namespace SRHWiscMano.Core.ViewModels
                 MaximumPadding = 0,
                 MinimumPadding = 0,
                 Minimum = 0, // 초기 시작값
-                Maximum = (ySize * SensorRange) - 1, // 초기 최대값
+                Maximum = ((ySize) * SensorResolution) + 1 , // 초기 최대값, 마지막 라인이 화면에 표시되기 위해서 ySize+1 함
                 AbsoluteMinimum = 0, // Panning 최소값
-                AbsoluteMaximum = (ySize * SensorRange) - 1, // Panning 최대값
+                AbsoluteMaximum = ((ySize) * SensorResolution) + 1, // Panning 최대값, 마지막 라인이 화면에 표시되기 위해서 ySize+1 함
                 IsAxisVisible = false,
                 Tag = "Y"
             });
@@ -183,17 +207,18 @@ namespace SRHWiscMano.Core.ViewModels
         public void RefreshPlotData()
         {
             // 이전과 동일하면 skip
-            if (Time.Equals(Data.Time))
-                return;
+            // if (Time.Equals(Data.Time))
+            //     return;
 
-            var heatmap = framePlotModel.Series.OfType<HeatMapSeries>().FirstOrDefault();
-            heatmap.Data = plotData;
-            heatmap.X0 = 0;
-            heatmap.X1 = plotData.GetLength(0) - 1;
-            heatmap.Y0 = 0;
-            heatmap.Y1 = plotData.GetLength(1) - 1;
+            Data.UpdateTime(Data.Time);
+
+            plotData = Data.FrameSamples.ConvertToDoubleArray(true);
+            UpdateLineSeries(FramePlotModel, plotData, Data.MinSensorBound, Data.MaxSensorBound);
+            // var mainYAxis = FramePlotModel.Axes.First(ax => ax.Tag == "Y");
+            // mainYAxis.Minimum = Data.MinSensorBound;
+            // mainYAxis.Maximum = Data.MaxSensorBound;
+
             framePlotModel.InvalidatePlot(true);
-
             this.Time = Data.Time;
         }
 

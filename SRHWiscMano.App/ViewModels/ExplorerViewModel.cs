@@ -159,7 +159,7 @@ namespace SRHWiscMano.App.ViewModels
         private void AdjustLeft(object arg)
         {
             var viewmodel = arg as TimeFrameViewModel;
-            viewmodel.AdjustTimeInMs(-100);
+            viewmodel.AdjustTimeInMs(-10);
             timeFrames.AddOrUpdate(viewmodel.Data);
         }
 
@@ -167,7 +167,7 @@ namespace SRHWiscMano.App.ViewModels
         private void AdjustRight(object arg)
         {
             var viewmodel = arg as TimeFrameViewModel;
-            viewmodel.AdjustTimeInMs(100);
+            viewmodel.AdjustTimeInMs(10);
             timeFrames.AddOrUpdate(viewmodel.Data);
         }
     }
