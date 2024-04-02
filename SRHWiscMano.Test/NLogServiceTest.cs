@@ -18,6 +18,12 @@ namespace SRHWiscMano.Test
             provider = services.BuildServiceProvider();
         }
 
+        [OneTimeTearDown]
+        public void OneTimeTearDown()
+        {
+            provider.Dispose();
+        }
+
         [Test]
         public void WriteLogInform()
         {

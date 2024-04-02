@@ -241,7 +241,7 @@ namespace SRHWiscMano.App.ViewModels
                         overAnno.X = xPos;
                         OverviewPlotModel.InvalidatePlot(false);
 
-                        logger.LogTrace($"Update: {change.Current.Text}");
+                        logger.LogTrace($"Updated : {change.Current.Text}");
                         break;
                     }
                     case ChangeReason.Refresh:
@@ -301,9 +301,11 @@ namespace SRHWiscMano.App.ViewModels
                     model.InvalidatePlot(false);
 
                     la.X = (long)la.InverseTransform(e.Position).X;
+                    var oldTime = timeFrame.Time.ToUnixTimeMilliseconds();
                     timeFrame.UpdateTime(Instant.FromUnixTimeMilliseconds((long)la.X*10));
+                    var newTime = timeFrame.Time.ToUnixTimeMilliseconds();
+                    logger.LogTrace($"Change time [{timeFrame.Text}] : {oldTime}->{newTime}");
                     timeFrames.AddOrUpdate(timeFrame);
-
                     e.Handled = true;
                 };
             }

@@ -235,7 +235,7 @@ namespace SRHWiscMano.App.ViewModels
                 new DelegatePlotCommand<OxyMouseDownEventArgs>((view, controller, args) =>
                     HeatmapClickedCommand(view, args));
 
-            // plotController.BindMouseDown(OxyMouseButton.Left, OxyModifierKeys.None, HeatmapClicked);
+            plotController.BindMouseDown(OxyMouseButton.Left, OxyModifierKeys.Control, HeatmapClicked);
             plotController.BindMouseDown(OxyMouseButton.Left, OxyModifierKeys.None, PlotCommands.SnapTrack);
 
             return plotController;
@@ -261,7 +261,10 @@ namespace SRHWiscMano.App.ViewModels
             return plotController;
         }
 
-
+        /// <summary>
+        /// Heatmap 에서 Tracker 변경 이벤트처리
+        /// </summary>
+        /// <param name="args"></param>
         private void HandleTrackerChanged(TrackerEventArgs args)
         {
             if (args.HitResult == null)
@@ -284,7 +287,7 @@ namespace SRHWiscMano.App.ViewModels
             // SamplePoint dataPoint = new SamplePoint(posF)
             // regionFinder.Find(RegionType.VP, CurrentTimeFrameVM.Data, 
 
-            logger.LogDebug($"Clicked pos {posFrame:F2}, {posSensor:F2}");
+            logger.LogTrace($"Clicked pos {posFrame:F2}, {posSensor:F2}");
         }
 
         private void GraphClickedCommand(IPlotView view, OxyMouseDownEventArgs args)
