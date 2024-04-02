@@ -141,7 +141,7 @@ namespace SRHWiscMano.App.ViewModels
                         var updItem = TimeFrameViewModels.SingleOrDefault(item => item.Id == change.Current.Id);
                         updItem.RefreshPlotData();
                         
-                        if (CurrentTimeFrameVM.Id == change.Current.Id)
+                        if (CurrentTimeFrameVM?.Id == change.Current.Id)
                         {
                             CurrentTimeFrameVM.RefreshPlotData();
                             CurrentTimeFrameGraphVM.RefreshPlotData();
@@ -191,17 +191,14 @@ namespace SRHWiscMano.App.ViewModels
                     handler => MainPlotModel.TrackerChanged += handler,
                     handler => MainPlotModel.TrackerChanged -= handler).Subscribe(HandleTrackerChanged);
 
-                CurrentTimeFrameVM.Data.UpdateSensorBounds(timeFrameData.MinSensorBound, timeFrameData.MaxSensorBound);
+                MainPlotController = BuildMainPlotcontroller();
                 CurrentTimeFrameVM.RefreshPlotData();
 
-                MainPlotController = BuildMainPlotcontroller();
                 
                 CurrentTimeFrameGraphVM = new TimeFrameGraphViewModel(timeFrameData);
                 GraphPlotModel = CurrentTimeFrameGraphVM.FramePlotModel;
-                
-                CurrentTimeFrameGraphVM.Data.UpdateSensorBounds(timeFrameData.MinSensorBound, timeFrameData.MaxSensorBound);
-                // CurrentTimeFrameGraphVM.RefreshPlotData();
-                GraphPlotController = BuildMainPlotcontroller();
+                GraphPlotController = BuildGraphPlotcontroller();
+                CurrentTimeFrameGraphVM.RefreshPlotData();
             }
             catch
             {
@@ -209,6 +206,11 @@ namespace SRHWiscMano.App.ViewModels
             }
         }
 
+        /// <summary>
+        /// Sensor Bound 변경에 다른 이벤트 처리
+        /// </summary>
+        /// <param name="recipient"></param>
+        /// <param name="message"></param>
         private void SensorBoundsChanged(object recipient, SensorBoundsChangedMessage message)
         {
             if(CurrentTimeFrameVM != null)
@@ -221,6 +223,10 @@ namespace SRHWiscMano.App.ViewModels
             }
         }
 
+        /// <summary>
+        /// MainPlot을 위한 Controller 구성
+        /// </summary>
+        /// <returns></returns>
         private PlotController BuildMainPlotcontroller()
         {
             var plotController = new PlotController();
@@ -235,6 +241,10 @@ namespace SRHWiscMano.App.ViewModels
             return plotController;
         }
 
+        /// <summary>
+        /// GraphPlot을 위한 Controller 구성
+        /// </summary>
+        /// <returns></returns>
         private PlotController BuildGraphPlotcontroller()
         {
             var plotController = new PlotController();
