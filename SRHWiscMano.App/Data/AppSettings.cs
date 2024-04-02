@@ -22,14 +22,14 @@ namespace SRHWiscMano.App.Data
         public int MaxRecentFileSize { get; set; } = 5;
 
         public long MainViewFrameRange { get; set; } = 20000;
-        public int InterpolateSensorScale { get; set; } = 1;
+        public int InterpolateSensorScale { get; set; } = 10;
 
         public bool UpdateSubRange { get; set; } = true;
 
         public List<string>? RecentFiles { get; set; }
 
-        public double MinSensorBound { get; set; } = 0;
-        public double MaxSensorBound { get; set; } = 36;
+        // public double MinSensorBound { get; set; } = 0;
+        // public double MaxSensorBound { get; set; } = 36;
 
         /// <summary>
         /// TimeFrame의 시간간격

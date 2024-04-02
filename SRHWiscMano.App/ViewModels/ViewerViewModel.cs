@@ -177,10 +177,6 @@ namespace SRHWiscMano.App.ViewModels
 
             UpdateSubRange = this.settings.UpdateSubRange;
 
-            minSensorBound = this.settings.MinSensorBound;
-            maxSensorBound = this.settings.MaxSensorBound;
-            SensorBoundsChanged();
-
             WeakReferenceMessenger.Default.Register<AppBaseThemeChangedMessage>(this, ThemeChanged);
         }
 
@@ -329,11 +325,17 @@ namespace SRHWiscMano.App.ViewModels
             LoadExamDataImpl();
         }
 
+        /// <summary>
+        /// 로드된 Exam 데이터를 Viewer에 표시하도록 처리한다
+        /// </summary>
         private void LoadExamDataImpl()
         {
             var examData = sharedService.ExamData;
             var sensorCount = examData.SensorCount();
             var frameCount = examData.Samples.Count;
+            
+            MinSensorBound = 0;
+            MaxSensorBound = sensorCount;
             ExamSensorSize = sensorCount;
 
             // 기존의 PlotView를 clear 한 후 ExamData에 대한 PlotModel을 생성해서 입력한다.
@@ -365,6 +367,7 @@ namespace SRHWiscMano.App.ViewModels
             if (axisChangeObserver != null)
                 axisChangeObserver.Dispose();
 
+            // X 축 Axis를 변경하는 이벤트를 처리하는 hanlder를 등록한다
             axisChangeObserver = Observable.FromEvent<EventHandler<AxisChangedEventArgs>, AxisChangedEventArgs>(
                 handler => (sender, e) => handler(e),
                 handler => xAxis.AxisChanged += handler,
@@ -801,6 +804,17 @@ namespace SRHWiscMano.App.ViewModels
             }
         }
 
+        /// <summary>
+        /// Sensor Bounds의 upper/lower 값을 변경할 때 표시할 높이를 변경한다
+        /// </summary>
+        [RelayCommand]
+        private void SensorBoundsChanged()
+        {
+            var minPos = MinSensorBound / (ExamSensorSize) * (MainPlotModel.PlotArea.Height - 8);
+            var maxPos = (ExamSensorSize - MaxSensorBound) * (MainPlotModel.PlotArea.Height - 8) / ExamSensorSize;
+            SensorBoundLowerHeight = minPos;
+            SensorBoundUpperHeight = maxPos;
+        }
 
         /// <summary>
         /// SensorBound edit 상태가 변경되었을 때에 이를 mainplotview 에 적용하도록 한다
@@ -854,20 +868,7 @@ namespace SRHWiscMano.App.ViewModels
             }
         }
 
-        /// <summary>
-        /// Sensor Bounds의 upper/lower 값을 변경할 때 표시할 높이를 변경한다
-        /// </summary>
-        [RelayCommand]
-        private void SensorBoundsChanged()
-        {
-            var minPos = MinSensorBound / (ExamSensorSize) * (MainPlotModel.PlotArea.Height - 8);
-            var maxPos = (ExamSensorSize - MaxSensorBound) * (MainPlotModel.PlotArea.Height - 8) / ExamSensorSize;
-            SensorBoundLowerHeight = minPos;
-            SensorBoundUpperHeight = maxPos;
-
-            settings.MinSensorBound = MinSensorBound;
-            settings.MaxSensorBound = MaxSensorBound;
-        }
+        
 
         /// <summary>
         /// WindowSize가 변경되면 SensorBounds 관련 control을 업데이트 한다.

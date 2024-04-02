@@ -83,7 +83,6 @@ namespace SRHWiscMano.Core.ViewModels
             plotData = Data.FrameSamples.ConvertToDoubleArray(true);
             AddAxes(plotModel, plotData.GetLength(0), plotData.GetLength(1));
             UpdateLineSeries(plotModel, plotData, Data.MinSensorBound, Data.MaxSensorBound);
-            // AddLineSeries(plotModel, plotData);
             FramePlotModel = plotModel;
         }
 
@@ -112,26 +111,25 @@ namespace SRHWiscMano.Core.ViewModels
             var colId = 0;
             for (int senId = 0; senId < sensorCount; senId++)
             {
-                // if(senId < minBound ||  senId > maxBound)
-                    // continue;
-
                 var lineSeries = new LineSeries();
                 lineSeries.LineStyle = LineStyle.Solid;
                 lineSeries.StrokeThickness = 1;
                 lineSeries.Color = OxyColors.Gray;
 
+                // List<SensorPoint> points = new List<SensorPoint>();
                 for (int rowId = 0; rowId < frameCount; rowId++)
                 {
-                    lineSeries.Points.Add(new OxyPlot.DataPoint(rowId, (colId * SensorResolution) + plotData[rowId, senId] * valueScale * 2));
+                    // points.Add(new SensorPoint(){Time = rowId, Sensor = senId, Value = plotData[rowId, senId], ValueScale = valueScale});
+                    lineSeries.Points.Add(new OxyPlot.DataPoint(rowId, ((colId)*SensorResolution) + plotData[rowId, senId] * valueScale * 1.8));
                 }
+                // lineSeries.ItemsSource = points;
 
                 colId++;
                 model.Series.Add(lineSeries);
             }
             var viewYAxis = model.Axes.First(ax => ax.Tag == "Y");
-            viewYAxis.Minimum = minBound * SensorResolution;
-            viewYAxis.Maximum = maxBound * SensorResolution;
-
+            viewYAxis.Minimum = (minBound-1) * SensorResolution;
+            viewYAxis.Maximum = (maxBound - 1) * SensorResolution;
         }
 
         /// <summary>
@@ -155,10 +153,10 @@ namespace SRHWiscMano.Core.ViewModels
                 Position = AxisPosition.Left,
                 MaximumPadding = 0,
                 MinimumPadding = 0,
-                Minimum = 0, // 초기 시작값
-                Maximum = ((ySize) * SensorResolution) + 1 , // 초기 최대값, 마지막 라인이 화면에 표시되기 위해서 ySize+1 함
-                AbsoluteMinimum = 0, // Panning 최소값
-                AbsoluteMaximum = ((ySize) * SensorResolution) + 1, // Panning 최대값, 마지막 라인이 화면에 표시되기 위해서 ySize+1 함
+                Minimum = -1, // 초기 시작값
+                Maximum = ((ySize - 1) * SensorResolution), // 초기 최대값
+                AbsoluteMinimum = -1, // Panning 최소값
+                AbsoluteMaximum = ((ySize) * SensorResolution), // Panning 최대값, LineSeries는 데이터를 한 step shift 하여 표시하기 위해 ySize+1 한다
                 IsAxisVisible = false,
                 Tag = "Y"
             });
@@ -214,9 +212,6 @@ namespace SRHWiscMano.Core.ViewModels
 
             plotData = Data.FrameSamples.ConvertToDoubleArray(true);
             UpdateLineSeries(FramePlotModel, plotData, Data.MinSensorBound, Data.MaxSensorBound);
-            // var mainYAxis = FramePlotModel.Axes.First(ax => ax.Tag == "Y");
-            // mainYAxis.Minimum = Data.MinSensorBound;
-            // mainYAxis.Maximum = Data.MaxSensorBound;
 
             framePlotModel.InvalidatePlot(true);
             this.Time = Data.Time;
