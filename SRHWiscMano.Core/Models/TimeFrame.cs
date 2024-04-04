@@ -13,7 +13,7 @@ namespace SRHWiscMano.Core.Models
     {
         private static int GuidId = 0;
 
-        public IExamination Data { get; private set; }
+        public IExamination ExamData { get; private set; }
 
         public int Id { get; }
 
@@ -51,7 +51,7 @@ namespace SRHWiscMano.Core.Models
 
         public TimeFrame(string text, Instant time, double timeDuration, IExamination data)
         {
-            Data = data;
+            ExamData = data;
             Id = Interlocked.Increment(ref GuidId);
             Text = text;
             Time = time;
@@ -59,7 +59,7 @@ namespace SRHWiscMano.Core.Models
             OwnerSamples = data.Samples;
             IntpSamples = data.InterpolatedSamples;
             MinSensorBound = 0;
-            MaxSensorBound = Data.SensorCount();
+            MaxSensorBound = ExamData.SensorCount();
             
             UpdateTime(Time);
         }
@@ -87,7 +87,7 @@ namespace SRHWiscMano.Core.Models
 
         public object Clone()
         {
-            var newObj = new TimeFrame(Text, Time, TimeDuration, Data);
+            var newObj = new TimeFrame(Text, Time, TimeDuration, ExamData);
             newObj.MinSensorBound = this.MinSensorBound;
             newObj.MaxSensorBound = this.MaxSensorBound;
 

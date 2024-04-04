@@ -205,7 +205,7 @@ namespace SRHWiscMano.Core.ViewModels
         public void RefreshPlotData()
         {
             // 이전과 동일하면 skip
-            // if (Time.Equals(Data.Time))
+            // if (Time.Equals(ExamData.Time))
             //     return;
 
             Data.UpdateTime(Data.Time);

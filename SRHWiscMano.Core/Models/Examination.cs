@@ -14,6 +14,7 @@ namespace SRHWiscMano.Core.Models
 
         public IReadOnlyList<TimeSample> InterpolatedSamples { get; private set; }
 
+        public int InterpolatedScale { get; private set; } 
         public IReadOnlyList<FrameNote> Notes { get; }
         public int InterpolationScale { get; private set; }
 
@@ -26,6 +27,7 @@ namespace SRHWiscMano.Core.Models
         public void UpdateInterpolation(int interpolateScale)
         {
             InterpolatedSamples = Samples.InterpolateSamples(interpolateScale);
+            InterpolationScale = interpolateScale;
         }
         
 
@@ -34,6 +36,7 @@ namespace SRHWiscMano.Core.Models
             StringBuilder sb = new StringBuilder();
             sb.AppendLine($"Sample Range : {this.SensorRange()}");
             sb.AppendLine($"Sample Count : {this.SensorCount()}");
+            sb.AppendLine($"InterpolateScale : {this.InterpolatedScale}");
             sb.AppendLine($"Sample Duration: {this.TotalDuration()} ms");
             sb.AppendLine($"Notes Counts : {Notes.Count}");
 

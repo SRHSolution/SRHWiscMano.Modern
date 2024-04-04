@@ -16,6 +16,7 @@ using DynamicData;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MoreLinq.Extensions;
+using NodaTime;
 using OxyPlot;
 using OxyPlot.Axes;
 using OxyPlot.Series;
@@ -279,15 +280,31 @@ namespace SRHWiscMano.App.ViewModels
         private void HeatmapClickedCommand(IPlotView view, OxyMouseDownEventArgs args)
         {
             var viewXAxis = view.ActualModel.Axes.First(ax => ax.Tag == "X");
-            var posFrame = viewXAxis.InverseTransform(args.Position.X);
-
+            var posX = viewXAxis.InverseTransform(args.Position.X);
+            
             var viewYAxis = view.ActualModel.Axes.First(ax => ax.Tag == "Y");
-            var posSensor = viewYAxis.InverseTransform(args.Position.Y);
+            var posY = viewYAxis.InverseTransform(args.Position.Y);
 
+            // 현재의 TimeFrame에서 Pick 한 위치의 실제 Instant time을 계산한다
+            var pickPosX = Duration.FromMilliseconds((long)(posX * 10));
+            var posTime = CurrentTimeFrameVM.Data.TimeRange().Start.Plus(pickPosX);
+
+            // 현재의 Sensor Range를 기준으로 센서 몇번에서 클릭되었는지를 계산한다
+            var tmpPos = (int)(posY / CurrentTimeFrameVM.Data.ExamData.InterpolationScale + 0.5);
+            var posSensor = CurrentTimeFrameVM.Data.SensorRange().Lesser + tmpPos;
+
+
+
+            logger.LogTrace($"Clicked pos {posX:F2}, {posY:F2}");
+            logger.LogTrace($"Frame pos {CurrentTimeFrameVM.Data.TimeRange().Start:F2}, {CurrentTimeFrameVM.Data.SensorRange().Lesser:F2}");
+            logger.LogTrace($"Pick Sample : {posTime.ToUnixTimeMilliseconds()}, {tmpPos}");
+
+
+            // SamplePoint pickPoint = new SamplePoint(posTime, (int)posSensor);
+            // regionFinder.Find(RegionType.VP, CurrentTimeFrameVM.Data, pickPoint, RegionFinderConfig.Default, null);
             // SamplePoint dataPoint = new SamplePoint(posF)
-            // regionFinder.Find(RegionType.VP, CurrentTimeFrameVM.Data, 
+            // regionFinder.Find(RegionType.VP, CurrentTimeFrameVM.ExamData, 
 
-            logger.LogTrace($"Clicked pos {posFrame:F2}, {posSensor:F2}");
         }
 
         private void GraphClickedCommand(IPlotView view, OxyMouseDownEventArgs args)

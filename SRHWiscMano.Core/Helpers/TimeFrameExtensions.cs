@@ -19,7 +19,7 @@ namespace SRHWiscMano.Core.Helpers
 
         public static Range<int> SensorRange(this ITimeFrame data)
         {
-            return Range.Create(0, data.SensorCount());
+            return Range.Create((int)data.MinSensorBound, (int)data.MaxSensorBound);//data.SensorCount());
         }
 
         public static Duration TickAmount(this ITimeFrame data)

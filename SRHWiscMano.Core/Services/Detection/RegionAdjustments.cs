@@ -81,14 +81,14 @@ namespace SRHWiscMano.Core.Services.Detection
         //     IEdgeAlgorithm algorithm,
         //     DiagnosticsContext diag)
         // {
-        //     Interval withTestWindow = RegionEdgeDetector.FindWithTestWindow(algorithm, region.Window.Data,
+        //     Interval withTestWindow = RegionEdgeDetector.FindWithTestWindow(algorithm, region.Window.ExamData,
         //         region.SensorRange, region.TimeRange, region.Type, diag);
         //     return region.ChangeTime(withTestWindow);
         // }
         //
         // public static Region AdjustToPeakChangeLeft(this Region region, Duration searchTimeBefore)
         // {
-        //     IExaminationData data = region.Window.Data;
+        //     IExaminationData data = region.Window.ExamData;
         //     int sensor = region.ClickPoint.Sensor;
         //     Interval timeRange1 = region.TimeRange;
         //     Instant start1 = timeRange1.Start - searchTimeBefore;
@@ -101,7 +101,7 @@ namespace SRHWiscMano.Core.Services.Detection
         //
         // public static Region AdjustToPeakChangeRight(this Region region, Duration searchTimeAfter)
         // {
-        //     IExaminationData data = region.Window.Data;
+        //     IExaminationData data = region.Window.ExamData;
         //     int sensor = region.ClickPoint.Sensor;
         //     Interval timeRange1 = region.TimeRange;
         //     Instant end1 = timeRange1.End;

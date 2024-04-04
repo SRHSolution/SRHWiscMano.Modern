@@ -28,7 +28,7 @@ namespace SRHWiscMano.Core.Services.Detection
         {
             Range<int> range = initialRegion.SensorRange.SetSpan(4);
             List<Interval> list = RegionEdgeDetector
-                .FindValidEdges(edgeAlgorithm, initialRegion.Window.Data, range, initialRegion.TimeRange, diag)
+                .FindValidEdges(edgeAlgorithm, initialRegion.Window.ExamData, range, initialRegion.TimeRange, diag)
                 .ToList();
             if (list.Count != range.Span())
                 return null;
