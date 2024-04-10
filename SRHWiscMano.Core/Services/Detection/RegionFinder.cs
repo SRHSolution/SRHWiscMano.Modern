@@ -1,8 +1,13 @@
-﻿using NodaTime;
+﻿using System.Diagnostics;
+using NodaTime;
 using SRHWiscMano.Core.Helpers;
 using SRHWiscMano.Core.Models;
 using System.Windows.Markup;
+using Accessibility;
+using NLog;
 using Range = SRHWiscMano.Core.Helpers.Range;
+using Microsoft.Extensions.Logging;
+using SRHWiscMano.Core.ViewModels;
 
 namespace SRHWiscMano.Core.Services.Detection
 {
@@ -53,6 +58,15 @@ namespace SRHWiscMano.Core.Services.Detection
             Region region = CreateRegionWithRelativeSensors(state, click, 1, 1, RegionType.VP);
             RegionFinderRegionConfig configForRegion = config.GetConfigForRegion(RegionType.VP);
             Duration initialWidth = configForRegion.InitialWidth;
+
+
+            var start1 = region.TimeRange.Start.ToUnixTimeMilliseconds();
+            var end1 = region.TimeRange.End.ToUnixTimeMilliseconds();
+            Debug.WriteLine($"Region {start1}~{end1}");
+            var updRegion = region.SetTimeCenteredOnClickPoint(initialWidth);
+            var start2 = updRegion.TimeRange.Start.ToUnixTimeMilliseconds();
+            var end2 = updRegion.TimeRange.End.ToUnixTimeMilliseconds();
+            Debug.WriteLine($"Region {start2}~{end2}");
             return region.SetTimeCenteredOnClickPoint(initialWidth).AdjustToPointOfMaximumInCenter().DetermineVPBounds(
                 configForRegion.Algorithm,new DiagnosticsContext(diagnostics, RegionType.VP));
         }
@@ -183,8 +197,8 @@ namespace SRHWiscMano.Core.Services.Detection
             RegionType type)
         {
             
-            int sensorTop = Math.Max(click.Sensor - sensorsAbove, window.SensorRange().Lesser);
-            int sensorBottom = Math.Min(click.Sensor + sensorsBelow + 1, window.SensorRange().Greater);
+            int sensorTop = Math.Min(click.Sensor + sensorsAbove, window.SensorRange().Greater);
+            int sensorBottom = Math.Max(click.Sensor - sensorsBelow, window.SensorRange().Lesser);
             return CreateRegionWithSensors(window, click, sensorTop, sensorBottom, type);
         }
 

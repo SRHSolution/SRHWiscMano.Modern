@@ -42,7 +42,9 @@ namespace SRHWiscMano.App.Windows
         {
             Dispatcher.Invoke(() =>
             {
-                LogTextBox.AppendText(message + Environment.NewLine);
+                LogTextBox.AppendText(message + Environment.NewLine);   
+                LogTextBox.CaretIndex = LogTextBox.Text.Length;
+                LogTextBox.ScrollToEnd();
             });
         }
 

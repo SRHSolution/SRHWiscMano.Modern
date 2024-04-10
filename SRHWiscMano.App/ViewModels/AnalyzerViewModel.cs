@@ -232,10 +232,13 @@ namespace SRHWiscMano.App.ViewModels
         {
             var plotController = new PlotController();
             // plotController.UnbindAll();
+            
+            // Custom Command 함수를 위한 Delegate를 정의한다.
             HeatmapClicked =
                 new DelegatePlotCommand<OxyMouseDownEventArgs>((view, controller, args) =>
                     HeatmapClickedCommand(view, args));
 
+            // Custom command의 delegate를 이벤트에 bind 한다
             plotController.BindMouseDown(OxyMouseButton.Left, OxyModifierKeys.Control, HeatmapClicked);
             plotController.BindMouseDown(OxyMouseButton.Left, OxyModifierKeys.None, PlotCommands.SnapTrack);
 
@@ -277,6 +280,7 @@ namespace SRHWiscMano.App.ViewModels
             StatusMessage = $"DataPoint : {datapoint.X}, {datapoint.Y}, value = {args.HitResult.Text}";
         }
 
+
         private void HeatmapClickedCommand(IPlotView view, OxyMouseDownEventArgs args)
         {
             var viewXAxis = view.ActualModel.Axes.First(ax => ax.Tag == "X");
@@ -291,17 +295,16 @@ namespace SRHWiscMano.App.ViewModels
 
             // 현재의 Sensor Range를 기준으로 센서 몇번에서 클릭되었는지를 계산한다
             var tmpPos = (int)(posY / CurrentTimeFrameVM.Data.ExamData.InterpolationScale + 0.5);
-            var posSensor = CurrentTimeFrameVM.Data.SensorRange().Lesser + tmpPos;
-
-
+            // var posSensor = CurrentTimeFrameVM.Data.SensorRange().Lesser + tmpPos;
+            var posSensor = tmpPos;
 
             logger.LogTrace($"Clicked pos {posX:F2}, {posY:F2}");
             logger.LogTrace($"Frame pos {CurrentTimeFrameVM.Data.TimeRange().Start:F2}, {CurrentTimeFrameVM.Data.SensorRange().Lesser:F2}");
-            logger.LogTrace($"Pick Sample : {posTime.ToUnixTimeMilliseconds()}, {tmpPos}");
+            logger.LogTrace($"Pick Sample : {(double)posTime.ToUnixTimeMilliseconds()/1000} msec, {posSensor}");
 
 
-            // SamplePoint pickPoint = new SamplePoint(posTime, (int)posSensor);
-            // regionFinder.Find(RegionType.VP, CurrentTimeFrameVM.Data, pickPoint, RegionFinderConfig.Default, null);
+            SamplePoint pickPoint = new SamplePoint(posTime, (int)posSensor);
+            regionFinder.Find(RegionType.VP, CurrentTimeFrameVM.Data, pickPoint, RegionFinderConfig.Default, null);
             // SamplePoint dataPoint = new SamplePoint(posF)
             // regionFinder.Find(RegionType.VP, CurrentTimeFrameVM.ExamData, 
 

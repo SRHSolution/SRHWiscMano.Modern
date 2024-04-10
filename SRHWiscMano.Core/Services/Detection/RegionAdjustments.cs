@@ -17,7 +17,8 @@ namespace SRHWiscMano.Core.Services.Detection
             Duration totalTime)
         {
             Interval bounds = region.Window.TimeRange();
-            return region.ChangeTime(timePoint.AtCenterOfDuration(totalTime, bounds));
+            var interval = timePoint.AtCenterOfDuration(totalTime, bounds);
+            return region.ChangeTime(interval);
         }
 
         public static Region SetTimeStartingAtPoint(
