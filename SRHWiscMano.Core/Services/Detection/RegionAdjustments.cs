@@ -16,7 +16,7 @@ namespace SRHWiscMano.Core.Services.Detection
             Instant timePoint,
             Duration totalTime)
         {
-            Interval bounds = region.Window.TimeRange();
+            Interval bounds = region.Window.ExamData.TotalTime();
             var interval = timePoint.AtCenterOfDuration(totalTime, bounds);
             return region.ChangeTime(interval);
         }
@@ -69,14 +69,14 @@ namespace SRHWiscMano.Core.Services.Detection
                 new SamplePoint(sample.Time, region.ClickPoint.Sensor));
         }
 
-        // public static Region AdjustToTimeRangeAboveBaseline(
-        //     this Region region,
-        //     Duration backgroundWindowWidth,
-        //     DiagnosticsContext diag)
-        // {
-        //     return region.AdjustToTimeRangeAtEdges(new RangeAboveBaseline(backgroundWindowWidth, Duration.Zero), diag);
-        // }
-        //
+        public static Region AdjustToTimeRangeAboveBaseline(
+            this Region region,
+            Duration backgroundWindowWidth,
+            DiagnosticsContext diag)
+        {
+            return region.AdjustToTimeRangeAtEdges(new RangeAboveBaseline(backgroundWindowWidth, Duration.Zero), diag);
+        }
+
         public static Region AdjustToTimeRangeAtEdges(
             this Region region,
             IEdgeAlgorithm algorithm,

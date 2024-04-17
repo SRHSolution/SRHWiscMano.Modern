@@ -62,7 +62,8 @@ namespace SRHWiscMano.Core.Services.Detection
                 new DescriptiveStatistics(
                     backgroundWindows.SelectMany(tr => data.ValuesForSensorInTimeRange(tr, sensorIndex)));
             return new MeanAndDeviation(Math.Min(descriptiveStatistics.Mean, 25.0),
-                Math.Min(descriptiveStatistics.StandardDeviation, 5.0), descriptiveStatistics.Count);
+                Math.Min(descriptiveStatistics.StandardDeviation, 5.0),
+                                                        descriptiveStatistics.Count);
         }
 
         private static Interval? DoFindOnsetEdges(

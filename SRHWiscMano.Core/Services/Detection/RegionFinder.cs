@@ -75,8 +75,7 @@ namespace SRHWiscMano.Core.Services.Detection
             var start2 = updRegion.TimeRange.Start.ToUnixTimeMilliseconds();
             var end2 = updRegion.TimeRange.End.ToUnixTimeMilliseconds();
             Debug.WriteLine($"Region {start2}~{end2}");
-            return region.SetTimeCenteredOnClickPoint(initialWidth).AdjustToPointOfMaximumInCenter().DetermineVPBounds(
-                configForRegion.Algorithm,new DiagnosticsContext(diagnostics, RegionType.VP));
+            return region.SetTimeCenteredOnClickPoint(initialWidth).AdjustToPointOfMaximumInCenter().DetermineVPBounds(configForRegion.Algorithm,new DiagnosticsContext(diagnostics, RegionType.VP));
         }
 
         private static Region FindPreUES(ITimeFrame state, SamplePoint click)
@@ -141,12 +140,10 @@ namespace SRHWiscMano.Core.Services.Detection
             int num2 = num1 - num1 / 2;
             RegionFinderRegionConfig configForRegion = config.GetConfigForRegion(RegionType.TB);
 
-            return null;
-
-            // return CreateRegionWithSensors(state, click, end, end + num2, RegionType.TB)
-            //     .SetTimeCenteredOnPoint(regionOrThrow1.FocalPoint.Time, configForRegion.InitialWidth)
-            //     .AdjustToTimeRangeAtEdges(configForRegion.Algorithm,
-            //         new DiagnosticsContext(diagnostics, RegionType.TB));
+            return CreateRegionWithSensors(state, click, end, end + num2, RegionType.TB)
+            .SetTimeCenteredOnPoint(regionOrThrow1.FocalPoint.Time, configForRegion.InitialWidth)
+            .AdjustToTimeRangeAtEdges(configForRegion.Algorithm,
+            new DiagnosticsContext(diagnostics, RegionType.TB));
         }
 
         /// <summary>
@@ -174,11 +171,11 @@ namespace SRHWiscMano.Core.Services.Detection
                 throw new RegionFinderException("TB must be above PostUES");
             RegionFinderRegionConfig configForRegion = config.GetConfigForRegion(RegionType.HP);
 
-            return null;
-            // return CreateRegionWithSensors(state, click, end, start, RegionType.HP)
-                // .SetTimeStartingAtPoint(regionOrThrow2.TimeRange.Start, configForRegion.InitialWidth)
-                // .AdjustToTimeRangeAtEdges(configForRegion.Algorithm,
-                    // new DiagnosticsContext(diagnostics, RegionType.HP));
+           
+            return CreateRegionWithSensors(state, click, end, start, RegionType.HP)
+                .SetTimeStartingAtPoint(regionOrThrow2.TimeRange.Start, configForRegion.InitialWidth)
+                .AdjustToTimeRangeAtEdges(configForRegion.Algorithm,
+                    new DiagnosticsContext(diagnostics, RegionType.HP));
         }
 
         private static Region FindMP(ITimeFrame state, SamplePoint click)
@@ -191,10 +188,9 @@ namespace SRHWiscMano.Core.Services.Detection
             if (end >= start)
                 throw new RegionFinderException("VP must be above PostUES");
 
-            return null;
-            // return CreateRegionWithSensors(state, click, end, start, RegionType.MP)
-                // .SetTimeCenteredOnPoint(regionOrThrow1.FocalPoint.Time, InitialWidthMP)
-                // .AdjustToTimeRangeAboveBaseline(InitialWidthMP, new DiagnosticsContext(null, RegionType.MP));
+            return CreateRegionWithSensors(state, click, end, start, RegionType.MP)
+                .SetTimeCenteredOnPoint(regionOrThrow1.FocalPoint.Time, InitialWidthMP)
+                .AdjustToTimeRangeAboveBaseline(InitialWidthMP, new DiagnosticsContext(null, RegionType.MP));
         }
 
         private static Region CreateRegionWithRelativeSensors(

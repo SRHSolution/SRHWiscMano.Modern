@@ -19,6 +19,7 @@ using MoreLinq.Extensions;
 using NLog;
 using NodaTime;
 using OxyPlot;
+using OxyPlot.Annotations;
 using OxyPlot.Axes;
 using OxyPlot.Series;
 using SRHWiscMano.App.Data;
@@ -297,9 +298,8 @@ namespace SRHWiscMano.App.ViewModels
             var tmpPos = (int)(datapoint.Y / CurrentTimeFrameHeatmapVM.Data.ExamData.InterpolationScale + 0.5 );
             // var posSensor = CurrentTimeFrameHeatmapVM.Data.SensorRange().Lesser + tmpPos;
             var posSensor = tmpPos;
-            
 
-            StatusMessage = $"DataPoint : {datapoint.X}, {datapoint.Y}, value = {args.HitResult.Text} => {(double)posTime.ToMillisecondsFromEpoch()/1000:F2}, {posSensor+1}";
+            StatusMessage = $"DataPoint : {datapoint.X}, {datapoint.Y}, value = {args.HitResult.Text} => {(double)posTime.ToMillisecondsFromEpoch()/1000:F2}, {posSensor}";
         }
 
 
@@ -358,6 +358,37 @@ namespace SRHWiscMano.App.ViewModels
                     $"Focal Point : {region.FocalPoint.Sensor}, {region.FocalPoint.Time.ToUnixTimeMilliseconds()}");
 
                 logger.LogTrace(sb.ToString());
+
+                var rangeXStart = region.TimeRange.Start.Minus(CurrentTimeFrameHeatmapVM.Data.TimeRange().Start).TotalMilliseconds / 10;
+                var rangeXEnd = region.TimeRange.End.Minus(CurrentTimeFrameHeatmapVM.Data.TimeRange().Start).TotalMilliseconds / 10;
+
+                var rangeYTop = region.SensorRange.Greater* CurrentTimeFrameHeatmapVM.Data.ExamData.InterpolationScale;
+
+                var rangeYBottom = region.SensorRange.Lesser * CurrentTimeFrameHeatmapVM.Data.ExamData.InterpolationScale;
+
+
+                var clickAnnot = new EllipseAnnotation()
+                {
+
+                    Fill = OxyColor.FromAColor(255, OxyColors.Black),
+                    Height = 20,
+                    Width = 20,
+                    X = args.Position.X,//region.ClickPoint.Time.ToUnixTimeMilliseconds()/10 ,
+                    Y = args.Position.Y,//region.ClickPoint.Sensor * 10
+                };
+                view.ActualModel.Annotations.Add(clickAnnot);
+                view.ActualModel.InvalidatePlot(false);
+                // var rectangleAnnotation = new RectangleAnnotation
+                // {
+                //     MinimumX = rangeXStart,
+                //     MaximumX = rangeXEnd,
+                //     MinimumY = rangeYTop,
+                //     MaximumY = rangeYBottom,
+                //     Fill = OxyColor.FromAColor(120, OxyColors.SkyBlue), // 투명도 120, 색상 SkyBlue
+                //     StrokeThickness = 0 // 테두리 없음
+                // };
+                //
+                // view.ActualModel.Annotations.Add(rectangleAnnotation);
             }
             catch (Exception ex)
             {
