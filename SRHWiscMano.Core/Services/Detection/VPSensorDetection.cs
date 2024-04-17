@@ -13,11 +13,13 @@ namespace SRHWiscMano.Core.Services.Detection
             IEdgeAlgorithm edgeAlgorithm,
             DiagnosticsContext diag)
         {
-            return initialRegion.DetermineVPAndTBSensorRange(edgeAlgorithm, diag);
-            // return versionType == RegionsVersionType.UsesMP
-                // ? initialRegion.AdjustToTimeRangeAtEdges(edgeAlgorithm, diag)
-                // : initialRegion.DetermineVPAndTBSensorRange(edgeAlgorithm, diag) ??
-                  // initialRegion.AdjustToTimeRangeAtEdges(edgeAlgorithm, diag);
+            var tmp = initialRegion.DetermineVPAndTBSensorRange(edgeAlgorithm, diag);
+            if(tmp == null)
+                return initialRegion.AdjustToTimeRangeAtEdges(edgeAlgorithm, diag);
+            else
+            {
+                return tmp;
+            }
         }
 
 

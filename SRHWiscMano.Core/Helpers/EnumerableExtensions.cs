@@ -50,5 +50,46 @@
                 }
             }
         }
+
+        public static IEnumerable<Tuple<T, int>> SelectWithIndex<T>(
+            this IEnumerable<T> source)
+        {
+            return source.Select((a, i) => Tuple.Create(a, i));
+        }
+
+        public static int? FirstIndexOf<T>(this IEnumerable<T> source, Func<T, bool> predicate)
+        {
+            int num = 0;
+            foreach (T obj in source)
+            {
+                if (predicate(obj))
+                    return num;
+                ++num;
+            }
+
+            return new int?();
+        }
+
+        public static int? LastIndexOf<T>(this IEnumerable<T> source, Func<T, bool> predicate)
+        {
+            int num = 0;
+            int? nullable = new int?();
+            foreach (T obj in source)
+            {
+                if (predicate(obj))
+                    nullable = num;
+                ++num;
+            }
+
+            return nullable;
+        }
+
+        public static List<T2> Map<T1, T2>(this IReadOnlyCollection<T1> list, Func<T1, T2> selector)
+        {
+            List<T2> objList = new List<T2>(list.Count);
+            foreach (T1 obj in list)
+                objList.Add(selector(obj));
+            return objList;
+        }
     }
 }

@@ -299,9 +299,8 @@ namespace SRHWiscMano.App.ViewModels
             var posSensor = tmpPos;
 
             logger.LogTrace($"Clicked pos {posX:F2}, {posY:F2}");
-            logger.LogTrace($"Frame pos {CurrentTimeFrameVM.Data.TimeRange().Start:F2}, {CurrentTimeFrameVM.Data.SensorRange().Lesser:F2}");
+            logger.LogTrace($"Frame pos {CurrentTimeFrameVM.Time.ToUnixTimeMilliseconds()} {CurrentTimeFrameVM.Data.TimeRange().Start.ToUnixTimeMilliseconds():F2}, {CurrentTimeFrameVM.Data.TimeRange().End.ToUnixTimeMilliseconds():F2}");
             logger.LogTrace($"Pick Sample : {(double)posTime.ToUnixTimeMilliseconds()/1000} msec, {posSensor}");
-
 
             SamplePoint pickPoint = new SamplePoint(posTime, (int)posSensor);
             regionFinder.Find(RegionType.VP, CurrentTimeFrameVM.Data, pickPoint, RegionFinderConfig.Default, null);
@@ -309,6 +308,16 @@ namespace SRHWiscMano.App.ViewModels
             // regionFinder.Find(RegionType.VP, CurrentTimeFrameVM.ExamData, 
 
         }
+
+        // private DetectionDiagnostics Diagnostics
+        // {
+        //     get
+        //     {
+        //         if (diagnostics == null)
+        //             diagnostics = new DetectionDiagnostics(CurrentExam, CurrentSnapshot, Duration.FromSeconds(3L));
+        //         return diagnostics;
+        //     }
+        // }
 
         private void GraphClickedCommand(IPlotView view, OxyMouseDownEventArgs args)
         {

@@ -37,6 +37,7 @@ namespace SRHWiscMano.Core.Services
             List<double> values = new List<double>();
             List<double> doubleList = values;
             foreach (string s in source.Skip(1))
+            {
                 if (string.IsNullOrEmpty(s))
                 {
                     // Sample Data가 잘못되었음을 알리기 위함 
@@ -45,6 +46,7 @@ namespace SRHWiscMano.Core.Services
                 }
                 else
                     doubleList.Add(s.AsDoubleOrDefault());
+            }
             return new TimeSample(InstantUtils.InstantFromMilliseconds(milliseconds), values);
         }
 

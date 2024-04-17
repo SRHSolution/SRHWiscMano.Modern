@@ -155,5 +155,7 @@ namespace SRHWiscMano.Core.Helpers
             var subSamples = samples.Where(s => s.Time >= startTime && s.Time <= endTime);
             return subSamples.ToList().AsReadOnly();
         }
+
+        
     }
 }

@@ -3,6 +3,7 @@ using NLog;
 using NodaTime;
 using SRHWiscMano.Core.Helpers;
 using SRHWiscMano.Core.Models;
+using SRHWiscMano.Core.Models.Results;
 
 namespace SRHWiscMano.Core.Services.Detection
 {
@@ -43,9 +44,8 @@ namespace SRHWiscMano.Core.Services.Detection
             Interval timeRange,
             DiagnosticsContext diag)
         {
-            // if (backgroundWindows == null)
-            //     backgroundWindows = BackgroundWindows.Default(timeRange, backgroundWindowWidth, inset, data.TotalTime())
-            //         .ToList();
+            if (backgroundWindows == null)
+                backgroundWindows = BackgroundWindows.Default(timeRange, backgroundWindowWidth, inset, data.TotalTime()).ToList();
             Track(diag, sensorIndex, timeRange);
             Interval? onsetEdges = DoFindOnsetEdges(data, sensorIndex, timeRange, backgroundWindows, diag);
             if (onsetEdges.HasValue)
@@ -61,7 +61,8 @@ namespace SRHWiscMano.Core.Services.Detection
             DescriptiveStatistics descriptiveStatistics =
                 new DescriptiveStatistics(
                     backgroundWindows.SelectMany(tr => data.ValuesForSensorInTimeRange(tr, sensorIndex)));
-            return (Math.Min(descriptiveStatistics.Mean, 25.0), Math.Min(descriptiveStatistics.StandardDeviation, 5.0));
+            return new MeanAndDeviation(Math.Min(descriptiveStatistics.Mean, 25.0),
+                Math.Min(descriptiveStatistics.StandardDeviation, 5.0), descriptiveStatistics.Count);
         }
 
         private static Interval? DoFindOnsetEdges(
@@ -183,23 +184,22 @@ namespace SRHWiscMano.Core.Services.Detection
             Duration slopeWindow)
         {
 
-            // int num1 = (int) (slopeWindow.ToMilliseconds() / data.TickAmount().ToMilliseconds());
-            // int indexAfter = num1 / 2;
-            // int indexBefore = num1 - indexAfter;
-            // for (int index = data.Samples.SampleIndexFromTime(betweenTimes.Start); index < data.Samples.Count; ++index)
-            // {
-            //     var sample1 = data.Samples[index];
-            //     if (sample1.Time >= betweenTimes.End)
-            //         break;
-            //     var sample2 = data.Samples[index > indexBefore ? index - indexBefore : 0];
-            //     var sample3 =
-            //         data.Samples[index + indexAfter < data.Samples.Count ? index + indexAfter : data.Samples.Count - 1];
-            //
-            //     double num2 = sample3.Values[sensorIndex] - sample2.Values[sensorIndex];
-            //     long num3 = sample3.Time.ToMillisecondsFromEpoch() - sample2.Time.ToMillisecondsFromEpoch();
-            //     yield return (sample1, num2 / num3);
-            // }
-            return null;
+            int num1 = (int) (slopeWindow.ToMilliseconds() / data.TickAmount().ToMilliseconds()); // 100 / 10 = 10
+            int indexAfter = num1 / 2;
+            int indexBefore = num1 - indexAfter;
+            for (int index = data.SampleIndexFromTime(betweenTimes.Start); index < data.Samples.Count; ++index)
+            {
+                var sample1 = data.Samples[index];
+                if (sample1.Time >= betweenTimes.End)
+                    break;
+                var sample2 = data.Samples[index > indexBefore ? index - indexBefore : 0];
+                var sample3 =
+                    data.Samples[index + indexAfter < data.Samples.Count ? index + indexAfter : data.Samples.Count - 1];
+            
+                double num2 = sample3.Values[sensorIndex] - sample2.Values[sensorIndex];
+                long num3 = sample3.Time.ToMillisecondsFromEpoch() - sample2.Time.ToMillisecondsFromEpoch();
+                yield return (sample1, num2 / num3);
+            }
         }
 
         private static double CalculateThreshold(dynamic stats)

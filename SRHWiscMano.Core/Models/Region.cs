@@ -7,11 +7,13 @@ namespace SRHWiscMano.Core.Models
     {
         public Region(
             ITimeFrame window,
+            Interval timerange,
             Range<int> sensorRange,
             RegionType type,
             SamplePoint clickPoint)
         {
             Window = window;
+            TimeRange = timerange;
             SensorRange = sensorRange;
             Type = type;
             ClickPoint = clickPoint;
@@ -19,18 +21,19 @@ namespace SRHWiscMano.Core.Models
 
         public Region(
             ITimeFrame window,
+            Interval timeRange,
             Range<int> sensorRange,
             RegionType type,
             SamplePoint clickPoint,
             SamplePoint focalPoint)
-            : this(window, sensorRange, type, clickPoint)
+            : this(window, timeRange, sensorRange, type, clickPoint)
         {
             FocalPoint = focalPoint;
         }
 
         public ITimeFrame Window { get; set; }
 
-        public Interval TimeRange => Window.TimeRange();
+        public Interval TimeRange { get; set; }
 
         public Range<int> SensorRange { get; set; }
 

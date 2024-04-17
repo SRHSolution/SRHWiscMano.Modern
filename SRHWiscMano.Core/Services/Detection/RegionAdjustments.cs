@@ -77,41 +77,41 @@ namespace SRHWiscMano.Core.Services.Detection
         //     return region.AdjustToTimeRangeAtEdges(new RangeAboveBaseline(backgroundWindowWidth, Duration.Zero), diag);
         // }
         //
-        // public static Region AdjustToTimeRangeAtEdges(
-        //     this Region region,
-        //     IEdgeAlgorithm algorithm,
-        //     DiagnosticsContext diag)
-        // {
-        //     Interval withTestWindow = RegionEdgeDetector.FindWithTestWindow(algorithm, region.Window.ExamData,
-        //         region.SensorRange, region.TimeRange, region.Type, diag);
-        //     return region.ChangeTime(withTestWindow);
-        // }
-        //
-        // public static Region AdjustToPeakChangeLeft(this Region region, Duration searchTimeBefore)
-        // {
-        //     IExaminationData data = region.Window.ExamData;
-        //     int sensor = region.ClickPoint.Sensor;
-        //     Interval timeRange1 = region.TimeRange;
-        //     Instant start1 = timeRange1.Start - searchTimeBefore;
-        //     timeRange1 = region.TimeRange;
-        //     Instant start2 = timeRange1.Start;
-        //     Interval timeRange2 = new Interval(start1, start2);
-        //     Duration offset = PeakChange.FindNegative(data, sensor, timeRange2).Time - region.TimeRange.Start;
-        //     return region.ChangeTime(region.TimeRange.Map(t => t + offset));
-        // }
-        //
-        // public static Region AdjustToPeakChangeRight(this Region region, Duration searchTimeAfter)
-        // {
-        //     IExaminationData data = region.Window.ExamData;
-        //     int sensor = region.ClickPoint.Sensor;
-        //     Interval timeRange1 = region.TimeRange;
-        //     Instant end1 = timeRange1.End;
-        //     timeRange1 = region.TimeRange;
-        //     Instant end2 = timeRange1.End + searchTimeAfter;
-        //     Interval timeRange2 = new Interval(end1, end2);
-        //     Duration offsetRight = PeakChange.FindNegative(data, sensor, timeRange2).Time - region.TimeRange.End;
-        //     return region.ChangeTime(region.TimeRange.Map(t => t + offsetRight));
-        // }
+        public static Region AdjustToTimeRangeAtEdges(
+            this Region region,
+            IEdgeAlgorithm algorithm,
+            DiagnosticsContext diag)
+        {
+            Interval withTestWindow = RegionEdgeDetector.FindWithTestWindow(algorithm, region.Window.ExamData,
+                region.SensorRange, region.TimeRange, region.Type, diag);
+            return region.ChangeTime(withTestWindow);
+        }
+        
+        public static Region AdjustToPeakChangeLeft(this Region region, Duration searchTimeBefore)
+        {
+            IExamination data = region.Window.ExamData;
+            int sensor = region.ClickPoint.Sensor;
+            Interval timeRange1 = region.TimeRange;
+            Instant start1 = timeRange1.Start - searchTimeBefore;
+            timeRange1 = region.TimeRange;
+            Instant start2 = timeRange1.Start;
+            Interval timeRange2 = new Interval(start1, start2);
+            Duration offset = PeakChange.FindNegative(data, sensor, timeRange2).Time - region.TimeRange.Start;
+            return region.ChangeTime(region.TimeRange.Map(t => t + offset));
+        }
+        
+        public static Region AdjustToPeakChangeRight(this Region region, Duration searchTimeAfter)
+        {
+            IExamination data = region.Window.ExamData;
+            int sensor = region.ClickPoint.Sensor;
+            Interval timeRange1 = region.TimeRange;
+            Instant end1 = timeRange1.End;
+            timeRange1 = region.TimeRange;
+            Instant end2 = timeRange1.End + searchTimeAfter;
+            Interval timeRange2 = new Interval(end1, end2);
+            Duration offsetRight = PeakChange.FindNegative(data, sensor, timeRange2).Time - region.TimeRange.End;
+            return region.ChangeTime(region.TimeRange.Map(t => t + offsetRight));
+        }
 
         public static Region ChangeTime(this Region region, Interval timeRange)
         {
@@ -123,7 +123,7 @@ namespace SRHWiscMano.Core.Services.Detection
             Interval timeRange,
             SamplePoint focalPoint)
         {
-            return new Region(region.Window, region.SensorRange, region.Type, region.ClickPoint, focalPoint);
+            return new Region(region.Window, timeRange, region.SensorRange, region.Type, region.ClickPoint, focalPoint);
         }
 
         public static Region ChangeTimeAndSensors(
@@ -131,7 +131,7 @@ namespace SRHWiscMano.Core.Services.Detection
             Interval timeRange,
             Range<int> sensorRange)
         {
-            return new Region(region.Window, sensorRange, region.Type, region.ClickPoint, region.FocalPoint);
+            return new Region(region.Window, timeRange, sensorRange, region.Type, region.ClickPoint, region.FocalPoint);
         }
     }
 }

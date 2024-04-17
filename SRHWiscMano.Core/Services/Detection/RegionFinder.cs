@@ -46,6 +46,14 @@ namespace SRHWiscMano.Core.Services.Detection
             }
         }
 
+        /// <summary>
+        /// 클릭한 위치를 기준으로 찾는다
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="click"></param>
+        /// <param name="config"></param>
+        /// <param name="diagnostics"></param>
+        /// <returns></returns>
         private static Region FindVP(
             ITimeFrame state,
             SamplePoint click,
@@ -200,6 +208,7 @@ namespace SRHWiscMano.Core.Services.Detection
             int sensorTop = Math.Min(click.Sensor + sensorsAbove, window.SensorRange().Greater);
             int sensorBottom = Math.Max(click.Sensor - sensorsBelow, window.SensorRange().Lesser);
             return CreateRegionWithSensors(window, click, sensorTop, sensorBottom, type);
+
         }
 
         private static Region CreateRegionWithSensorsFromVPLine(
@@ -230,7 +239,7 @@ namespace SRHWiscMano.Core.Services.Detection
             int sensorBottom,
             RegionType type)
         {
-            return new Region(window, Range.Create(sensorTop, sensorBottom), type, click, null);
+            return new Region(window, InstantUtils.EmptyInterval,Range.Create(sensorTop, sensorBottom), type, click, null);
         }
 
         private static IRegion FindRegionOrThrow(
