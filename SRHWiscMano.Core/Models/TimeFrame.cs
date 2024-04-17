@@ -59,7 +59,7 @@ namespace SRHWiscMano.Core.Models
             OwnerSamples = data.Samples;
             IntpSamples = data.InterpolatedSamples;
             MinSensorBound = 0;
-            MaxSensorBound = ExamData.SensorCount();
+            MaxSensorBound = ExamData.SensorCount()-1;
             
             UpdateTime(Time);
         }

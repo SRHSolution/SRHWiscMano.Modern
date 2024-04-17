@@ -128,8 +128,8 @@ namespace SRHWiscMano.Core.ViewModels
                 model.Series.Add(lineSeries);
             }
             var viewYAxis = model.Axes.First(ax => ax.Tag == "Y");
-            viewYAxis.Minimum = (minBound-1) * SensorResolution;
-            viewYAxis.Maximum = (maxBound - 1) * SensorResolution;
+            viewYAxis.Minimum = (minBound) * SensorResolution;
+            viewYAxis.Maximum = (maxBound) * SensorResolution;
         }
 
         /// <summary>
@@ -153,10 +153,10 @@ namespace SRHWiscMano.Core.ViewModels
                 Position = AxisPosition.Left,
                 MaximumPadding = 0,
                 MinimumPadding = 0,
-                Minimum = -1, // 초기 시작값
-                Maximum = ((ySize - 1) * SensorResolution), // 초기 최대값
-                AbsoluteMinimum = -1, // Panning 최소값
-                AbsoluteMaximum = ((ySize) * SensorResolution), // Panning 최대값, LineSeries는 데이터를 한 step shift 하여 표시하기 위해 ySize+1 한다
+                Minimum = 0, // 초기 시작값
+                Maximum = ((ySize + 1) * SensorResolution), // 초기 최대값
+                AbsoluteMinimum = -0, // Panning 최소값
+                AbsoluteMaximum = ((ySize + 1) * SensorResolution) , // Panning 최대값, LineSeries는 데이터를 한 step shift 하여 표시하기 위해 ySize+1 한다
                 IsAxisVisible = false,
                 Tag = "Y"
             });

@@ -11,6 +11,8 @@ namespace SRHWiscMano.Core.Models
         IReadOnlyList<FrameNote> Notes { get; }
 
         int InterpolationScale { get; }
+        string Title { get; }
+        string Id { get; }
 
         void UpdateInterpolation(int interpolateScale);
     }

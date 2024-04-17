@@ -11,6 +11,7 @@ using OxyPlot.Series;
 using SRHWiscMano.Core.Data;
 using SRHWiscMano.Core.Helpers;
 using SRHWiscMano.Core.Models;
+using Range = SRHWiscMano.Core.Helpers.Range;
 
 namespace SRHWiscMano.Core.ViewModels
 {
@@ -123,10 +124,10 @@ namespace SRHWiscMano.Core.ViewModels
                 Position = AxisPosition.Left,
                 MaximumPadding = 0,
                 MinimumPadding = 0,
-                // StartPosition = 1,
-                // EndPosition = 0,
+                StartPosition = 0,
+                EndPosition = 1,
                 Minimum = 0, // 초기 시작값
-                Maximum = ySize - 1, // 초기 최대값
+                Maximum = ySize -1, // 초기 최대값
                 AbsoluteMinimum = 0, // Panning 최소값
                 AbsoluteMaximum = ySize - 1, // Panning 최대값
                 IsAxisVisible = false,
@@ -141,7 +142,7 @@ namespace SRHWiscMano.Core.ViewModels
                 Position = AxisPosition.Bottom,
                 MinimumPadding = 0,
                 Minimum = 0,
-                Maximum = xSize - 1,
+                Maximum = xSize -1,
                 MajorStep = xSize,
                 MinorStep = xSize, // 최대 범위를 입력하여 MinorStep 이 표시되지 않도록 한다
                 AbsoluteMinimum = 0,
@@ -178,18 +179,18 @@ namespace SRHWiscMano.Core.ViewModels
         {
             var heatmap = framePlotModel.Series.OfType<HeatMapSeries>().FirstOrDefault();
             var yAxis = framePlotModel.Axes.First(ax => ax.Tag == "Y");
-            heatmap.Data = Data.IntpFrameSamples.ConvertToDoubleArray();
-
-            var sensorIntpScale = Data.IntpFrameSamples[0].DataSize / Data.FrameSamples[0].DataSize;
-
+            var intpScale = (Data.IntpFrameSamples[0].DataSize - 1) / (Data.FrameSamples[0].DataSize - 1);
             // Sensor Bounds 영역만을 표시하도록 한다
-            yAxis.Minimum = Data.MinSensorBound * sensorIntpScale;
-            yAxis.Maximum = Data.MaxSensorBound * sensorIntpScale - 1;
+            yAxis.Minimum = Data.MinSensorBound * intpScale;
+            yAxis.Maximum = Data.MaxSensorBound * intpScale + 1;
 
+            var samples = Data.IntpFrameSamples.ConvertToDoubleArray();
+            var data  =Data.IntpFrameSamples.SamplesForSensorRange(Range.Create((int)yAxis.Minimum, (int)yAxis.Maximum));
+            heatmap.Data = samples;//data.ConvertToDoubleArray();
             heatmap.X0 = 0;
-            heatmap.X1 = Data.IntpFrameSamples.Count - 1;
+            heatmap.X1 = Data.IntpFrameSamples.Count-1 ;
             heatmap.Y0 = 0;
-            heatmap.Y1 = Data.IntpFrameSamples.First().DataSize - 1;
+            heatmap.Y1 = Data.IntpFrameSamples[0].DataSize -1;
             framePlotModel.InvalidatePlot(false);
 
             this.Time = Data.Time;

@@ -17,6 +17,8 @@ namespace SRHWiscMano.Core.Models
         public int InterpolatedScale { get; private set; } 
         public IReadOnlyList<FrameNote> Notes { get; }
         public int InterpolationScale { get; private set; }
+        public string Title { get; set; }
+        public string Id { get; set; }
 
         public Examination(IList<TimeSample> samples, IList<FrameNote> notes)
         {

@@ -16,6 +16,7 @@ using DynamicData;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MoreLinq.Extensions;
+using NLog;
 using NodaTime;
 using OxyPlot;
 using OxyPlot.Axes;
@@ -26,6 +27,7 @@ using SRHWiscMano.Core.Data;
 using SRHWiscMano.Core.Helpers;
 using SRHWiscMano.Core.Models;
 using SRHWiscMano.Core.Services.Detection;
+using SRHWiscMano.Core.Services.Diagnostics;
 using SRHWiscMano.Core.ViewModels;
 
 
@@ -49,9 +51,13 @@ namespace SRHWiscMano.App.ViewModels
 
         
         /// <summary>
-        /// 현재 선택되어 표시되고 있는 TimeFrame Heatmap ViewModel
+        /// 현재 선택된 TimeFrame ViewModel 원본 데이터
         /// </summary>
         public TimeFrameViewModel CurrentTimeFrameVM { get; private set; }
+        /// <summary>
+        /// 현재 선택되어 표시되고 있는 TimeFrame Heatmap ViewModel
+        /// </summary>
+        public TimeFrameViewModel CurrentTimeFrameHeatmapVM { get; private set; }
 
         /// <summary>
         /// 현재 선택되어 표시되고 있는 TimeFrame Lineseries ViewModel
@@ -61,6 +67,8 @@ namespace SRHWiscMano.App.ViewModels
         [ObservableProperty] private string statusMessage = "Test status message";
 
         [ObservableProperty] private int selectedIndexOfTimeFrameViewModel = -1;
+        
+        private DetectionDiagnostics diagnostics;
 
         /// <summary>
         /// View에서 표시할 전체 TimeFrameViewModels 
@@ -142,9 +150,9 @@ namespace SRHWiscMano.App.ViewModels
                         var updItem = TimeFrameViewModels.SingleOrDefault(item => item.Id == change.Current.Id);
                         updItem.RefreshPlotData();
                         
-                        if (CurrentTimeFrameVM?.Id == change.Current.Id)
+                        if (CurrentTimeFrameHeatmapVM?.Id == change.Current.Id)
                         {
-                            CurrentTimeFrameVM.RefreshPlotData();
+                            CurrentTimeFrameHeatmapVM.RefreshPlotData();
                             CurrentTimeFrameGraphVM.RefreshPlotData();
                         }
                         break;
@@ -181,9 +189,9 @@ namespace SRHWiscMano.App.ViewModels
 
             try
             {
-                var timeFrameData = (selectedItem as TimeFrameViewModel).Data;
-                CurrentTimeFrameVM = new TimeFrameViewModel(timeFrameData);
-                MainPlotModel = CurrentTimeFrameVM.FramePlotModel;
+                CurrentTimeFrameVM = (selectedItem as TimeFrameViewModel);
+                CurrentTimeFrameHeatmapVM = new TimeFrameViewModel(CurrentTimeFrameVM.Data);
+                MainPlotModel = CurrentTimeFrameHeatmapVM.FramePlotModel;
                 
                 var heatmap = MainPlotModel.Series.OfType<HeatMapSeries>().FirstOrDefault();
                 heatmap.TrackerFormatString = "{6:0.00}";
@@ -193,10 +201,10 @@ namespace SRHWiscMano.App.ViewModels
                     handler => MainPlotModel.TrackerChanged -= handler).Subscribe(HandleTrackerChanged);
 
                 MainPlotController = BuildMainPlotcontroller();
-                CurrentTimeFrameVM.RefreshPlotData();
+                CurrentTimeFrameHeatmapVM.RefreshPlotData();
 
                 
-                CurrentTimeFrameGraphVM = new TimeFrameGraphViewModel(timeFrameData);
+                CurrentTimeFrameGraphVM = new TimeFrameGraphViewModel(CurrentTimeFrameVM.Data);
                 GraphPlotModel = CurrentTimeFrameGraphVM.FramePlotModel;
                 GraphPlotController = BuildGraphPlotcontroller();
                 CurrentTimeFrameGraphVM.RefreshPlotData();
@@ -214,10 +222,10 @@ namespace SRHWiscMano.App.ViewModels
         /// <param name="message"></param>
         private void SensorBoundsChanged(object recipient, SensorBoundsChangedMessage message)
         {
-            if(CurrentTimeFrameVM != null)
+            if(CurrentTimeFrameHeatmapVM != null)
             {
-                CurrentTimeFrameVM.Data.UpdateSensorBounds(message.Value.MinBound, message.Value.MaxBound);
-                CurrentTimeFrameVM.RefreshPlotData();
+                CurrentTimeFrameHeatmapVM.Data.UpdateSensorBounds(message.Value.MinBound, message.Value.MaxBound);
+                CurrentTimeFrameHeatmapVM.RefreshPlotData();
 
                 CurrentTimeFrameGraphVM.Data.UpdateSensorBounds(message.Value.MinBound, message.Value.MaxBound);
                 CurrentTimeFrameGraphVM.RefreshPlotData();
@@ -277,7 +285,21 @@ namespace SRHWiscMano.App.ViewModels
             // PlotView에서 Tracker 가 표시되지 않도록 한다
             MainPlotModel.PlotView.HideTracker();
             var datapoint = args.HitResult.DataPoint;
-            StatusMessage = $"DataPoint : {datapoint.X}, {datapoint.Y}, value = {args.HitResult.Text}";
+
+            var viewXAxis = MainPlotModel.PlotView.ActualModel.Axes.First(ax => ax.Tag == "X");
+            var posX = viewXAxis.InverseTransform(datapoint.X);
+
+            // 현재의 TimeFrame에서 Pick 한 위치의 실제 Instant time을 계산한다
+            var pickPosX = Duration.FromMilliseconds((long)(datapoint.X * 10 + 0.5));
+            var posTime = CurrentTimeFrameHeatmapVM.Data.TimeRange().Start.Plus(pickPosX);
+            
+            // 현재의 Sensor Range를 기준으로 센서 몇번에서 클릭되었는지를 계산한다
+            var tmpPos = (int)(datapoint.Y / CurrentTimeFrameHeatmapVM.Data.ExamData.InterpolationScale + 0.5 );
+            // var posSensor = CurrentTimeFrameHeatmapVM.Data.SensorRange().Lesser + tmpPos;
+            var posSensor = tmpPos;
+            
+
+            StatusMessage = $"DataPoint : {datapoint.X}, {datapoint.Y}, value = {args.HitResult.Text} => {(double)posTime.ToMillisecondsFromEpoch()/1000:F2}, {posSensor+1}";
         }
 
 
@@ -291,33 +313,67 @@ namespace SRHWiscMano.App.ViewModels
 
             // 현재의 TimeFrame에서 Pick 한 위치의 실제 Instant time을 계산한다
             var pickPosX = Duration.FromMilliseconds((long)(posX * 10));
-            var posTime = CurrentTimeFrameVM.Data.TimeRange().Start.Plus(pickPosX);
+            var posTime = CurrentTimeFrameHeatmapVM.Data.TimeRange().Start.Plus(pickPosX);
 
             // 현재의 Sensor Range를 기준으로 센서 몇번에서 클릭되었는지를 계산한다
-            var tmpPos = (int)(posY / CurrentTimeFrameVM.Data.ExamData.InterpolationScale + 0.5);
-            // var posSensor = CurrentTimeFrameVM.Data.SensorRange().Lesser + tmpPos;
+            var tmpPos = (int)(posY / CurrentTimeFrameHeatmapVM.Data.ExamData.InterpolationScale + 0.5);
+            // var posSensor = CurrentTimeFrameHeatmapVM.Data.SensorRange().Lesser + tmpPos;
             var posSensor = tmpPos;
 
             logger.LogTrace($"Clicked pos {posX:F2}, {posY:F2}");
-            logger.LogTrace($"Frame pos {CurrentTimeFrameVM.Time.ToUnixTimeMilliseconds()} {CurrentTimeFrameVM.Data.TimeRange().Start.ToUnixTimeMilliseconds():F2}, {CurrentTimeFrameVM.Data.TimeRange().End.ToUnixTimeMilliseconds():F2}");
+            logger.LogTrace($"Frame pos {CurrentTimeFrameHeatmapVM.Time.ToUnixTimeMilliseconds()} {CurrentTimeFrameHeatmapVM.Data.TimeRange().Start.ToUnixTimeMilliseconds():F2}, {CurrentTimeFrameHeatmapVM.Data.TimeRange().End.ToUnixTimeMilliseconds():F2}");
             logger.LogTrace($"Pick Sample : {(double)posTime.ToUnixTimeMilliseconds()/1000} msec, {posSensor}");
 
-            SamplePoint pickPoint = new SamplePoint(posTime, (int)posSensor);
-            regionFinder.Find(RegionType.VP, CurrentTimeFrameVM.Data, pickPoint, RegionFinderConfig.Default, null);
-            // SamplePoint dataPoint = new SamplePoint(posF)
-            // regionFinder.Find(RegionType.VP, CurrentTimeFrameVM.ExamData, 
+            try
+            {
 
+
+                SamplePoint pickPoint = new SamplePoint(posTime, (int)posSensor);
+                var region = regionFinder.Find(RegionType.VP, CurrentTimeFrameHeatmapVM.Data, pickPoint,
+                    RegionFinderConfig.Default, Diagnostics);
+                if (region.SensorRange.Greater > CurrentTimeFrameHeatmapVM.Data.SensorRange().Greater)
+                    throw new RegionFinderException("Region selection is too low.");
+                if (region.SensorRange.Lesser < CurrentTimeFrameHeatmapVM.Data.SensorRange().Lesser + 1)
+                    throw new RegionFinderException("Region selection is too high.");
+                if (!region.SensorRange.IsForward)
+                {
+                    // Logger.Error(() => string.Format("Sensor range backwards {0} -> {1}", region.SensorRange.Start,
+                    //     region.SensorRange.End));
+                    // throw new RegionFinderException("Error calculating region.");
+                }
+
+                // Logger.Trace(() => string.Format("Bounds {0}, {1}", region.SensorRange.Start, region.SensorRange.End));
+                // AddRegionToSnapshot(step, snapshot, region);
+                // StatusMessage = null;
+                // return true;
+
+                StringBuilder sb = new StringBuilder();
+                sb.AppendLine("Region : " + region.Type);
+                sb.AppendLine($"Sensor Range : {region.SensorRange.Start}-{region.SensorRange.End}");
+                sb.AppendLine(
+                    $"Time Interval : {region.TimeRange.Start.ToUnixTimeMilliseconds()}-{region.TimeRange.End.ToUnixTimeMilliseconds()}");
+                sb.AppendLine(
+                    $"Click Point : {region.ClickPoint.Sensor}, {region.ClickPoint.Time.ToUnixTimeMilliseconds()}");
+                sb.AppendLine(
+                    $"Focal Point : {region.FocalPoint.Sensor}, {region.FocalPoint.Time.ToUnixTimeMilliseconds()}");
+
+                logger.LogTrace(sb.ToString());
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex.Message);
+            }
         }
 
-        // private DetectionDiagnostics Diagnostics
-        // {
-        //     get
-        //     {
-        //         if (diagnostics == null)
-        //             diagnostics = new DetectionDiagnostics(CurrentExam, CurrentSnapshot, Duration.FromSeconds(3L));
-        //         return diagnostics;
-        //     }
-        // }
+        private DetectionDiagnostics Diagnostics
+        {
+            get
+            {
+                if (diagnostics == null)
+                    diagnostics = new DetectionDiagnostics(CurrentTimeFrameVM.Data.ExamData, CurrentTimeFrameVM.Data, Duration.FromSeconds(3L));
+                return diagnostics;
+            }
+        }
 
         private void GraphClickedCommand(IPlotView view, OxyMouseDownEventArgs args)
         {

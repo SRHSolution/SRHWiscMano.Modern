@@ -21,18 +21,18 @@ namespace SRHWiscMano.Core.Helpers
         /// <returns></returns>
         public static void AddHeatmapSeries(PlotModel model, double[,] plotData)
         {
-            var frameCount = plotData.GetLength(0) - 1;
-            var sensorCount = plotData.GetLength(1) - 1;
+            var frameCount = plotData.GetLength(0) ;
+            var sensorCount = plotData.GetLength(1) ;
 
             // Create your heatmap series and add to MyModel
             var heatmapSeries = new HeatMapSeries
             {
                 CoordinateDefinition = HeatMapCoordinateDefinition.Center,
                 X0 = 0,
-                X1 = (double)frameCount,
+                X1 = (double)frameCount-1,  // 전체 갯수에서는 1을 빼서 인덱스를 맞춘다
                 Y0 = 0,
-                Y1 = sensorCount, 
-                Data = plotData /* Your 2D data array */,
+                Y1 = sensorCount-1,     // 전체 갯수에서는 1을 빼서 인덱스를 맞춘다
+                Data = plotData ,   // 2D 데이터를 입력한다
                 Interpolate = true,
                 RenderMethod = HeatMapRenderMethod.Bitmap,
                 // TrackerFormatString = "{2:0.0},{4:0.0},{6:0.00}",

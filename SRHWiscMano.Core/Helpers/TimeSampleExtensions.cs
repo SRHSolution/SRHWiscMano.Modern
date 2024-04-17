@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MoreLinq;
 using NLog;
 using NodaTime;
 using SRHWiscMano.Core.Models;
@@ -70,7 +71,8 @@ namespace SRHWiscMano.Core.Helpers
             if (!sampleList.Any())
                 return new List<TimeSample>(); // Return an empty list instead of null
 
-            var sensorCount = sampleList.First().DataSize * interpolateScale;
+            // 센서 사이의 값만 interpolation 한다.
+            var sensorCount = (sampleList.First().DataSize-1) * interpolateScale + 1;
 
             // Use a concurrent collection to store results temporarily
             var tempResults = new ConcurrentBag<(int Index, TimeSample Sample)>();
@@ -121,6 +123,7 @@ namespace SRHWiscMano.Core.Helpers
             return data.Samples.SamplesInTimeRange(timeRange).Select((Func<TimeSample, double>)(s => s.Values[sensorIndex]));
         }
 
+
         public static IEnumerable<Tuple<TimeSample, double>> SampleValuesForSensorInTimeRange(
             this IExamination data,
             Interval timeRange,
@@ -152,10 +155,29 @@ namespace SRHWiscMano.Core.Helpers
         public static IReadOnlyList<TimeSample> SamplesInTimeRange(this IEnumerable<TimeSample> samples,
             Instant startTime, Instant endTime)
         {
-            var subSamples = samples.Where(s => s.Time >= startTime && s.Time <= endTime);
+            var subSamples = samples.Where(s => s.Time >= startTime && s.Time < endTime);
             return subSamples.ToList().AsReadOnly();
         }
 
-        
+
+        /// <summary>
+        /// TimeSamples 에서 특정 센서 영역의 값만 추출하여 새로운 TimeSamples로 전달한다
+        /// </summary>
+        /// <param name="samples"></param>
+        /// <param name="sensorRange"></param>
+        /// <returns></returns>
+        public static IReadOnlyList<TimeSample> SamplesForSensorRange(this IEnumerable<TimeSample> samples,
+            Range<int> sensorRange)
+        {
+            var newSample = samples.Select(ts =>
+            {
+                var rangeValue = Enumerable.Range(sensorRange.Start, sensorRange.Span())
+                    .Select(idx => ts.Values[idx]).ToList().AsReadOnly();
+                return new TimeSample(ts.Time, rangeValue);
+            });
+            
+            return newSample.ToList().AsReadOnlyList();
+        }
+
     }
 }

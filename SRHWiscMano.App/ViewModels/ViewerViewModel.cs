@@ -65,7 +65,7 @@ namespace SRHWiscMano.App.ViewModels
         [ObservableProperty] private long timeDuration = 2000;
         [ObservableProperty] private OxyPalette selectedPalette = OxyPalettes.Hue64;
 
-        [ObservableProperty] private double examSensorSize;
+        [ObservableProperty] private double examSensorMaxIndex;
 
         // Sensor Bound Properties
         [ObservableProperty] private bool pickingSensorBounds = false;
@@ -329,8 +329,8 @@ namespace SRHWiscMano.App.ViewModels
             var frameCount = examData.Samples.Count;
             
             MinSensorBound = 0;
-            MaxSensorBound = sensorCount;
-            ExamSensorSize = sensorCount;
+            MaxSensorBound = sensorCount-1;
+            ExamSensorMaxIndex = sensorCount-1;
 
             // 기존의 PlotView를 clear 한 후 ExamData에 대한 PlotModel을 생성해서 입력한다.
             // ((IPlotModel)this.MainPlotModel)?.AttachPlotView(null);
@@ -537,9 +537,9 @@ namespace SRHWiscMano.App.ViewModels
                 MaximumPadding = 0,
                 MinimumPadding = 0,
                 Minimum = 0, // 초기 시작값
-                Maximum = ySize - 1, // 초기 최대값
+                Maximum = ySize , // 초기 최대값
                 AbsoluteMinimum = 0, // Panning 최소값
-                AbsoluteMaximum = ySize - 1, // Panning 최대값
+                AbsoluteMaximum = ySize , // Panning 최대값
                 IsAxisVisible = false,
                 Tag = "Y"
             });
@@ -559,7 +559,7 @@ namespace SRHWiscMano.App.ViewModels
                 MajorTickSize = 4,
                 MinorTickSize = 2,
                 AbsoluteMinimum = 0,
-                AbsoluteMaximum = xSize - 1,
+                AbsoluteMaximum = xSize,
                 Tag = "X"
             });
         }
@@ -593,7 +593,7 @@ namespace SRHWiscMano.App.ViewModels
                 Minimum = 0, // 초기 시작값
                 Maximum = ySize - 1, // 초기 최대값
                 AbsoluteMinimum = 0, // Panning 최소값
-                AbsoluteMaximum = ySize - 1, // Panning 최대값
+                AbsoluteMaximum = ySize , // Panning 최대값
                 IsAxisVisible = false,
                 Tag = "Y"
             });
@@ -606,13 +606,13 @@ namespace SRHWiscMano.App.ViewModels
                 Position = AxisPosition.Bottom,
                 MinimumPadding = 0,
                 Minimum = 0,
-                Maximum = xSize - 1, //100000,// - 1,
+                Maximum = xSize , //100000,// - 1,
                 MinorStep = 1000, // 최대 범위를 입력하여 MinorStep 이 표시되지 않도록 한다
                 MajorStep = 5000,
                 MajorTickSize = 4,
                 MinorTickSize = 2,
                 AbsoluteMinimum = 0,
-                AbsoluteMaximum = xSize - 1,
+                AbsoluteMaximum = xSize ,
                 Tag = "X"
             });
         }
@@ -804,8 +804,8 @@ namespace SRHWiscMano.App.ViewModels
         [RelayCommand]
         private void SensorBoundsChanged()
         {
-            var minPos = MinSensorBound / (ExamSensorSize) * (MainPlotModel.PlotArea.Height - 8);
-            var maxPos = (ExamSensorSize - MaxSensorBound) * (MainPlotModel.PlotArea.Height - 8) / ExamSensorSize;
+            var minPos = MinSensorBound / (ExamSensorMaxIndex) * (MainPlotModel.PlotArea.Height - 8);
+            var maxPos = ((ExamSensorMaxIndex) - MaxSensorBound) * (MainPlotModel.PlotArea.Height - 8) / ExamSensorMaxIndex;
             SensorBoundLowerHeight = minPos;
             SensorBoundUpperHeight = maxPos;
         }
@@ -815,9 +815,9 @@ namespace SRHWiscMano.App.ViewModels
         /// </summary>
         /// <param name="sender"></param>
         [RelayCommand]
-        private void ToggleSensorBounds(bool sender)
+        private void ToggleSensorBounds(object sender)
         {
-            PickingSensorBounds = sender;
+            PickingSensorBounds = (bool)sender;
             var heatMapSeries = MainPlotModel.Series.OfType<HeatMapSeries>().FirstOrDefault();
             var mainYAxis = MainPlotModel.Axes.First(ax => ax.Tag == "Y");
 
@@ -850,9 +850,9 @@ namespace SRHWiscMano.App.ViewModels
                 if (heatMapSeries != null)
                 {
                     // LinearAxis 에 의해서 위치가 변경되었으므로, Series 에서도 데이터를 해당 위치에 출력하도록 한다.
-                    var sensorIntpScale = (mainYAxis.ActualMaximum + 1) / ExamSensorSize;
+                    var sensorIntpScale = (mainYAxis.ActualMaximum-1) / ExamSensorMaxIndex;
                     mainYAxis.Minimum = MinSensorBound * sensorIntpScale;
-                    mainYAxis.Maximum = MaxSensorBound * sensorIntpScale - 1;
+                    mainYAxis.Maximum = MaxSensorBound * sensorIntpScale+1;
 
                     MainPlotModel.InvalidatePlot(true);
 
