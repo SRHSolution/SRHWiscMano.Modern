@@ -415,8 +415,6 @@ namespace SRHWiscMano.App.ViewModels
         }
 
 
-        //TODO : SensorBoundsChanged와 같이 Time changed 에 대한 이벤트에 따른 mainmodel 업데이트 기능 필요
-
         #region 버튼 이벤트
 
         /// <summary>
