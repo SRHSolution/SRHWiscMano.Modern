@@ -190,9 +190,6 @@ namespace SRHWiscMano.App.ViewModels
         }
 
         
-
-
-
         /// <summary>
         /// SharedService의 TimeFrames에 등록된 데이터를 View에 binding 작업을 수행한다.
         /// </summary>

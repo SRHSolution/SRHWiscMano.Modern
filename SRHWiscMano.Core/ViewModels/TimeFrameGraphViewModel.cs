@@ -22,28 +22,28 @@ namespace SRHWiscMano.Core.ViewModels
     {
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
-        // private readonly ITimeFrame timeFrame;
-
+        public int Id { get; }
         public ITimeFrame Data { get; }
 
-        public static OxyPalette SelectedPalette { get; private set; }
-
-        [ObservableProperty] private PlotModel framePlotModel;
-        [ObservableProperty] private PlotController framePlotController;
-
-        public int Id { get; }
-
-        private double[,] plotData;
+        /// <summary>
+        /// TimeFrame의 중심위치 시간
+        /// </summary>
+        public Instant Time { get; private set; }
 
         /// <summary>
         /// TimeFrame의 메인 Label
         /// </summary>
         [ObservableProperty] private string label;
-        
+
         /// <summary>
         /// Label에서 포함되어 있는 Volume 정보
         /// </summary>
         [ObservableProperty] private string volume;
+
+        [ObservableProperty] private PlotModel framePlotModel;
+        [ObservableProperty] private PlotController framePlotController;
+
+        private double[,] plotData;
 
         /// <summary>
         /// Label을 Editing 하는 매개값
@@ -54,22 +54,15 @@ namespace SRHWiscMano.Core.ViewModels
 
         [ObservableProperty] private bool isEditing = false;
 
-        /// <summary>
-        /// Sensor 값을 Plot하기 위한 Resolution 
-        /// </summary>
-        public int SensorResolution { get; private set; } = 10;
 
-        public Instant Time { get; private set; }
-
+        public static OxyPalette SelectedPalette { get; private set; }
 
         public TimeFrameGraphViewModel(ITimeFrame data)
         {
-
             this.Data = data;
             this.Id = data.Id;
             this.Time = data.Time;
             this.Label = data.Text;
-            SensorResolution = 1;
             if (Label.Contains("cc"))
             {
                 this.Volume = Label.Trim().Split("cc")[0];
@@ -80,56 +73,13 @@ namespace SRHWiscMano.Core.ViewModels
             }
 
             var plotModel = new PlotModel();
+            //TimeFrame의 원본 데이터 값을 Plot을 위한 Double Array 로 저장한다
             plotData = Data.FrameSamples.ConvertToDoubleArray();
+            // Line graph를 위한 Axes를 등록한다
             AddAxes(plotModel, plotData.GetLength(0), plotData.GetLength(1));
+            // Sensor Bounds 에 맞춰서 Line 데이터를 등록한다
             UpdateLineSeries(plotModel, plotData, Data.MinSensorBound, Data.MaxSensorBound);
             FramePlotModel = plotModel;
-        }
-
-        /// <summary>
-        /// Sensor 데이터를 Graph Series 로 그리는 함수
-        /// </summary>
-        /// <param name="model"></param>
-        /// <param name="plotData"></param>
-        private void AddLineSeries(PlotModel model, double[,] plotData)
-        {
-            var sensorCount = plotData.GetLength(1);
-
-            UpdateLineSeries(model, plotData, Data.MinSensorBound, Data.MaxSensorBound);
-        }
-
-        private void UpdateLineSeries(PlotModel model, double[,] plotData, double minBound, double maxBound)
-        {
-            model.Series.Clear();
-
-            var frameCount = plotData.GetLength(0);
-            var sensorCount = plotData.GetLength(1);
-
-            var valueRange = plotData.Max2D() - plotData.Min2D();
-            var valueScale = SensorResolution/valueRange;   // 
-
-            var colId = 0;
-            for (int senId = 0; senId < sensorCount; senId++)
-            {
-                var lineSeries = new LineSeries();
-                lineSeries.LineStyle = LineStyle.Solid;
-                lineSeries.StrokeThickness = 1;
-                lineSeries.Color = OxyColors.Gray;
-
-                // List<SensorPoint> points = new List<SensorPoint>();
-                for (int rowId = 0; rowId < frameCount; rowId++)
-                {
-                    // points.Add(new SensorPoint(){Time = rowId, Sensor = senId, Value = plotData[rowId, senId], ValueScale = valueScale});
-                    lineSeries.Points.Add(new OxyPlot.DataPoint(rowId, ((colId)*SensorResolution) - plotData[rowId, senId] * valueScale * 1.8));
-                }
-                // lineSeries.ItemsSource = points;
-
-                colId++;
-                model.Series.Add(lineSeries);
-            }
-            var viewYAxis = model.Axes.First(ax => ax.Tag == "Y");
-            viewYAxis.Minimum = (minBound) * SensorResolution;
-            viewYAxis.Maximum = (maxBound) * SensorResolution;
         }
 
         /// <summary>
@@ -146,6 +96,7 @@ namespace SRHWiscMano.Core.ViewModels
                 model.Axes.Remove(axis);
             }
 
+            // Y-Axis
             model.Axes.Add(new LinearAxis()
             {
                 IsPanEnabled = false,
@@ -156,9 +107,9 @@ namespace SRHWiscMano.Core.ViewModels
                 StartPosition = 1,
                 EndPosition = 0,
                 Minimum = 0, // 초기 시작값
-                Maximum = ((ySize + 1) * SensorResolution), // 초기 최대값
+                Maximum = ((ySize + 1) ), // 초기 최대값
                 AbsoluteMinimum = -0, // Panning 최소값
-                AbsoluteMaximum = ((ySize + 1) * SensorResolution) , // Panning 최대값, LineSeries는 데이터를 한 step shift 하여 표시하기 위해 ySize+1 한다
+                AbsoluteMaximum = ((ySize + 1) ) , // Panning 최대값, LineSeries는 데이터를 한 step shift 하여 표시하기 위해 ySize+1 한다
                 IsAxisVisible = false,
                 Tag = "Y"
             });
@@ -182,6 +133,68 @@ namespace SRHWiscMano.Core.ViewModels
         }
 
         /// <summary>
+        /// Sensor 데이터를 Graph Series 로 그린다
+        /// </summary>
+        /// <param name="model"></param>
+        /// <param name="plotData"></param>
+        /// <param name="minBound"></param>
+        /// <param name="maxBound"></param>
+        private void UpdateLineSeries(PlotModel model, double[,] plotData, double minBound, double maxBound)
+        {
+            model.Series.Clear();
+
+            var frameCount = plotData.GetLength(0);
+            var sensorCount = plotData.GetLength(1);
+
+            var valueRange = plotData.Max2D() - plotData.Min2D();
+            var valueScale = 1 / valueRange;
+
+            var colId = 0;
+            for (int senId = 0; senId < sensorCount; senId++)
+            {
+                var lineSeries = new LineSeries();
+                lineSeries.LineStyle = LineStyle.Solid;
+                lineSeries.StrokeThickness = 1;
+                lineSeries.Color = OxyColors.Gray;
+
+                // Line의 Value 값을 추가한다
+                for (int rowId = 0; rowId < frameCount; rowId++)
+                {
+                    // Sensor의 rendering 위치가 반전되어 있으므로 PlotData를 반전하여 그린다
+                    lineSeries.Points.Add(new DataPoint(rowId, colId - plotData[rowId, senId] * valueScale * 1.8));
+                }
+
+                colId++;
+                model.Series.Add(lineSeries);
+            }
+            var viewYAxis = model.Axes.First(ax => ax.Tag == "Y");
+            viewYAxis.Minimum = minBound;
+            viewYAxis.Maximum = maxBound;
+        }
+
+        public void AdjustTimeInMs(long delta)
+        {
+            Data.UpdateTime(Data.Time.Plus(Duration.FromMilliseconds(delta)));
+            RefreshPlotData();
+
+            logger.Trace($"Adjust {Data.Text} {delta}msec");
+        }
+
+        /// <summary>
+        /// Plot을 업데이트한다
+        /// </summary>
+        public void RefreshPlotData()
+        {
+            Data.UpdateTime(Data.Time);
+
+            plotData = Data.FrameSamples.ConvertToDoubleArray();
+            UpdateLineSeries(FramePlotModel, plotData, Data.MinSensorBound, Data.MaxSensorBound);
+
+            framePlotModel.InvalidatePlot(true);
+            this.Time = Data.Time;
+        }
+
+        /// <summary>
         /// Label을 Editing 상태로 전환
         /// </summary>
         [RelayCommand]
@@ -202,29 +215,6 @@ namespace SRHWiscMano.Core.ViewModels
             Label = Volume + "cc" + labelTag;
             Data.Text = Label;
             IsEditing = false;
-        }
-
-        public void RefreshPlotData()
-        {
-            // 이전과 동일하면 skip
-            // if (Time.Equals(ExamData.Time))
-            //     return;
-
-            Data.UpdateTime(Data.Time);
-
-            plotData = Data.FrameSamples.ConvertToDoubleArray();
-            UpdateLineSeries(FramePlotModel, plotData, Data.MinSensorBound, Data.MaxSensorBound);
-
-            framePlotModel.InvalidatePlot(true);
-            this.Time = Data.Time;
-        }
-
-        public void AdjustTimeInMs(long delta)
-        {
-            Data.UpdateTime(Data.Time.Plus(Duration.FromMilliseconds(delta)));
-            RefreshPlotData();
-
-            logger.Trace($"Adjust {Data.Text} {delta}msec");
         }
     }
 }

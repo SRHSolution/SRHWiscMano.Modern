@@ -1,4 +1,5 @@
 ﻿using System.Net.Mime;
+using System.Runtime.CompilerServices;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
@@ -21,29 +22,35 @@ namespace SRHWiscMano.Core.ViewModels
     public partial class TimeFrameViewModel : ViewModelBase
     {
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
-
-        // private readonly ITimeFrame timeFrame;
-
-        public ITimeFrame Data { get; }
-
-        public static OxyPalette SelectedPalette { get; private set; }
-
-        [ObservableProperty] private PlotModel framePlotModel;
-        [ObservableProperty] private PlotController framePlotController;
-
         public int Id { get; }
 
-        private double[,] plotData;
+        public ITimeFrame Data { get; }
+        /// <summary>
+        /// TimeFrame의 중심위치 시간
+        /// </summary>
+        public Instant Time { get; private set; }
 
         /// <summary>
         /// TimeFrame의 메인 Label
         /// </summary>
         [ObservableProperty] private string label;
-        
+
         /// <summary>
         /// Label에서 포함되어 있는 Volume 정보
         /// </summary>
         [ObservableProperty] private string volume;
+
+        [ObservableProperty] private PlotModel framePlotModel;
+        [ObservableProperty] private PlotController framePlotController;
+        private double[,] plotData;
+
+        private IReadOnlyList<RegionSelectStep> regionSelectSteps;
+
+        public IReadOnlyList<RegionSelectStep> RegionSelectSteps => regionSelectSteps;
+
+        public bool AllStepsAreCompleted => regionSelectSteps.All(s => s.IsCompleted);
+
+        public bool NoStepsAreCompleted => regionSelectSteps.All(s => !s.IsCompleted);
 
         /// <summary>
         /// Label을 Editing 하는 매개값
@@ -53,9 +60,8 @@ namespace SRHWiscMano.Core.ViewModels
         [ObservableProperty] private bool isSelected;
 
         [ObservableProperty] private bool isEditing = false;
+        public static OxyPalette SelectedPalette { get; private set; }
 
-        public Instant Time { get; private set; }
-        
         public TimeFrameViewModel(ITimeFrame data)
         {
             this.Data = data;
@@ -72,34 +78,26 @@ namespace SRHWiscMano.Core.ViewModels
             }
 
             var plotModel = new PlotModel();
+            //TimeFrame의 원본 데이터 값을 Plot을 위한 Double Array 로 저장한다
             plotData = Data.IntpFrameSamples.ConvertToDoubleArray();
+            // Heamap Series를 추가한ㄷ
             PlotDataUtils.AddHeatmapSeries(plotModel, plotData);
+            // Graph를 위한 Axes를 등록한다
             AddAxes(plotModel, plotData.GetLength(0), plotData.GetLength(1));
             FramePlotModel = plotModel;
 
+            regionSelectSteps = RegionSelectStep.GetStandardSteps(this).ToList();
+
+            // Heatmap의 색상 Pallete가 변경시 업데이트를 위한 handler를 등록한다
             WeakReferenceMessenger.Default.Register<PaletteChangedMessageMessage>(this, OnPaletteChange);
         }
 
         /// <summary>
-        /// PlotModel을 그리기 위한 Palette가 변경된 이벤트를 처리한다
+        /// Heatmap을 위한 Axes를 등록한다
         /// </summary>
-        /// <param name="recipient"></param>
-        /// <param name="arg"></param>
-        private void OnPaletteChange(object recipient, PaletteChangedMessageMessage arg)
-        {
-            SelectedPalette = arg.Value.palette;
-
-            var mainColorAxis = FramePlotModel.Axes.OfType<LinearColorAxis>().FirstOrDefault();
-            mainColorAxis.Palette = arg.Value.palette;
-            mainColorAxis.Minimum = arg.Value.Minimum; // 최소 limit 값
-            mainColorAxis.Maximum = arg.Value.Maximum; // 최대 limit 값
-            mainColorAxis.HighColor = arg.Value.HighColor; // OxyColors.White,
-            mainColorAxis.LowColor = arg.Value.LowColor;
-
-            FramePlotModel.InvalidatePlot(false);
-        }
-
-
+        /// <param name="model"></param>
+        /// <param name="xSize"></param>
+        /// <param name="ySize"></param>
         private void AddAxes(PlotModel model, int xSize, int ySize)
         {
             foreach (var axis in model.Axes)
@@ -153,6 +151,63 @@ namespace SRHWiscMano.Core.ViewModels
         }
 
         /// <summary>
+        /// PlotModel을 그리기 위한 Palette가 변경된 이벤트를 처리한다
+        /// </summary>
+        /// <param name="recipient"></param>
+        /// <param name="arg"></param>
+        private void OnPaletteChange(object recipient, PaletteChangedMessageMessage arg)
+        {
+            SelectedPalette = arg.Value.palette;
+
+            var mainColorAxis = FramePlotModel.Axes.OfType<LinearColorAxis>().FirstOrDefault();
+            mainColorAxis.Palette = arg.Value.palette;
+            mainColorAxis.Minimum = arg.Value.Minimum; // 최소 limit 값
+            mainColorAxis.Maximum = arg.Value.Maximum; // 최대 limit 값
+            mainColorAxis.HighColor = arg.Value.HighColor; // OxyColors.White,
+            mainColorAxis.LowColor = arg.Value.LowColor;
+
+            FramePlotModel.InvalidatePlot(false);
+        }
+
+        /// <summary>
+        /// TimeFrame의 시간을 조정한다
+        /// </summary>
+        /// <param name="delta"></param>
+        public void AdjustTimeInMs(long delta)
+        {
+            Data.UpdateTime(Data.Time.Plus(Duration.FromMilliseconds(delta)));
+            RefreshPlotData();
+
+            logger.Trace($"Adjust {Data.Text} {delta}msec");
+        }
+
+        /// <summary>
+        /// Plot을 다시 그린다
+        /// </summary>
+        public void RefreshPlotData()
+        {
+            var heatmap = framePlotModel.Series.OfType<HeatMapSeries>().FirstOrDefault();
+            var yAxis = framePlotModel.Axes.First(ax => ax.Tag == "Y");
+            
+            // 데이터의 interpolation scale값을 찾는다
+            var intpScale = (Data.IntpFrameSamples[0].DataSize - 1) / (Data.FrameSamples[0].DataSize - 1);
+            
+            // Sensor Bounds 영역만을 표시하도록 한다
+            yAxis.Minimum = Data.MinSensorBound * intpScale;
+            yAxis.Maximum = Data.MaxSensorBound * intpScale + 1;
+
+            heatmap.Data = Data.IntpFrameSamples.ConvertToDoubleArray();
+            heatmap.X0 = 0;
+            heatmap.X1 = Data.IntpFrameSamples.Count-1 ;
+            heatmap.Y0 = 0;
+            heatmap.Y1 = Data.IntpFrameSamples[0].DataSize -1;
+
+            framePlotModel.InvalidatePlot(false);
+
+            this.Time = Data.Time;
+        }
+
+        /// <summary>
         /// Label을 Editing 상태로 전환
         /// </summary>
         [RelayCommand]
@@ -173,35 +228,6 @@ namespace SRHWiscMano.Core.ViewModels
             Label = Volume + "cc" + labelTag;
             Data.Text = Label;
             IsEditing = false;
-        }
-
-        public void RefreshPlotData()
-        {
-            var heatmap = framePlotModel.Series.OfType<HeatMapSeries>().FirstOrDefault();
-            var yAxis = framePlotModel.Axes.First(ax => ax.Tag == "Y");
-            var intpScale = (Data.IntpFrameSamples[0].DataSize - 1) / (Data.FrameSamples[0].DataSize - 1);
-            // Sensor Bounds 영역만을 표시하도록 한다
-            yAxis.Minimum = Data.MinSensorBound * intpScale;
-            yAxis.Maximum = Data.MaxSensorBound * intpScale + 1;
-
-            var samples = Data.IntpFrameSamples.ConvertToDoubleArray();
-            var data  =Data.IntpFrameSamples.SamplesForSensorRange(Range.Create((int)yAxis.Minimum, (int)yAxis.Maximum));
-            heatmap.Data = samples;//data.ConvertToDoubleArray();
-            heatmap.X0 = 0;
-            heatmap.X1 = Data.IntpFrameSamples.Count-1 ;
-            heatmap.Y0 = 0;
-            heatmap.Y1 = Data.IntpFrameSamples[0].DataSize -1;
-            framePlotModel.InvalidatePlot(false);
-
-            this.Time = Data.Time;
-        }
-
-        public void AdjustTimeInMs(long delta)
-        {
-            Data.UpdateTime(Data.Time.Plus(Duration.FromMilliseconds(delta)));
-            RefreshPlotData();
-
-            logger.Trace($"Adjust {Data.Text} {delta}msec");
         }
     }
 }

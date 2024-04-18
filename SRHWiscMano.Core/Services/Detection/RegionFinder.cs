@@ -201,8 +201,8 @@ namespace SRHWiscMano.Core.Services.Detection
             RegionType type)
         {
             
-            int sensorTop = Math.Min(click.Sensor + sensorsAbove, window.SensorRange().Greater);
-            int sensorBottom = Math.Max(click.Sensor - sensorsBelow, window.SensorRange().Lesser);
+            int sensorTop = Math.Max(click.Sensor - sensorsAbove, window.SensorRange().Lesser);
+            int sensorBottom = Math.Min(click.Sensor + sensorsBelow, window.SensorRange().Greater);
             return CreateRegionWithSensors(window, click, sensorTop, sensorBottom, type);
 
         }

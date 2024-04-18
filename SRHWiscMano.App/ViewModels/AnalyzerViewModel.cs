@@ -324,17 +324,17 @@ namespace SRHWiscMano.App.ViewModels
             logger.LogTrace($"Frame pos {CurrentTimeFrameHeatmapVM.Time.ToUnixTimeMilliseconds()} {CurrentTimeFrameHeatmapVM.Data.TimeRange().Start.ToUnixTimeMilliseconds():F2}, {CurrentTimeFrameHeatmapVM.Data.TimeRange().End.ToUnixTimeMilliseconds():F2}");
             logger.LogTrace($"Pick Sample : {(double)posTime.ToUnixTimeMilliseconds()/1000} msec, {posSensor}");
 
+
+            RegionSelectStep step = CurrentTimeFrameVM.RegionSelectSteps.FirstOrDefault(s => !s.IsCompleted);
+
             try
             {
-
-
                 SamplePoint pickPoint = new SamplePoint(posTime, (int)posSensor);
-                var region = regionFinder.Find(RegionType.VP, CurrentTimeFrameHeatmapVM.Data, pickPoint,
-                    RegionFinderConfig.Default, Diagnostics);
+                var region = regionFinder.Find(step.Type, CurrentTimeFrameHeatmapVM.Data, pickPoint, RegionFinderConfig.Default, Diagnostics);
                 if (region.SensorRange.Greater > CurrentTimeFrameHeatmapVM.Data.SensorRange().Greater)
-                    throw new RegionFinderException("Region selection is too low.");
+                    throw new RegionFinderException("Selected TopSensor is too low.");
                 if (region.SensorRange.Lesser < CurrentTimeFrameHeatmapVM.Data.SensorRange().Lesser + 1)
-                    throw new RegionFinderException("Region selection is too high.");
+                    throw new RegionFinderException("Selected BottomSensor is too high.");
                 if (!region.SensorRange.IsForward)
                 {
                     // Logger.Error(() => string.Format("Sensor range backwards {0} -> {1}", region.SensorRange.Start,
@@ -342,8 +342,14 @@ namespace SRHWiscMano.App.ViewModels
                     // throw new RegionFinderException("Error calculating region.");
                 }
 
+                if (region != null)
+                {
+                    step.IsCompleted = true;
+                }
+
+
                 // Logger.Trace(() => string.Format("Bounds {0}, {1}", region.SensorRange.Start, region.SensorRange.End));
-                // AddRegionToSnapshot(step, snapshot, region);
+                // AddRegionToTimeFrame(step, snapshot, region);
                 // StatusMessage = null;
                 // return true;
 
