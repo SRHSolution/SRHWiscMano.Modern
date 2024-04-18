@@ -72,7 +72,7 @@ namespace SRHWiscMano.Core.ViewModels
             }
 
             var plotModel = new PlotModel();
-            plotData = Data.IntpFrameSamples.ConvertToDoubleArray(true);
+            plotData = Data.IntpFrameSamples.ConvertToDoubleArray();
             PlotDataUtils.AddHeatmapSeries(plotModel, plotData);
             AddAxes(plotModel, plotData.GetLength(0), plotData.GetLength(1));
             FramePlotModel = plotModel;
@@ -124,8 +124,8 @@ namespace SRHWiscMano.Core.ViewModels
                 Position = AxisPosition.Left,
                 MaximumPadding = 0,
                 MinimumPadding = 0,
-                StartPosition = 0,
-                EndPosition = 1,
+                StartPosition = 1,
+                EndPosition = 0,
                 Minimum = 0, // 초기 시작값
                 Maximum = ySize -1, // 초기 최대값
                 AbsoluteMinimum = 0, // Panning 최소값

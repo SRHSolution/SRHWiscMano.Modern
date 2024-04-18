@@ -22,7 +22,7 @@ namespace SRHWiscMano.Core.Helpers
         /// <param name="samples"></param>
         /// <param name="bFlipVertical"></param>
         /// <returns></returns>
-        public static double[,] ConvertToDoubleArray(this IEnumerable<TimeSample> samples, bool bFlipVertical = true)
+        public static double[,] ConvertToDoubleArray(this IEnumerable<TimeSample> samples, bool bFlipVertical = false)
         {
             // Check if the input is empty or null to avoid IndexOutOfRangeException
             var sampleList = samples as IList<TimeSample> ?? samples.ToList();

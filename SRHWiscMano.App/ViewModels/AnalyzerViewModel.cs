@@ -365,30 +365,19 @@ namespace SRHWiscMano.App.ViewModels
                 var rangeYTop = region.SensorRange.Greater* CurrentTimeFrameHeatmapVM.Data.ExamData.InterpolationScale;
 
                 var rangeYBottom = region.SensorRange.Lesser * CurrentTimeFrameHeatmapVM.Data.ExamData.InterpolationScale;
-
-
-                var clickAnnot = new EllipseAnnotation()
+                var rectangleAnnotation = new RectangleAnnotation
                 {
-
-                    Fill = OxyColor.FromAColor(255, OxyColors.Black),
-                    Height = 20,
-                    Width = 20,
-                    X = args.Position.X,//region.ClickPoint.Time.ToUnixTimeMilliseconds()/10 ,
-                    Y = args.Position.Y,//region.ClickPoint.Sensor * 10
+                    MinimumX = rangeXStart,
+                    MaximumX = rangeXEnd,
+                    MinimumY = rangeYTop,
+                    MaximumY = rangeYBottom,
+                    Fill = OxyColors.Transparent,//OxyColor.FromAColor(120, ), // 투명도 120, 색상 SkyBlue
+                    Stroke = OxyColors.Black,
+                    StrokeThickness = 2 // 테두리 없음
                 };
-                view.ActualModel.Annotations.Add(clickAnnot);
-                view.ActualModel.InvalidatePlot(false);
-                // var rectangleAnnotation = new RectangleAnnotation
-                // {
-                //     MinimumX = rangeXStart,
-                //     MaximumX = rangeXEnd,
-                //     MinimumY = rangeYTop,
-                //     MaximumY = rangeYBottom,
-                //     Fill = OxyColor.FromAColor(120, OxyColors.SkyBlue), // 투명도 120, 색상 SkyBlue
-                //     StrokeThickness = 0 // 테두리 없음
-                // };
                 //
-                // view.ActualModel.Annotations.Add(rectangleAnnotation);
+                view.ActualModel.Annotations.Add(rectangleAnnotation);
+                view.ActualModel.InvalidatePlot(false);
             }
             catch (Exception ex)
             {

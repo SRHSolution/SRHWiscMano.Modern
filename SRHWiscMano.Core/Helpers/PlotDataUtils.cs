@@ -35,6 +35,7 @@ namespace SRHWiscMano.Core.Helpers
                 Data = plotData ,   // 2D 데이터를 입력한다
                 Interpolate = true,
                 RenderMethod = HeatMapRenderMethod.Bitmap,
+                
                 // TrackerFormatString = "{2:0.0},{4:0.0},{6:0.00}",
                 Tag = "Heatmap"
             };

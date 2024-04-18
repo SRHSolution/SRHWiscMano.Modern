@@ -80,7 +80,7 @@ namespace SRHWiscMano.Core.ViewModels
             }
 
             var plotModel = new PlotModel();
-            plotData = Data.FrameSamples.ConvertToDoubleArray(true);
+            plotData = Data.FrameSamples.ConvertToDoubleArray();
             AddAxes(plotModel, plotData.GetLength(0), plotData.GetLength(1));
             UpdateLineSeries(plotModel, plotData, Data.MinSensorBound, Data.MaxSensorBound);
             FramePlotModel = plotModel;
@@ -120,7 +120,7 @@ namespace SRHWiscMano.Core.ViewModels
                 for (int rowId = 0; rowId < frameCount; rowId++)
                 {
                     // points.Add(new SensorPoint(){Time = rowId, Sensor = senId, Value = plotData[rowId, senId], ValueScale = valueScale});
-                    lineSeries.Points.Add(new OxyPlot.DataPoint(rowId, ((colId)*SensorResolution) + plotData[rowId, senId] * valueScale * 1.8));
+                    lineSeries.Points.Add(new OxyPlot.DataPoint(rowId, ((colId)*SensorResolution) - plotData[rowId, senId] * valueScale * 1.8));
                 }
                 // lineSeries.ItemsSource = points;
 
@@ -153,6 +153,8 @@ namespace SRHWiscMano.Core.ViewModels
                 Position = AxisPosition.Left,
                 MaximumPadding = 0,
                 MinimumPadding = 0,
+                StartPosition = 1,
+                EndPosition = 0,
                 Minimum = 0, // 초기 시작값
                 Maximum = ((ySize + 1) * SensorResolution), // 초기 최대값
                 AbsoluteMinimum = -0, // Panning 최소값
@@ -210,7 +212,7 @@ namespace SRHWiscMano.Core.ViewModels
 
             Data.UpdateTime(Data.Time);
 
-            plotData = Data.FrameSamples.ConvertToDoubleArray(true);
+            plotData = Data.FrameSamples.ConvertToDoubleArray();
             UpdateLineSeries(FramePlotModel, plotData, Data.MinSensorBound, Data.MaxSensorBound);
 
             framePlotModel.InvalidatePlot(true);
