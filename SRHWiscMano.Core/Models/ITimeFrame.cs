@@ -14,7 +14,7 @@ namespace SRHWiscMano.Core.Models
         double MinSensorBound { get; }
         double MaxSensorBound { get; }
 
-        IReadOnlyList<IRegion> Regions { get; }
+        List<IRegion> Regions { get; }
 
         public IReadOnlyList<TimeSample> FrameSamples { get; }
         public IReadOnlyList<TimeSample> IntpFrameSamples { get; }

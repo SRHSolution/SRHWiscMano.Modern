@@ -20,7 +20,7 @@ namespace SRHWiscMano.Core.Models
         public IReadOnlyList<TimeSample> OwnerSamples { get; set; }
         public IReadOnlyList<TimeSample> IntpSamples { get; private set; }
 
-        public IReadOnlyList<IRegion> Regions { get; private set; }
+        public List<IRegion> Regions { get; private set; } = new List<IRegion>();
 
         public IReadOnlyList<TimeSample> FrameSamples { get; private set; }
         public IReadOnlyList<TimeSample> IntpFrameSamples { get; private set; }

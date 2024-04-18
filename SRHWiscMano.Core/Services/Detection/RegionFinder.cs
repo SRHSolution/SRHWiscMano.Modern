@@ -80,22 +80,17 @@ namespace SRHWiscMano.Core.Services.Detection
 
         private static Region FindPreUES(ITimeFrame state, SamplePoint click)
         {
-            return null;
-
-            // return CreateRegionWithSensorsDownToUesLine(state, click, state.UesLowerBound.Value, RegionType.PreUES)
-            //     .SetTimeCenteredOnClickPoint(Duration.FromMilliseconds(500L)).AdjustToPointOfMaximumOnRightEdge()
-            //     .AdjustToPeakChangeRight(Duration.FromMilliseconds(500L))
-            //     .ExtendTimeLeft(Duration.FromMilliseconds(1000L));
+            return CreateRegionWithSensorsDownToUesLine(state, click, RegionType.PreUES)
+            .SetTimeCenteredOnClickPoint(Duration.FromMilliseconds(500L)).AdjustToPointOfMaximumOnRightEdge()
+            .AdjustToPeakChangeRight(Duration.FromMilliseconds(500L))
+            .ExtendTimeLeft(Duration.FromMilliseconds(1000L));
         }
 
         private static Region FindPostUES(ITimeFrame state, SamplePoint click)
         {
-            return null;
-            // if (!state.UesLowerBound.HasValue)
-            //     throw new RegionFinderException("UES lower bound must be set");
-            // return CreateRegionWithSensorsDownToUesLine(state, click, state.UesLowerBound.Value, RegionType.PostUES)
-            //     .SetTimeCenteredOnClickPoint(Duration.FromMilliseconds(1000L)).AdjustToPointOfMaximumOnLeftEdge()
-            //     .AdjustToPeakChangeLeft(Duration.FromMilliseconds(500L));
+            return CreateRegionWithSensorsDownToUesLine(state, click, RegionType.PostUES)
+            .SetTimeCenteredOnClickPoint(Duration.FromMilliseconds(1000L)).AdjustToPointOfMaximumOnLeftEdge()
+            .AdjustToPeakChangeLeft(Duration.FromMilliseconds(500L));
         }
 
         private static Region FindUES(ITimeFrame state, SamplePoint click)
@@ -224,8 +219,7 @@ namespace SRHWiscMano.Core.Services.Detection
             SamplePoint click,
             RegionType type)
         {
-            // return CreateRegionWithRelativeSensors(window, click, 0, uesLowerBound - click.Sensor, type);
-            return CreateRegionWithRelativeSensors(window, click, 0, click.Sensor, type);
+            return CreateRegionWithRelativeSensors(window, click, 0, (int)window.MaxSensorBound - click.Sensor, type);
         }
 
         private static Region CreateRegionWithSensors(
@@ -239,11 +233,11 @@ namespace SRHWiscMano.Core.Services.Detection
         }
 
         private static IRegion FindRegionOrThrow(
-            ITimeFrame snapshot,
+            ITimeFrame window,
             RegionType regionType,
             string exceptionMessage)
         {
-            return snapshot.Regions.FirstOrDefault(r => r.Type == regionType) ??
+            return window.Regions.FirstOrDefault(r => r.Type == regionType) ??
                    throw new RegionFinderException(exceptionMessage);
         }
 
