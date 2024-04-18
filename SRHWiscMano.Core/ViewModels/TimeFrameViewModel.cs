@@ -107,72 +107,6 @@ namespace SRHWiscMano.Core.ViewModels
             WeakReferenceMessenger.Default.Register<PaletteChangedMessageMessage>(this, OnPaletteChange);
         }
 
-        private void HandleRegionList(IChangeSet<IRegion> changeSet)
-        {
-            foreach (var change in changeSet)
-            {
-                switch (change.Reason)
-                {
-                    case ListChangeReason.Add:
-                    {
-                        var region = change.Item.Current;
-                        DrawRegionAnnotation(region);
-
-                        RegionSelectSteps.First(stp => stp.Type == region.Type).IsCompleted = true;
-                        break;
-                    }
-                    case ListChangeReason.Remove:
-                    {
-                        var region = change.Item.Current;
-                        var itemToRemove =
-                            FramePlotModel.Annotations.First(ann => string.Equals(ann.Tag, region.Type));
-                        FramePlotModel.Annotations.Remove(itemToRemove);
-                        FramePlotModel.InvalidatePlot(false);
-
-                        RegionSelectSteps.First(stp => stp.Type == region.Type).IsCompleted = false;
-                        break;
-                    }
-
-                    case ListChangeReason.Clear:
-                    {
-                        FramePlotModel.Annotations.Clear();
-                        FramePlotModel.InvalidatePlot(false);
-                        RegionSelectSteps.ForEach(stp =>stp.IsCompleted = false);
-                        break;
-                    }
-                }
-            }
-        }
-
-        private void DrawRegionAnnotation(IRegion region)
-        {
-            var rangeXStart = region.TimeRange.Start.Minus(Data.TimeRange().Start)
-                .TotalMilliseconds / 10;
-            var rangeXEnd = region.TimeRange.End.Minus(Data.TimeRange().Start)
-                                .TotalMilliseconds /
-                            10;
-
-            var rangeYTop = region.SensorRange.Greater * Data.ExamData.InterpolationScale;
-
-            var rangeYBottom = region.SensorRange.Lesser * Data.ExamData.InterpolationScale;
-            var regColor = RegionSelectStep.GetStandardSteps(null).Where(stp => stp.Type == region.Type)
-                .Select(stp => stp.Color).FirstOrDefault(Colors.Black);
-
-            var rectangleAnnotation = new RectangleAnnotation
-            {
-                MinimumX = rangeXStart,
-                MaximumX = rangeXEnd,
-                MinimumY = rangeYTop,
-                MaximumY = rangeYBottom,
-                Fill = OxyColors.Transparent,
-                Stroke = OxyColor.FromArgb(regColor.A, regColor.R, regColor.G, regColor.B),
-                StrokeThickness = 2,
-                Tag = region.Type.ToString(),
-            };
-            FramePlotModel.Annotations.Add(rectangleAnnotation);
-            FramePlotModel.InvalidatePlot(false);
-        }
-
         /// <summary>
         /// Heatmap을 위한 Axes를 등록한다
         /// </summary>
@@ -229,6 +163,80 @@ namespace SRHWiscMano.Core.ViewModels
                 IsAxisVisible = false,
                 Tag = "X"
             });
+        }
+
+        /// <summary>
+        /// Region List 추가 삭제에 대한 Annotation 처리를 수행한다.
+        /// </summary>
+        /// <param name="changeSet"></param>
+        private void HandleRegionList(IChangeSet<IRegion> changeSet)
+        {
+            foreach (var change in changeSet)
+            {
+                switch (change.Reason)
+                {
+                    case ListChangeReason.Add:
+                    {
+                        var region = change.Item.Current;
+                        DrawRegionAnnotation(region);
+
+                        RegionSelectSteps.First(stp => stp.Type == region.Type).IsCompleted = true;
+                        break;
+                    }
+                    case ListChangeReason.Remove:
+                    {
+                        var region = change.Item.Current;
+                        var itemToRemove =
+                            FramePlotModel.Annotations.First(ann => string.Equals(ann.Tag, region.Type));
+                        FramePlotModel.Annotations.Remove(itemToRemove);
+                        FramePlotModel.InvalidatePlot(false);
+
+                        RegionSelectSteps.First(stp => stp.Type == region.Type).IsCompleted = false;
+                        break;
+                    }
+
+                    case ListChangeReason.Clear:
+                    {
+                        FramePlotModel.Annotations.Clear();
+                        FramePlotModel.InvalidatePlot(false);
+                        RegionSelectSteps.ForEach(stp =>stp.IsCompleted = false);
+                        break;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// 입력받은 region 정보에 따라 Rect Annotation를 그린다.
+        /// </summary>
+        /// <param name="region"></param>
+        private void DrawRegionAnnotation(IRegion region)
+        {
+            var rangeXStart = region.TimeRange.Start.Minus(Data.TimeRange().Start)
+                .TotalMilliseconds / 10;
+            var rangeXEnd = region.TimeRange.End.Minus(Data.TimeRange().Start)
+                                .TotalMilliseconds /
+                            10;
+
+            var rangeYTop = region.SensorRange.Greater * Data.ExamData.InterpolationScale;
+
+            var rangeYBottom = region.SensorRange.Lesser * Data.ExamData.InterpolationScale;
+            var regColor = RegionSelectStep.GetStandardSteps(null).Where(stp => stp.Type == region.Type)
+                .Select(stp => stp.Color).FirstOrDefault(Colors.Black);
+
+            var rectangleAnnotation = new RectangleAnnotation
+            {
+                MinimumX = rangeXStart,
+                MaximumX = rangeXEnd,
+                MinimumY = rangeYTop,
+                MaximumY = rangeYBottom,
+                Fill = OxyColors.Transparent,
+                Stroke = OxyColor.FromArgb(regColor.A, regColor.R, regColor.G, regColor.B),
+                StrokeThickness = 2,
+                Tag = region.Type.ToString(),
+            };
+            FramePlotModel.Annotations.Add(rectangleAnnotation);
+            FramePlotModel.InvalidatePlot(false);
         }
 
         /// <summary>
