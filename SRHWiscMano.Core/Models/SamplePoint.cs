@@ -6,9 +6,9 @@ namespace SRHWiscMano.Core.Models
     /// <summary>
     /// TimeSample 에서 특정 센서의 값
     /// </summary>
-    public class DataPoint
+    public class SamplePoint
     {
-        public DataPoint(Instant time, int sensor)
+        public SamplePoint(Instant time, int sensor)
         {
             Time = time;
             Sensor = sensor;
@@ -18,11 +18,11 @@ namespace SRHWiscMano.Core.Models
 
         public int Sensor { get; }
 
-        public static DataPoint TryLoad(long? time, int? sensor)
+        public static SamplePoint TryLoad(long? time, int? sensor)
         {
             return !time.HasValue || !sensor.HasValue
                 ? null
-                : new DataPoint(InstantUtils.InstantFromMilliseconds(time.Value), sensor.Value);
+                : new SamplePoint(InstantUtils.InstantFromMilliseconds(time.Value), sensor.Value);
         }
     }
 }

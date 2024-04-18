@@ -32,7 +32,19 @@
         </Grid.RowDefinitions>
         <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
 
-            <!-- Zoom Out Button -->
+
+            <Button Width="32"
+                    Height="32 "
+                    Margin="2"
+                    Foreground="{DynamicResource MahApps.Brushes.Accent}"
+                    Style="{StaticResource MahApps.Styles.Button.Circle}" ToolTip="Select all notes"
+                    Command="{Binding SelectAllCommand}">
+                <Button.ContentTemplate>
+                    <DataTemplate>
+                        <iconPacks:PackIconMaterial Kind="CheckboxOutline" />
+                    </DataTemplate>
+                </Button.ContentTemplate>
+            </Button>
             <Button Width="32"
                     Height="32 "
                     Margin="2"
@@ -46,18 +58,7 @@
                     </DataTemplate>
                 </Button.ContentTemplate>
             </Button>
-            <Button Width="32"
-                    Height="32 "
-                    Margin="2"
-                    Foreground="{DynamicResource MahApps.Brushes.Accent}"
-                    Style="{StaticResource MahApps.Styles.Button.Circle}" ToolTip="Select all notes"
-                    Command="{Binding SelectAllCommand}">
-                <Button.ContentTemplate>
-                    <DataTemplate>
-                        <iconPacks:PackIconMaterial Kind="CheckboxOutline" />
-                    </DataTemplate>
-                </Button.ContentTemplate>
-            </Button>
+            
             <Button Width="32"
                     Height="32 "
                     Margin="2"

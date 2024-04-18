@@ -69,8 +69,6 @@ var appconfig = new ConfigurationBuilder()
     .Build();
 
 
-
-
 LogManager.Shutdown();
 
 

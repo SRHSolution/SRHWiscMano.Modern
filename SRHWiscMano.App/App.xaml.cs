@@ -39,10 +39,13 @@ namespace SRHWiscMano.App
             SRHWiscMano.Core.ServiceRegistration.ConfigureServices(services);
             SRHWiscMano.App.ServiceRegistration.ConfigureServices(services);
 
+            // SRHWiscMano.App Assembly 에 포함된 Singleton attribute를 갖는 모든 클래스를 검색하여 등록한다.
             services.AddSingletonTypes("SRHWiscMano.App");
 
+            // Service Provider 를 build 한다.
             serviceProvider = services.BuildServiceProvider();
 
+            // Service Provider를 Ioc 에 등록한다.
             Ioc.Default.ConfigureServices(serviceProvider);
 
             // Logging 메시지를 back단에서 계속 받기 위해서 Instance를 미리 생성함

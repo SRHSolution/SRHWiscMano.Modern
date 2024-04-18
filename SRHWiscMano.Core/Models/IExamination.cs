@@ -6,13 +6,14 @@ namespace SRHWiscMano.Core.Models
     public interface IExamination
     {
         IReadOnlyList<TimeSample> Samples { get; }
+        IReadOnlyList<TimeSample> InterpolatedSamples { get; }
 
         IReadOnlyList<FrameNote> Notes { get; }
 
         int InterpolationScale { get; }
+        string Title { get; }
+        string Id { get; }
 
-        double[,] PlotData { get; }
-
-        Task UpdatePlotData(int interpolateScale);
+        void UpdateInterpolation(int interpolateScale);
     }
 }

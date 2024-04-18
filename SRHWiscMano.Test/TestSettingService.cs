@@ -14,6 +14,12 @@ namespace SRHWiscMano.Test
             Console.WriteLine($"{this.GetType().Namespace}");
         }
 
+        [TearDown]
+        public void OneTimeTearDown()
+        {
+            provider.Dispose();
+        }
+
 
         [Test]
         public void TestInjection()

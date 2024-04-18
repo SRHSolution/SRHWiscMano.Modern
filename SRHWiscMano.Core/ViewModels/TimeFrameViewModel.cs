@@ -11,6 +11,7 @@ using OxyPlot.Series;
 using SRHWiscMano.Core.Data;
 using SRHWiscMano.Core.Helpers;
 using SRHWiscMano.Core.Models;
+using Range = SRHWiscMano.Core.Helpers.Range;
 
 namespace SRHWiscMano.Core.ViewModels
 {
@@ -32,6 +33,8 @@ namespace SRHWiscMano.Core.ViewModels
 
         public int Id { get; }
 
+        private double[,] plotData;
+
         /// <summary>
         /// TimeFrame의 메인 Label
         /// </summary>
@@ -50,11 +53,9 @@ namespace SRHWiscMano.Core.ViewModels
         [ObservableProperty] private bool isSelected;
 
         [ObservableProperty] private bool isEditing = false;
-        
 
         public Instant Time { get; private set; }
-
-
+        
         public TimeFrameViewModel(ITimeFrame data)
         {
             this.Data = data;
@@ -71,14 +72,19 @@ namespace SRHWiscMano.Core.ViewModels
             }
 
             var plotModel = new PlotModel();
-            PlotDataUtils.AddHeatmapSeries(plotModel, data.PlotData);
-            AddAxes(plotModel, data.PlotData.GetLength(0), data.PlotData.GetLength(1));
+            plotData = Data.IntpFrameSamples.ConvertToDoubleArray();
+            PlotDataUtils.AddHeatmapSeries(plotModel, plotData);
+            AddAxes(plotModel, plotData.GetLength(0), plotData.GetLength(1));
             FramePlotModel = plotModel;
 
             WeakReferenceMessenger.Default.Register<PaletteChangedMessageMessage>(this, OnPaletteChange);
         }
 
-
+        /// <summary>
+        /// PlotModel을 그리기 위한 Palette가 변경된 이벤트를 처리한다
+        /// </summary>
+        /// <param name="recipient"></param>
+        /// <param name="arg"></param>
         private void OnPaletteChange(object recipient, PaletteChangedMessageMessage arg)
         {
             SelectedPalette = arg.Value.palette;
@@ -118,8 +124,10 @@ namespace SRHWiscMano.Core.ViewModels
                 Position = AxisPosition.Left,
                 MaximumPadding = 0,
                 MinimumPadding = 0,
+                StartPosition = 1,
+                EndPosition = 0,
                 Minimum = 0, // 초기 시작값
-                Maximum = ySize - 1, // 초기 최대값
+                Maximum = ySize -1, // 초기 최대값
                 AbsoluteMinimum = 0, // Panning 최소값
                 AbsoluteMaximum = ySize - 1, // Panning 최대값
                 IsAxisVisible = false,
@@ -130,11 +138,11 @@ namespace SRHWiscMano.Core.ViewModels
             model.Axes.Add(new LinearAxis()
             {
                 // IsZoomEnabled = false,
-                LabelFormatter = value => $"{(value / 1000).ToString()}",
+                LabelFormatter = value => $"{(value / 100).ToString()}",
                 Position = AxisPosition.Bottom,
                 MinimumPadding = 0,
                 Minimum = 0,
-                Maximum = xSize - 1,
+                Maximum = xSize -1,
                 MajorStep = xSize,
                 MinorStep = xSize, // 최대 범위를 입력하여 MinorStep 이 표시되지 않도록 한다
                 AbsoluteMinimum = 0,
@@ -169,17 +177,21 @@ namespace SRHWiscMano.Core.ViewModels
 
         public void RefreshPlotData()
         {
-            // 이전과 동일하면 skip
-            if (Time.Equals(Data.Time))
-                return;
-
             var heatmap = framePlotModel.Series.OfType<HeatMapSeries>().FirstOrDefault();
-            heatmap.Data = Data.PlotData;
+            var yAxis = framePlotModel.Axes.First(ax => ax.Tag == "Y");
+            var intpScale = (Data.IntpFrameSamples[0].DataSize - 1) / (Data.FrameSamples[0].DataSize - 1);
+            // Sensor Bounds 영역만을 표시하도록 한다
+            yAxis.Minimum = Data.MinSensorBound * intpScale;
+            yAxis.Maximum = Data.MaxSensorBound * intpScale + 1;
+
+            var samples = Data.IntpFrameSamples.ConvertToDoubleArray();
+            var data  =Data.IntpFrameSamples.SamplesForSensorRange(Range.Create((int)yAxis.Minimum, (int)yAxis.Maximum));
+            heatmap.Data = samples;//data.ConvertToDoubleArray();
             heatmap.X0 = 0;
-            heatmap.X1 = Data.PlotData.GetLength(0) - 1;
+            heatmap.X1 = Data.IntpFrameSamples.Count-1 ;
             heatmap.Y0 = 0;
-            heatmap.Y1 = Data.PlotData.GetLength(1) - 1;
-            framePlotModel.InvalidatePlot(true);
+            heatmap.Y1 = Data.IntpFrameSamples[0].DataSize -1;
+            framePlotModel.InvalidatePlot(false);
 
             this.Time = Data.Time;
         }

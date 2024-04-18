@@ -9,8 +9,9 @@
              xmlns:oxy="http://oxyplot.org/wpf"
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:behaviors="clr-namespace:SRHWiscMano.App.Behaviors"
              mc:Ignorable="d"
-             d:DesignHeight="550" d:DesignWidth="800" Background="AntiqueWhite"
+             d:DesignHeight="550" d:DesignWidth="800" 
              d:DataContext="{d:DesignInstance viewModels:AnalyzerViewModel, IsDesignTimeCreatable=True}">
     <Grid>
         <Grid.RowDefinitions>
@@ -70,6 +71,9 @@
                                            CommandParameter="{Binding SelectedItem, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ListBox}}}" />
                 </b:EventTrigger>
             </b:Interaction.Triggers>
+            <b:Interaction.Behaviors>
+                <behaviors:ScrollIntoViewBehavior/>
+            </b:Interaction.Behaviors>
         </ListBox>
         <Border Grid.Row="1">
             <TextBlock HorizontalAlignment="Stretch" VerticalAlignment="Center" Foreground="Red"

@@ -18,12 +18,12 @@ namespace SRHWiscMano.App
     {
         public static void ConfigureServices(IServiceCollection services)
         {
-            services.AddSingleton<SharedService>();                         // For Shared Data
+            services.AddSingleton<SharedService>();                         // For Shared ExamData
             services.AddSingleton<MainWindowViewModel>();                   // For MainWindow
             services.AddSingleton<IViewerViewModel, ViewerViewModel>();     // For ViewerView
             services.AddSingleton<IExplorerViewModel, ExplorerViewModel>(); // For ExplorerView
-            services.AddSingleton<IAnalyzerViewModel, AnalyzerViewModel>(); // For AnalyzerView
             services.AddSingleton<IReportViewModel, ReportViewModel>(); // For AnalyzerView
+            services.AddSingleton<IAnalyzerViewModel, AnalyzerViewModel>(); // For AnalyzerView
             services.AddSingleton<ISettingViewModel, SettingViewModel>();   // For SettingView
             
             // services.AddTransient<ColorRangeSliderViewModel>();
@@ -39,6 +39,7 @@ namespace SRHWiscMano.App
             config.GetSection("AppSettings")["FilePath"] = configPath;
 
             // requires Microsoft.Extensions.ConfigurationExtensions, IOptions<AppSettings> 를 등록한다.
+            // config에 지정된 파일 configuration.json 파일에서 각각의 Section의 정의를 지정된 클래스와 mapping하여 등록한다
             services.Configure<AppSettings>(config.GetSection("AppSettings"));    
             services.Configure<ConfigAlgorithms>(config.GetSection("ConfigAlgorithms"));    
 

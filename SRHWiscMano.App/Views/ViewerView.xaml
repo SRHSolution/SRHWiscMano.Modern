@@ -328,7 +328,7 @@
                              IsSnapToTickEnabled=" True"
                              LowerValue="{Binding MinSensorBound}"
                              UpperValue="{Binding MaxSensorBound}"
-                             Maximum="{Binding ExamSensorSize}"
+                             Maximum="{Binding ExamSensorMaxIndex}"
                              Minimum="0" MinRangeWidth="0" 
                              Orientation="Vertical"
                              SmallChange="0.1" Height="{Binding SensorBoundHeight}">
