@@ -4,6 +4,7 @@ using SRHWiscMano.Core.Helpers;
 using SRHWiscMano.Core.Models;
 using System.Windows.Markup;
 using Accessibility;
+using DynamicData;
 using NLog;
 using Range = SRHWiscMano.Core.Helpers.Range;
 using Microsoft.Extensions.Logging;
@@ -237,7 +238,7 @@ namespace SRHWiscMano.Core.Services.Detection
             RegionType regionType,
             string exceptionMessage)
         {
-            return window.Regions.FirstOrDefault(r => r.Type == regionType) ??
+            return window.Regions.Items.FirstOrDefault(r => r.Type == regionType) ??
                    throw new RegionFinderException(exceptionMessage);
         }
 

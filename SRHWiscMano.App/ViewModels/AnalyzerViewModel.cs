@@ -100,7 +100,7 @@ namespace SRHWiscMano.App.ViewModels
 
             timeFrames = sharedService.TimeFrames;
             timeFrames.Connect().Subscribe(HandleBindingTimeFrames);
-
+            
             WeakReferenceMessenger.Default.Register<SensorBoundsChangedMessage>(this, SensorBoundsChanged);
         }
 
@@ -124,7 +124,7 @@ namespace SRHWiscMano.App.ViewModels
                         viewmodel.FramePlotController.UnbindAll();
 
                         TimeFrameViewModels.Insert(insertIdx, viewmodel);
-
+                        
                         // TimeFrameViewModels에서 Label property 가 변경될 경우 이에 대한 Update 이벤트를 발생하도록 한다.
                         Observable.FromEvent<PropertyChangedEventHandler, PropertyChangedEventArgs>(
                                 handler => (sender, e) => handler(e),
@@ -194,6 +194,7 @@ namespace SRHWiscMano.App.ViewModels
                 CurrentTimeFrameVM = (selectedItem as TimeFrameViewModel);
                 CurrentTimeFrameHeatmapVM = new TimeFrameViewModel(CurrentTimeFrameVM.Data);
                 MainPlotModel = CurrentTimeFrameHeatmapVM.FramePlotModel;
+
                 
                 var heatmap = MainPlotModel.Series.OfType<HeatMapSeries>().FirstOrDefault();
                 heatmap.TrackerFormatString = "{6:0.00}";
@@ -353,13 +354,12 @@ namespace SRHWiscMano.App.ViewModels
 
                 if (region != null)
                 {
-                    step.IsCompleted = true;
                     CurrentTimeFrameVM.Data.Regions.Add(region);
                 }
 
                 logger.LogTrace(region.ToString());
 
-                DrawRegionBox(view, region);
+                // DrawRegionBox(view, region);
             }
             catch (Exception ex)
             {
@@ -467,7 +467,7 @@ namespace SRHWiscMano.App.ViewModels
         [RelayCommand]
         private void ResetInspect()
         {
-            logger.LogTrace("Clicked");
+            CurrentTimeFrameVM.Data.Regions.Clear();
         }
 
         /// <summary>

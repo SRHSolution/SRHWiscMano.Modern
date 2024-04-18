@@ -1,12 +1,19 @@
-﻿using System.Net.Mime;
+﻿using System.ComponentModel;
+using System.Net.Mime;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Runtime.CompilerServices;
+using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using DynamicData;
+using MoreLinq;
 using NLog;
 using NodaTime;
 using NodaTime.Serialization.SystemTextJson;
 using OxyPlot;
+using OxyPlot.Annotations;
 using OxyPlot.Axes;
 using OxyPlot.Series;
 using SRHWiscMano.Core.Data;
@@ -25,6 +32,7 @@ namespace SRHWiscMano.Core.ViewModels
         public int Id { get; }
 
         public ITimeFrame Data { get; }
+
         /// <summary>
         /// TimeFrame의 중심위치 시간
         /// </summary>
@@ -86,10 +94,83 @@ namespace SRHWiscMano.Core.ViewModels
             AddAxes(plotModel, plotData.GetLength(0), plotData.GetLength(1));
             FramePlotModel = plotModel;
 
+            // SourceList의 Connect를 등록하기 전에 이미 있던 Items 에 대해서는 별도로 Draw를 수행한다.
+            foreach (var oldRegion in Data.Regions.Items)
+            {
+                DrawRegionAnnotation(oldRegion);
+            }
+
+            Data.Regions.Connect().Subscribe(HandleRegionList);
             regionSelectSteps = RegionSelectStep.GetStandardSteps(this).ToList();
 
             // Heatmap의 색상 Pallete가 변경시 업데이트를 위한 handler를 등록한다
             WeakReferenceMessenger.Default.Register<PaletteChangedMessageMessage>(this, OnPaletteChange);
+        }
+
+        private void HandleRegionList(IChangeSet<IRegion> changeSet)
+        {
+            foreach (var change in changeSet)
+            {
+                switch (change.Reason)
+                {
+                    case ListChangeReason.Add:
+                    {
+                        var region = change.Item.Current;
+                        DrawRegionAnnotation(region);
+
+                        RegionSelectSteps.First(stp => stp.Type == region.Type).IsCompleted = true;
+                        break;
+                    }
+                    case ListChangeReason.Remove:
+                    {
+                        var region = change.Item.Current;
+                        var itemToRemove =
+                            FramePlotModel.Annotations.First(ann => string.Equals(ann.Tag, region.Type));
+                        FramePlotModel.Annotations.Remove(itemToRemove);
+                        FramePlotModel.InvalidatePlot(false);
+
+                        RegionSelectSteps.First(stp => stp.Type == region.Type).IsCompleted = false;
+                        break;
+                    }
+
+                    case ListChangeReason.Clear:
+                    {
+                        FramePlotModel.Annotations.Clear();
+                        FramePlotModel.InvalidatePlot(false);
+                        RegionSelectSteps.ForEach(stp =>stp.IsCompleted = false);
+                        break;
+                    }
+                }
+            }
+        }
+
+        private void DrawRegionAnnotation(IRegion region)
+        {
+            var rangeXStart = region.TimeRange.Start.Minus(Data.TimeRange().Start)
+                .TotalMilliseconds / 10;
+            var rangeXEnd = region.TimeRange.End.Minus(Data.TimeRange().Start)
+                                .TotalMilliseconds /
+                            10;
+
+            var rangeYTop = region.SensorRange.Greater * Data.ExamData.InterpolationScale;
+
+            var rangeYBottom = region.SensorRange.Lesser * Data.ExamData.InterpolationScale;
+            var regColor = RegionSelectStep.GetStandardSteps(null).Where(stp => stp.Type == region.Type)
+                .Select(stp => stp.Color).FirstOrDefault(Colors.Black);
+
+            var rectangleAnnotation = new RectangleAnnotation
+            {
+                MinimumX = rangeXStart,
+                MaximumX = rangeXEnd,
+                MinimumY = rangeYTop,
+                MaximumY = rangeYBottom,
+                Fill = OxyColors.Transparent,
+                Stroke = OxyColor.FromArgb(regColor.A, regColor.R, regColor.G, regColor.B),
+                StrokeThickness = 2,
+                Tag = region.Type.ToString(),
+            };
+            FramePlotModel.Annotations.Add(rectangleAnnotation);
+            FramePlotModel.InvalidatePlot(false);
         }
 
         /// <summary>
@@ -125,7 +206,7 @@ namespace SRHWiscMano.Core.ViewModels
                 StartPosition = 1,
                 EndPosition = 0,
                 Minimum = 0, // 초기 시작값
-                Maximum = ySize -1, // 초기 최대값
+                Maximum = ySize - 1, // 초기 최대값
                 AbsoluteMinimum = 0, // Panning 최소값
                 AbsoluteMaximum = ySize - 1, // Panning 최대값
                 IsAxisVisible = false,
@@ -140,7 +221,7 @@ namespace SRHWiscMano.Core.ViewModels
                 Position = AxisPosition.Bottom,
                 MinimumPadding = 0,
                 Minimum = 0,
-                Maximum = xSize -1,
+                Maximum = xSize - 1,
                 MajorStep = xSize,
                 MinorStep = xSize, // 최대 범위를 입력하여 MinorStep 이 표시되지 않도록 한다
                 AbsoluteMinimum = 0,
@@ -188,19 +269,19 @@ namespace SRHWiscMano.Core.ViewModels
         {
             var heatmap = framePlotModel.Series.OfType<HeatMapSeries>().FirstOrDefault();
             var yAxis = framePlotModel.Axes.First(ax => ax.Tag == "Y");
-            
+
             // 데이터의 interpolation scale값을 찾는다
             var intpScale = (Data.IntpFrameSamples[0].DataSize - 1) / (Data.FrameSamples[0].DataSize - 1);
-            
+
             // Sensor Bounds 영역만을 표시하도록 한다
             yAxis.Minimum = Data.MinSensorBound * intpScale;
             yAxis.Maximum = Data.MaxSensorBound * intpScale + 1;
 
             heatmap.Data = Data.IntpFrameSamples.ConvertToDoubleArray();
             heatmap.X0 = 0;
-            heatmap.X1 = Data.IntpFrameSamples.Count-1 ;
+            heatmap.X1 = Data.IntpFrameSamples.Count - 1;
             heatmap.Y0 = 0;
-            heatmap.Y1 = Data.IntpFrameSamples[0].DataSize -1;
+            heatmap.Y1 = Data.IntpFrameSamples[0].DataSize - 1;
 
             framePlotModel.InvalidatePlot(false);
 

@@ -1,4 +1,5 @@
-﻿using NodaTime;
+﻿using DynamicData;
+using NodaTime;
 using SRHWiscMano.Core.Helpers;
 
 namespace SRHWiscMano.Core.Models
@@ -13,8 +14,7 @@ namespace SRHWiscMano.Core.Models
 
         double MinSensorBound { get; }
         double MaxSensorBound { get; }
-
-        List<IRegion> Regions { get; }
+        ISourceList<IRegion> Regions { get; }
 
         public IReadOnlyList<TimeSample> FrameSamples { get; }
         public IReadOnlyList<TimeSample> IntpFrameSamples { get; }
