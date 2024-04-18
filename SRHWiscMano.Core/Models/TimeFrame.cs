@@ -2,6 +2,7 @@
 using SRHWiscMano.Core.Helpers;
 using System;
 using CommunityToolkit.Mvvm.ComponentModel;
+using DynamicData;
 using SRHWiscMano.Core.ViewModels;
 
 namespace SRHWiscMano.Core.Models
@@ -20,8 +21,8 @@ namespace SRHWiscMano.Core.Models
         public IReadOnlyList<TimeSample> OwnerSamples { get; set; }
         public IReadOnlyList<TimeSample> IntpSamples { get; private set; }
 
-        public IReadOnlyList<IRegion> Regions { get; private set; }
-
+        public ISourceList<IRegion> Regions { get; private set; } = new SourceList<IRegion>();
+        
         public IReadOnlyList<TimeSample> FrameSamples { get; private set; }
         public IReadOnlyList<TimeSample> IntpFrameSamples { get; private set; }
 

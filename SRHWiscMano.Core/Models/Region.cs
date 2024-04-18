@@ -1,5 +1,7 @@
 ﻿using NodaTime;
+using SkiaSharp;
 using SRHWiscMano.Core.Helpers;
+using System.Text;
 
 namespace SRHWiscMano.Core.Models
 {
@@ -42,5 +44,20 @@ namespace SRHWiscMano.Core.Models
         public SamplePoint ClickPoint { get; set; }
 
         public SamplePoint FocalPoint { get; set; }
+
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine("Region : " + Type);
+            sb.AppendLine($"Sensor Range : {SensorRange.Start}-{SensorRange.End}");
+            sb.AppendLine(
+            $"Time Interval : {TimeRange.Start.ToUnixTimeMilliseconds()}-{TimeRange.End.ToUnixTimeMilliseconds()}");
+            sb.AppendLine(
+            $"Click Point : {ClickPoint.Sensor}, {ClickPoint.Time.ToUnixTimeMilliseconds()}");
+            sb.AppendLine(
+            $"Focal Point : {FocalPoint?.Sensor}, {FocalPoint?.Time.ToUnixTimeMilliseconds()}");
+
+            return sb.ToString();
+        }
     }
 }

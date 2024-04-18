@@ -9,6 +9,7 @@ using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Markup;
+using System.Windows.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
@@ -99,7 +100,7 @@ namespace SRHWiscMano.App.ViewModels
 
             timeFrames = sharedService.TimeFrames;
             timeFrames.Connect().Subscribe(HandleBindingTimeFrames);
-
+            
             WeakReferenceMessenger.Default.Register<SensorBoundsChangedMessage>(this, SensorBoundsChanged);
         }
 
@@ -123,7 +124,7 @@ namespace SRHWiscMano.App.ViewModels
                         viewmodel.FramePlotController.UnbindAll();
 
                         TimeFrameViewModels.Insert(insertIdx, viewmodel);
-
+                        
                         // TimeFrameViewModels에서 Label property 가 변경될 경우 이에 대한 Update 이벤트를 발생하도록 한다.
                         Observable.FromEvent<PropertyChangedEventHandler, PropertyChangedEventArgs>(
                                 handler => (sender, e) => handler(e),
@@ -193,6 +194,7 @@ namespace SRHWiscMano.App.ViewModels
                 CurrentTimeFrameVM = (selectedItem as TimeFrameViewModel);
                 CurrentTimeFrameHeatmapVM = new TimeFrameViewModel(CurrentTimeFrameVM.Data);
                 MainPlotModel = CurrentTimeFrameHeatmapVM.FramePlotModel;
+
                 
                 var heatmap = MainPlotModel.Series.OfType<HeatMapSeries>().FirstOrDefault();
                 heatmap.TrackerFormatString = "{6:0.00}";
@@ -324,65 +326,71 @@ namespace SRHWiscMano.App.ViewModels
             logger.LogTrace($"Frame pos {CurrentTimeFrameHeatmapVM.Time.ToUnixTimeMilliseconds()} {CurrentTimeFrameHeatmapVM.Data.TimeRange().Start.ToUnixTimeMilliseconds():F2}, {CurrentTimeFrameHeatmapVM.Data.TimeRange().End.ToUnixTimeMilliseconds():F2}");
             logger.LogTrace($"Pick Sample : {(double)posTime.ToUnixTimeMilliseconds()/1000} msec, {posSensor}");
 
+            SamplePoint pickPoint = new SamplePoint(posTime, (int)posSensor);
+            FindRegions(view, pickPoint);
+        }
+
+
+        private void FindRegions(IPlotView view, SamplePoint clickPoint)
+        {
+            RegionSelectStep step = CurrentTimeFrameVM.RegionSelectSteps.FirstOrDefault(s => !s.IsCompleted);
+            
+            if (step == null && CurrentTimeFrameVM.AllStepsAreCompleted)
+                return;
             try
             {
+                var region = regionFinder.Find(step.Type, CurrentTimeFrameHeatmapVM.Data, clickPoint, RegionFinderConfig.Default,
+                    Diagnostics);
 
-
-                SamplePoint pickPoint = new SamplePoint(posTime, (int)posSensor);
-                var region = regionFinder.Find(RegionType.VP, CurrentTimeFrameHeatmapVM.Data, pickPoint,
-                    RegionFinderConfig.Default, Diagnostics);
                 if (region.SensorRange.Greater > CurrentTimeFrameHeatmapVM.Data.SensorRange().Greater)
-                    throw new RegionFinderException("Region selection is too low.");
+                    throw new RegionFinderException("Selected TopSensor is too low.");
                 if (region.SensorRange.Lesser < CurrentTimeFrameHeatmapVM.Data.SensorRange().Lesser + 1)
-                    throw new RegionFinderException("Region selection is too high.");
+                    throw new RegionFinderException("Selected BottomSensor is too high.");
                 if (!region.SensorRange.IsForward)
                 {
-                    // Logger.Error(() => string.Format("Sensor range backwards {0} -> {1}", region.SensorRange.Start,
-                    //     region.SensorRange.End));
-                    // throw new RegionFinderException("Error calculating region.");
+                    logger.LogError($"Sensor range backwards {region.SensorRange.Start} -> {region.SensorRange.End}");
+                    throw new RegionFinderException("Error calculating region.");
                 }
 
-                // Logger.Trace(() => string.Format("Bounds {0}, {1}", region.SensorRange.Start, region.SensorRange.End));
-                // AddRegionToSnapshot(step, snapshot, region);
-                // StatusMessage = null;
-                // return true;
-
-                StringBuilder sb = new StringBuilder();
-                sb.AppendLine("Region : " + region.Type);
-                sb.AppendLine($"Sensor Range : {region.SensorRange.Start}-{region.SensorRange.End}");
-                sb.AppendLine(
-                    $"Time Interval : {region.TimeRange.Start.ToUnixTimeMilliseconds()}-{region.TimeRange.End.ToUnixTimeMilliseconds()}");
-                sb.AppendLine(
-                    $"Click Point : {region.ClickPoint.Sensor}, {region.ClickPoint.Time.ToUnixTimeMilliseconds()}");
-                sb.AppendLine(
-                    $"Focal Point : {region.FocalPoint.Sensor}, {region.FocalPoint.Time.ToUnixTimeMilliseconds()}");
-
-                logger.LogTrace(sb.ToString());
-
-                var rangeXStart = region.TimeRange.Start.Minus(CurrentTimeFrameHeatmapVM.Data.TimeRange().Start).TotalMilliseconds / 10;
-                var rangeXEnd = region.TimeRange.End.Minus(CurrentTimeFrameHeatmapVM.Data.TimeRange().Start).TotalMilliseconds / 10;
-
-                var rangeYTop = region.SensorRange.Greater* CurrentTimeFrameHeatmapVM.Data.ExamData.InterpolationScale;
-
-                var rangeYBottom = region.SensorRange.Lesser * CurrentTimeFrameHeatmapVM.Data.ExamData.InterpolationScale;
-                var rectangleAnnotation = new RectangleAnnotation
+                if (region != null)
                 {
-                    MinimumX = rangeXStart,
-                    MaximumX = rangeXEnd,
-                    MinimumY = rangeYTop,
-                    MaximumY = rangeYBottom,
-                    Fill = OxyColors.Transparent,//OxyColor.FromAColor(120, ), // 투명도 120, 색상 SkyBlue
-                    Stroke = OxyColors.Black,
-                    StrokeThickness = 2 // 테두리 없음
-                };
-                //
-                view.ActualModel.Annotations.Add(rectangleAnnotation);
-                view.ActualModel.InvalidatePlot(false);
+                    CurrentTimeFrameVM.Data.Regions.Add(region);
+                }
+
+                logger.LogTrace(region.ToString());
+
+                // DrawRegionBox(view, region);
             }
             catch (Exception ex)
             {
                 logger.LogError(ex.Message);
             }
+        }
+
+        private void DrawRegionBox(IPlotView view, Region region)
+        {
+            var rangeXStart = region.TimeRange.Start.Minus(CurrentTimeFrameHeatmapVM.Data.TimeRange().Start)
+                .TotalMilliseconds / 10;
+            var rangeXEnd = region.TimeRange.End.Minus(CurrentTimeFrameHeatmapVM.Data.TimeRange().Start).TotalMilliseconds /
+                            10;
+
+            var rangeYTop = region.SensorRange.Greater * CurrentTimeFrameHeatmapVM.Data.ExamData.InterpolationScale;
+
+            var rangeYBottom = region.SensorRange.Lesser * CurrentTimeFrameHeatmapVM.Data.ExamData.InterpolationScale;
+            var regColor = RegionSelectStep.GetStandardSteps(null).Where(stp => stp.Type == region.Type).Select(stp => stp.Color).FirstOrDefault(Colors.Black);
+
+            var rectangleAnnotation = new RectangleAnnotation
+            {
+                MinimumX = rangeXStart,
+                MaximumX = rangeXEnd,
+                MinimumY = rangeYTop,
+                MaximumY = rangeYBottom,
+                Fill = OxyColors.Transparent, 
+                Stroke = OxyColor.FromArgb(regColor.A, regColor.R, regColor.G, regColor.B),
+                StrokeThickness = 2 
+            };
+            view.ActualModel.Annotations.Add(rectangleAnnotation);
+            view.ActualModel.InvalidatePlot(false);
         }
 
         private DetectionDiagnostics Diagnostics
@@ -459,7 +467,7 @@ namespace SRHWiscMano.App.ViewModels
         [RelayCommand]
         private void ResetInspect()
         {
-            logger.LogTrace("Clicked");
+            CurrentTimeFrameVM.Data.Regions.Clear();
         }
 
         /// <summary>

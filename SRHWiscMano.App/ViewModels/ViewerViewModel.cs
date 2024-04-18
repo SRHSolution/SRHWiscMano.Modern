@@ -190,9 +190,6 @@ namespace SRHWiscMano.App.ViewModels
         }
 
         
-
-
-
         /// <summary>
         /// SharedService의 TimeFrames에 등록된 데이터를 View에 binding 작업을 수행한다.
         /// </summary>
@@ -855,13 +852,16 @@ namespace SRHWiscMano.App.ViewModels
                 {
                     // LinearAxis 에 의해서 위치가 변경되었으므로, Series 에서도 데이터를 해당 위치에 출력하도록 한다.
                     var sensorIntpScale = (mainYAxis.ActualMaximum-1) / ExamSensorMaxIndex;
-                    mainYAxis.Minimum = MinSensorBound * sensorIntpScale;
-                    mainYAxis.Maximum = MaxSensorBound * sensorIntpScale+1;
+                    // View의 RangeSlider의 경우 min 값이 아래 max값이 위에 위치하기 때문에 YAxis에 입력시에는 반전하여 입력한다.
+                    mainYAxis.Minimum =(ExamSensorMaxIndex - MaxSensorBound)  * sensorIntpScale;
+                    mainYAxis.Maximum = (ExamSensorMaxIndex - MinSensorBound)  * sensorIntpScale+1;
+                    mainYAxis.StartPosition = 1;
+                    mainYAxis.EndPosition = 0;
 
                     MainPlotModel.InvalidatePlot(true);
 
                     WeakReferenceMessenger.Default.Send(new SensorBoundsChangedMessage(
-                        new SensorBoundsChangedMessageArg() { MinBound = MinSensorBound, MaxBound = MaxSensorBound }));
+                        new SensorBoundsChangedMessageArg() { MinBound = ExamSensorMaxIndex - MaxSensorBound, MaxBound = ExamSensorMaxIndex - MinSensorBound }));
                 }
             }
         }

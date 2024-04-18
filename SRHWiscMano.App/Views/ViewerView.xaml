@@ -323,7 +323,6 @@
             <mah:RangeSlider Grid.Column="1" x:Name="sensorBoundSlider" Margin="{Binding  SensorBoundsSliderMargin}"
                              mah:SliderHelper.EnableMouseWheel="MouseHover"
                              AutoToolTipPlacement="None" HorizontalAlignment="Left" VerticalAlignment="Top"
-                 
                              LargeChange="10"
                              IsSnapToTickEnabled=" True"
                              LowerValue="{Binding MinSensorBound}"
@@ -331,6 +330,8 @@
                              Maximum="{Binding ExamSensorMaxIndex}"
                              Minimum="0" MinRangeWidth="0" 
                              Orientation="Vertical"
+                             
+                             
                              SmallChange="0.1" Height="{Binding SensorBoundHeight}">
                 <b:Interaction.Triggers>
                     <b:EventTrigger EventName="UpperValueChanged">
