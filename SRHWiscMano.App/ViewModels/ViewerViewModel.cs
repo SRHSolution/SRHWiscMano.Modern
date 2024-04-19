@@ -264,6 +264,8 @@ namespace SRHWiscMano.App.ViewModels
                 ClipByYAxis = true,
                 Text = timeFrame.Text,
                 TextColor = OxyColors.White,
+                TextLinePosition = 0,
+                TextMargin = 5,
                 TextOrientation = AnnotationTextOrientation.Horizontal,
                 Tag = timeFrame.Id
             };
@@ -621,34 +623,55 @@ namespace SRHWiscMano.App.ViewModels
         [RelayCommand]
         private void ZoomInOut(double zoomVal)
         {
-            TimeDuration += (long)zoomVal;
-            var mainX = MainPlotModel.Axes.First(ax => (string)ax.Tag == "X");
-            mainX.Zoom(mainX.ActualMinimum, mainX.ActualMinimum + TimeDuration / 10);
-            MainPlotModel.InvalidatePlot(true);
-            // OverviewPlotModel.InvalidatePlot(false);
-            logger.LogTrace($"Zoom Timeduration : {TimeDuration / 1000}sec");
+            try
+            {
+                TimeDuration += (long) zoomVal;
+                var mainX = MainPlotModel.Axes.First(ax => (string) ax.Tag == "X");
+                mainX.Zoom(mainX.ActualMinimum, mainX.ActualMinimum + TimeDuration / 10);
+                MainPlotModel.InvalidatePlot(true);
+                // OverviewPlotModel.InvalidatePlot(false);
+                logger.LogTrace($"Zoom Timeduration : {TimeDuration / 1000}sec");
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex.Message);
+            }
         }
 
         private void ZoomInOutAt(double zoomVal, ScreenPoint pos)
         {
-            TimeDuration += (long)zoomVal;
-            var mainX = MainPlotModel.Axes.First(ax => (string)ax.Tag == "X");
-            var mainY = MainPlotModel.Axes.First(ax => (string)ax.Tag == "Y");
-            var xPos = mainX.InverseTransform(pos.X, pos.Y, mainY).X;
-            var minX = (xPos - TimeDuration / 10 / 2);
-            var maxX = (xPos + TimeDuration / 10 / 2);
-            mainX.Zoom(minX, maxX);
-            MainPlotModel.InvalidatePlot(true);
-            logger.LogTrace($"Zoom Timeduration : {TimeDuration / 1000} sec");
+            try
+            {
+                TimeDuration += (long) zoomVal;
+                var mainX = MainPlotModel.Axes.First(ax => (string) ax.Tag == "X");
+                var mainY = MainPlotModel.Axes.First(ax => (string) ax.Tag == "Y");
+                var xPos = mainX.InverseTransform(pos.X, pos.Y, mainY).X;
+                var minX = (xPos - TimeDuration / 10 / 2);
+                var maxX = (xPos + TimeDuration / 10 / 2);
+                mainX.Zoom(minX, maxX);
+                MainPlotModel.InvalidatePlot(true);
+                logger.LogTrace($"Zoom Timeduration : {TimeDuration / 1000} sec");
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex.Message);
+            }
         }
 
         [RelayCommand(CanExecute = "IsDataLoaded")]
         private void FitToScreen()
         {
-            sharedService.TimeFrames.Refresh();
-            var overviewX = OverviewPlotModel.Axes.First(ax => (string)ax.Tag == "X");
-            overviewX.Zoom(overviewX.AbsoluteMinimum, overviewX.AbsoluteMaximum);
-            OverviewPlotModel.InvalidatePlot(false);
+            try
+            {
+                sharedService.TimeFrames.Refresh();
+                var overviewX = OverviewPlotModel.Axes.First(ax => (string) ax.Tag == "X");
+                overviewX.Zoom(overviewX.AbsoluteMinimum, overviewX.AbsoluteMaximum);
+                OverviewPlotModel.InvalidatePlot(false);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex.Message);
+            }
         }
 
         [RelayCommand]
@@ -681,42 +704,51 @@ namespace SRHWiscMano.App.ViewModels
         /// </summary>
         private void UpdatePaletteChanged()
         {
-            if (MainPlotModel.Series.Count == 0)
-                return;
-
-            if (!string.IsNullOrEmpty(SelectedPaletteKey) && Palettes.ContainsKey(SelectedPaletteKey))
-                SelectedPalette = Palettes[SelectedPaletteKey];
-
-            paletteManager.SetPaletteKey(SelectedPaletteKey);
-            // TimeFrameViewModel.SelectedPalette = SelectedPalette;
-
-            var mainColorAxis = MainPlotModel.Axes.Single(s => s is LinearColorAxis) as LinearColorAxis;
-            mainColorAxis.Palette = SelectedPalette;
-            mainColorAxis.Minimum = MinSensorRange; // 최소 limit 값
-            mainColorAxis.Maximum = MaxSensorRange; // 최대 limit 값
-            mainColorAxis.HighColor = SelectedPalette.Colors.Last(); // OxyColors.White,
-            mainColorAxis.LowColor = SelectedPalette.Colors.First();
-            MainPlotModel.InvalidatePlot(false);
-
-            var overviewColorAxis = OverviewPlotModel.Axes.Single(s => s is LinearColorAxis) as LinearColorAxis;
-            overviewColorAxis.Palette = SelectedPalette;
-            overviewColorAxis.Minimum = MinSensorRange; // 최소 limit 값
-            overviewColorAxis.Maximum = MaxSensorRange; // 최대 limit 값
-            overviewColorAxis.HighColor = SelectedPalette.Colors.Last(); // OxyColors.White,
-            overviewColorAxis.LowColor = SelectedPalette.Colors.First();
-            OverviewPlotModel.InvalidatePlot(false);
-
-            var changedArg = new PaletteChangedMessageArg()
+            try
             {
-                palette = SelectedPalette,
-                Minimum = MinSensorRange,
-                Maximum = MaxSensorRange,
-                HighColor = SelectedPalette.Colors.Last(),
-                LowColor = SelectedPalette.Colors.First(),
-            };
 
-            //Pallette 가 변경되었음을 메시지로 전송한다.
-            WeakReferenceMessenger.Default.Send(new PaletteChangedMessageMessage(changedArg));
+
+                if (MainPlotModel.Series.Count == 0)
+                    return;
+
+                if (!string.IsNullOrEmpty(SelectedPaletteKey) && Palettes.ContainsKey(SelectedPaletteKey))
+                    SelectedPalette = Palettes[SelectedPaletteKey];
+
+                paletteManager.SetPaletteKey(SelectedPaletteKey);
+                // TimeFrameViewModel.SelectedPalette = SelectedPalette;
+
+                var mainColorAxis = MainPlotModel.Axes.Single(s => s is LinearColorAxis) as LinearColorAxis;
+                mainColorAxis.Palette = SelectedPalette;
+                mainColorAxis.Minimum = MinSensorRange; // 최소 limit 값
+                mainColorAxis.Maximum = MaxSensorRange; // 최대 limit 값
+                mainColorAxis.HighColor = SelectedPalette.Colors.Last(); // OxyColors.White,
+                mainColorAxis.LowColor = SelectedPalette.Colors.First();
+                MainPlotModel.InvalidatePlot(false);
+
+                var overviewColorAxis = OverviewPlotModel.Axes.Single(s => s is LinearColorAxis) as LinearColorAxis;
+                overviewColorAxis.Palette = SelectedPalette;
+                overviewColorAxis.Minimum = MinSensorRange; // 최소 limit 값
+                overviewColorAxis.Maximum = MaxSensorRange; // 최대 limit 값
+                overviewColorAxis.HighColor = SelectedPalette.Colors.Last(); // OxyColors.White,
+                overviewColorAxis.LowColor = SelectedPalette.Colors.First();
+                OverviewPlotModel.InvalidatePlot(false);
+
+                var changedArg = new PaletteChangedMessageArg()
+                {
+                    palette = SelectedPalette,
+                    Minimum = MinSensorRange,
+                    Maximum = MaxSensorRange,
+                    HighColor = SelectedPalette.Colors.Last(),
+                    LowColor = SelectedPalette.Colors.First(),
+                };
+
+                //Pallette 가 변경되었음을 메시지로 전송한다.
+                WeakReferenceMessenger.Default.Send(new PaletteChangedMessageMessage(changedArg));
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex.Message);
+            }
         }
 
         /// <summary>
@@ -758,8 +790,9 @@ namespace SRHWiscMano.App.ViewModels
                 xAxis.Pan(delta);
                 MainPlotModel.InvalidatePlot(false);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                logger.LogError(ex.Message);
             }
         }
 
@@ -794,8 +827,9 @@ namespace SRHWiscMano.App.ViewModels
                 xAxis.Pan(delta);
                 MainPlotModel.InvalidatePlot(false);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                logger.LogError(ex.Message);
             }
         }
 
@@ -866,8 +900,6 @@ namespace SRHWiscMano.App.ViewModels
             }
         }
 
-        
-
         /// <summary>
         /// WindowSize가 변경되면 SensorBounds 관련 control을 업데이트 한다.
         /// </summary>
@@ -875,10 +907,17 @@ namespace SRHWiscMano.App.ViewModels
         [RelayCommand]
         private void WindowSizeChanged(object sender)
         {
-            if (PickingSensorBounds)
+            try
             {
-                ToggleSensorBounds(true);
-                SensorBoundsChanged();
+                if (PickingSensorBounds)
+                {
+                    ToggleSensorBounds(true);
+                    SensorBoundsChanged();
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex.Message);
             }
         }
     }

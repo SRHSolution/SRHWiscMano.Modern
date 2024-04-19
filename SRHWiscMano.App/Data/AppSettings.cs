@@ -22,7 +22,7 @@ namespace SRHWiscMano.App.Data
         public int MaxRecentFileSize { get; set; } = 5;
 
         public long MainViewFrameRange { get; set; } = 20000;
-        public int InterpolateSensorScale { get; set; } = 10;
+        public int InterpolateSensorScale { get; set; } = 5;
 
         public bool UpdateSubRange { get; set; } = true;
 

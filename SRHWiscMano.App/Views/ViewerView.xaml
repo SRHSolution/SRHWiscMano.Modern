@@ -111,9 +111,9 @@
                         </DataTemplate>
                     </Button.ContentTemplate>
                 </Button>
-                <CheckBox Margin="10,0,0,0" Content="Update"
-                          HorizontalAlignment="Left"
-                          VerticalAlignment="Center" IsChecked="{Binding UpdateSubRange}" />
+                <!-- <CheckBox Margin="10,0,0,0" Content="Update" -->
+                          <!-- HorizontalAlignment="Left" -->
+                          <!-- VerticalAlignment="Center" IsChecked="{Binding UpdateSubRange}" /> -->
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal">
                 <Button Width="32"

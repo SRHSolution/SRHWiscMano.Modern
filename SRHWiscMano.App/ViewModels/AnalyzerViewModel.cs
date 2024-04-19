@@ -51,11 +51,12 @@ namespace SRHWiscMano.App.ViewModels
         [ObservableProperty] private PlotModel graphPlotModel;
         [ObservableProperty] private PlotController graphPlotController;
 
-        
+
         /// <summary>
         /// 현재 선택된 TimeFrame ViewModel 원본 데이터
         /// </summary>
         public TimeFrameViewModel CurrentTimeFrameVM { get; private set; }
+
         /// <summary>
         /// 현재 선택되어 표시되고 있는 TimeFrame Heatmap ViewModel
         /// </summary>
@@ -65,29 +66,29 @@ namespace SRHWiscMano.App.ViewModels
         /// 현재 선택되어 표시되고 있는 TimeFrame Lineseries ViewModel
         /// </summary>
         public TimeFrameGraphViewModel CurrentTimeFrameGraphVM { get; private set; }
-        
+
         [ObservableProperty] private string statusMessage = "Test status message";
 
         [ObservableProperty] private int selectedIndexOfTimeFrameViewModel = -1;
-        
+
         private DetectionDiagnostics diagnostics;
 
         /// <summary>
         /// View에서 표시할 전체 TimeFrameViewModels 
         /// </summary>
         public ObservableCollection<TimeFrameViewModel> TimeFrameViewModels { get; } = new();
-        
+
         /// <summary>
         /// Heatmap clicked 이벤트에 대한 delegate를 등록하는 변수
         /// </summary>
         public DelegatePlotCommand<OxyMouseDownEventArgs> HeatmapClicked { get; set; }
+
         public DelegatePlotCommand<OxyMouseDownEventArgs> GraphClicked { get; set; }
 
         #endregion
 
         public AnalyzerViewModel()
         {
-            
         }
 
         public AnalyzerViewModel(ILogger<AnalyzerViewModel> logger, SharedService sharedService,
@@ -100,7 +101,7 @@ namespace SRHWiscMano.App.ViewModels
 
             timeFrames = sharedService.TimeFrames;
             timeFrames.Connect().Subscribe(HandleBindingTimeFrames);
-            
+
             WeakReferenceMessenger.Default.Register<SensorBoundsChangedMessage>(this, SensorBoundsChanged);
         }
 
@@ -124,7 +125,7 @@ namespace SRHWiscMano.App.ViewModels
                         viewmodel.FramePlotController.UnbindAll();
 
                         TimeFrameViewModels.Insert(insertIdx, viewmodel);
-                        
+
                         // TimeFrameViewModels에서 Label property 가 변경될 경우 이에 대한 Update 이벤트를 발생하도록 한다.
                         Observable.FromEvent<PropertyChangedEventHandler, PropertyChangedEventArgs>(
                                 handler => (sender, e) => handler(e),
@@ -151,12 +152,13 @@ namespace SRHWiscMano.App.ViewModels
                     case ChangeReason.Update:
                         var updItem = TimeFrameViewModels.SingleOrDefault(item => item.Id == change.Current.Id);
                         updItem.RefreshPlotData();
-                        
+
                         if (CurrentTimeFrameHeatmapVM?.Id == change.Current.Id)
                         {
                             CurrentTimeFrameHeatmapVM.RefreshPlotData();
                             CurrentTimeFrameGraphVM.RefreshPlotData();
                         }
+
                         break;
 
                     case ChangeReason.Refresh:
@@ -195,10 +197,10 @@ namespace SRHWiscMano.App.ViewModels
                 CurrentTimeFrameHeatmapVM = new TimeFrameViewModel(CurrentTimeFrameVM.Data);
                 MainPlotModel = CurrentTimeFrameHeatmapVM.FramePlotModel;
 
-                
                 var heatmap = MainPlotModel.Series.OfType<HeatMapSeries>().FirstOrDefault();
                 heatmap.TrackerFormatString = "{6:0.00}";
-                ;                Observable.FromEvent<EventHandler<TrackerEventArgs>, TrackerEventArgs>(
+                ;
+                Observable.FromEvent<EventHandler<TrackerEventArgs>, TrackerEventArgs>(
                     handler => (sender, e) => handler(e),
                     handler => MainPlotModel.TrackerChanged += handler,
                     handler => MainPlotModel.TrackerChanged -= handler).Subscribe(HandleTrackerChanged);
@@ -206,7 +208,6 @@ namespace SRHWiscMano.App.ViewModels
                 MainPlotController = BuildMainPlotcontroller();
                 CurrentTimeFrameHeatmapVM.RefreshPlotData();
 
-                
                 CurrentTimeFrameGraphVM = new TimeFrameGraphViewModel(CurrentTimeFrameVM.Data);
                 GraphPlotModel = CurrentTimeFrameGraphVM.FramePlotModel;
                 GraphPlotController = BuildGraphPlotcontroller();
@@ -225,7 +226,7 @@ namespace SRHWiscMano.App.ViewModels
         /// <param name="message"></param>
         private void SensorBoundsChanged(object recipient, SensorBoundsChangedMessage message)
         {
-            if(CurrentTimeFrameHeatmapVM != null)
+            if (CurrentTimeFrameHeatmapVM != null)
             {
                 CurrentTimeFrameHeatmapVM.Data.UpdateSensorBounds(message.Value.MinBound, message.Value.MaxBound);
                 CurrentTimeFrameHeatmapVM.RefreshPlotData();
@@ -243,7 +244,7 @@ namespace SRHWiscMano.App.ViewModels
         {
             var plotController = new PlotController();
             // plotController.UnbindAll();
-            
+
             // Custom Command 함수를 위한 Delegate를 정의한다.
             HeatmapClicked =
                 new DelegatePlotCommand<OxyMouseDownEventArgs>((view, controller, args) =>
@@ -284,7 +285,7 @@ namespace SRHWiscMano.App.ViewModels
         {
             if (args.HitResult == null)
                 return;
-            
+
             // PlotView에서 Tracker 가 표시되지 않도록 한다
             MainPlotModel.PlotView.HideTracker();
             var datapoint = args.HitResult.DataPoint;
@@ -293,15 +294,16 @@ namespace SRHWiscMano.App.ViewModels
             var posX = viewXAxis.InverseTransform(datapoint.X);
 
             // 현재의 TimeFrame에서 Pick 한 위치의 실제 Instant time을 계산한다
-            var pickPosX = Duration.FromMilliseconds((long)(datapoint.X * 10 + 0.5));
+            var pickPosX = Duration.FromMilliseconds((long) (datapoint.X * 10 + 0.5));
             var posTime = CurrentTimeFrameHeatmapVM.Data.TimeRange().Start.Plus(pickPosX);
-            
+
             // 현재의 Sensor Range를 기준으로 센서 몇번에서 클릭되었는지를 계산한다
-            var tmpPos = (int)(datapoint.Y / CurrentTimeFrameHeatmapVM.Data.ExamData.InterpolationScale + 0.5 );
+            var tmpPos = (int) (datapoint.Y / CurrentTimeFrameHeatmapVM.Data.ExamData.InterpolationScale + 0.5);
             // var posSensor = CurrentTimeFrameHeatmapVM.Data.SensorRange().Lesser + tmpPos;
             var posSensor = tmpPos;
 
-            StatusMessage = $"DataPoint : {datapoint.X}, {datapoint.Y}, value = {args.HitResult.Text} => {(double)posTime.ToMillisecondsFromEpoch()/1000:F2}, {posSensor}";
+            StatusMessage =
+                $"DataPoint: {datapoint.X}, {datapoint.Y} => {(double) posTime.ToMillisecondsFromEpoch() / 1000:F2} sec, sensor : {posSensor}, value : {args.HitResult.Text}";
         }
 
 
@@ -309,37 +311,40 @@ namespace SRHWiscMano.App.ViewModels
         {
             var viewXAxis = view.ActualModel.Axes.First(ax => ax.Tag == "X");
             var posX = viewXAxis.InverseTransform(args.Position.X);
-            
+
             var viewYAxis = view.ActualModel.Axes.First(ax => ax.Tag == "Y");
             var posY = viewYAxis.InverseTransform(args.Position.Y);
 
             // 현재의 TimeFrame에서 Pick 한 위치의 실제 Instant time을 계산한다
-            var pickPosX = Duration.FromMilliseconds((long)(posX * 10));
+            var pickPosX = Duration.FromMilliseconds((long) (posX * 10));
             var posTime = CurrentTimeFrameHeatmapVM.Data.TimeRange().Start.Plus(pickPosX);
 
             // 현재의 Sensor Range를 기준으로 센서 몇번에서 클릭되었는지를 계산한다
-            var tmpPos = (int)(posY / CurrentTimeFrameHeatmapVM.Data.ExamData.InterpolationScale + 0.5);
+            var tmpPos = (int) (posY / CurrentTimeFrameHeatmapVM.Data.ExamData.InterpolationScale + 0.5);
             // var posSensor = CurrentTimeFrameHeatmapVM.Data.SensorRange().Lesser + tmpPos;
             var posSensor = tmpPos;
 
             logger.LogTrace($"Clicked pos {posX:F2}, {posY:F2}");
-            logger.LogTrace($"Frame pos {CurrentTimeFrameHeatmapVM.Time.ToUnixTimeMilliseconds()} {CurrentTimeFrameHeatmapVM.Data.TimeRange().Start.ToUnixTimeMilliseconds():F2}, {CurrentTimeFrameHeatmapVM.Data.TimeRange().End.ToUnixTimeMilliseconds():F2}");
-            logger.LogTrace($"Pick Sample : {(double)posTime.ToUnixTimeMilliseconds()/1000} msec, {posSensor}");
+            logger.LogTrace(
+                $"Frame pos {CurrentTimeFrameHeatmapVM.Time.ToUnixTimeMilliseconds()} {CurrentTimeFrameHeatmapVM.Data.TimeRange().Start.ToUnixTimeMilliseconds():F2}, {CurrentTimeFrameHeatmapVM.Data.TimeRange().End.ToUnixTimeMilliseconds():F2}");
+            logger.LogTrace($"Pick Sample : {(double) posTime.ToUnixTimeMilliseconds() / 1000} msec, {posSensor}");
 
-            SamplePoint pickPoint = new SamplePoint(posTime, (int)posSensor);
-            FindRegions(view, pickPoint);
+            SamplePoint pickPoint = new SamplePoint(posTime, (int) posSensor);
+            FindRegions(pickPoint);
+            TryAutoFindRegions(pickPoint);
         }
 
 
-        private void FindRegions(IPlotView view, SamplePoint clickPoint)
+        private void FindRegions(SamplePoint clickPoint)
         {
             RegionSelectStep step = CurrentTimeFrameVM.RegionSelectSteps.FirstOrDefault(s => !s.IsCompleted);
-            
+
             if (step == null && CurrentTimeFrameVM.AllStepsAreCompleted)
                 return;
             try
             {
-                var region = regionFinder.Find(step.Type, CurrentTimeFrameHeatmapVM.Data, clickPoint, RegionFinderConfig.Default,
+                var region = regionFinder.Find(step.Type, CurrentTimeFrameHeatmapVM.Data, clickPoint,
+                    RegionFinderConfig.Default,
                     Diagnostics);
 
                 if (region.SensorRange.Greater > CurrentTimeFrameHeatmapVM.Data.SensorRange().Greater)
@@ -367,17 +372,55 @@ namespace SRHWiscMano.App.ViewModels
             }
         }
 
+        private void TryAutoFindRegions(SamplePoint pickPoint)
+        {
+            var cpltRegions = CurrentTimeFrameVM.Data.Regions.Items;
+
+            // 기본 조건으로 VP, PreUES, PostUES를 완료해야한다
+            if (cpltRegions.Count() < 3)
+                return;
+            var check = cpltRegions.Any(s => s.Type == RegionType.VP) &&
+                        cpltRegions.Any(s => s.Type == RegionType.PreUES) &&
+                        cpltRegions.Any(s => s.Type == RegionType.PostUES);
+
+            if (!check)
+                return;
+
+            if (!TryAutoAddRegions(RegionType.UES) || !TryAutoAddRegions(RegionType.TB) ||
+                !TryAutoAddRegions(RegionType.HP))
+                return;
+        }
+
+        private bool TryAutoAddRegions(RegionType stepType)
+        {
+            var cpltRegions = CurrentTimeFrameVM.Data.Regions.Items;
+            if (!cpltRegions.Any(s => s.Type == stepType))
+            {
+                var region = regionFinder.Find(stepType, CurrentTimeFrameHeatmapVM.Data, null, RegionFinderConfig.Default, Diagnostics);
+                if (region != null)
+                {
+                    CurrentTimeFrameVM.Data.Regions.Add(region);
+                    return true;
+                }
+
+                return false;
+            }
+            return true;
+        }
+
         private void DrawRegionBox(IPlotView view, Region region)
         {
             var rangeXStart = region.TimeRange.Start.Minus(CurrentTimeFrameHeatmapVM.Data.TimeRange().Start)
                 .TotalMilliseconds / 10;
-            var rangeXEnd = region.TimeRange.End.Minus(CurrentTimeFrameHeatmapVM.Data.TimeRange().Start).TotalMilliseconds /
+            var rangeXEnd = region.TimeRange.End.Minus(CurrentTimeFrameHeatmapVM.Data.TimeRange().Start)
+                                .TotalMilliseconds /
                             10;
 
             var rangeYTop = region.SensorRange.Greater * CurrentTimeFrameHeatmapVM.Data.ExamData.InterpolationScale;
 
             var rangeYBottom = region.SensorRange.Lesser * CurrentTimeFrameHeatmapVM.Data.ExamData.InterpolationScale;
-            var regColor = RegionSelectStep.GetStandardSteps(null).Where(stp => stp.Type == region.Type).Select(stp => stp.Color).FirstOrDefault(Colors.Black);
+            var regColor = RegionSelectStep.GetStandardSteps(null).Where(stp => stp.Type == region.Type)
+                .Select(stp => stp.Color).FirstOrDefault(Colors.Black);
 
             var rectangleAnnotation = new RectangleAnnotation
             {
@@ -385,9 +428,9 @@ namespace SRHWiscMano.App.ViewModels
                 MaximumX = rangeXEnd,
                 MinimumY = rangeYTop,
                 MaximumY = rangeYBottom,
-                Fill = OxyColors.Transparent, 
+                Fill = OxyColors.Transparent,
                 Stroke = OxyColor.FromArgb(regColor.A, regColor.R, regColor.G, regColor.B),
-                StrokeThickness = 2 
+                StrokeThickness = 2
             };
             view.ActualModel.Annotations.Add(rectangleAnnotation);
             view.ActualModel.InvalidatePlot(false);
@@ -398,7 +441,8 @@ namespace SRHWiscMano.App.ViewModels
             get
             {
                 if (diagnostics == null)
-                    diagnostics = new DetectionDiagnostics(CurrentTimeFrameVM.Data.ExamData, CurrentTimeFrameVM.Data, Duration.FromSeconds(3L));
+                    diagnostics = new DetectionDiagnostics(CurrentTimeFrameVM.Data.ExamData, CurrentTimeFrameVM.Data,
+                        Duration.FromSeconds(3L));
                 return diagnostics;
             }
         }
