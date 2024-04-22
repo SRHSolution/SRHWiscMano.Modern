@@ -24,7 +24,7 @@
 
         public static double PercentOf(this Range<long> range, long value) => (double)(value - range.Lesser) / (double)range.Span();
 
-        public static IEnumerable<int> AsEnumerable(this Range<int> range) => Enumerable.Range(range.Lesser, range.Span());
+        public static IEnumerable<int> AsEnumerable(this Range<int> range) => Enumerable.Range(range.Lesser, range.Span()+1);
 
         public static int ValueAt(this Range<int> range, double percent)
         {

@@ -180,18 +180,41 @@ namespace SRHWiscMano.Core.ViewModels
                         var region = change.Item.Current;
                         DrawRegionAnnotation(region);
 
-                        RegionSelectSteps.First(stp => stp.Type == region.Type).IsCompleted = true;
+                        try
+                        {
+                            RegionSelectSteps.FirstOrDefault(stp => stp.Type == region.Type).IsCompleted = true;
+                        }
+                        catch (Exception)
+                        {
+                            logger.Log(LogLevel.Error, $"{region.Type} is not valid type");
+                        }
+
                         break;
                     }
                     case ListChangeReason.Remove:
                     {
                         var region = change.Item.Current;
                         var itemToRemove =
-                            FramePlotModel.Annotations.First(ann => string.Equals(ann.Tag, region.Type));
+                            FramePlotModel.Annotations.Single(ann => Equals(ann.Tag.ToString(), region.Type.ToString()));
                         FramePlotModel.Annotations.Remove(itemToRemove);
                         FramePlotModel.InvalidatePlot(false);
 
                         RegionSelectSteps.First(stp => stp.Type == region.Type).IsCompleted = false;
+                        break;
+                    }
+                    case ListChangeReason.RemoveRange:
+                    {
+                        var rangeToRemove = change.Range;
+                        foreach (var region in rangeToRemove)
+                        {
+                            var itemToRemove =
+                                FramePlotModel.Annotations.Single(ann => Equals(ann.Tag.ToString(), region.Type.ToString()));
+                            FramePlotModel.Annotations.Remove(itemToRemove);
+                            FramePlotModel.InvalidatePlot(false);
+
+                            RegionSelectSteps.First(stp => stp.Type == region.Type).IsCompleted = false;
+                        }
+
                         break;
                     }
 
@@ -199,7 +222,7 @@ namespace SRHWiscMano.Core.ViewModels
                     {
                         FramePlotModel.Annotations.Clear();
                         FramePlotModel.InvalidatePlot(false);
-                        RegionSelectSteps.ForEach(stp =>stp.IsCompleted = false);
+                        RegionSelectSteps.ForEach(stp => stp.IsCompleted = false);
                         break;
                     }
                 }
@@ -218,9 +241,8 @@ namespace SRHWiscMano.Core.ViewModels
                                 .TotalMilliseconds /
                             10;
 
-            var rangeYTop = region.SensorRange.Greater * Data.ExamData.InterpolationScale;
-
-            var rangeYBottom = region.SensorRange.Lesser * Data.ExamData.InterpolationScale;
+            var rangeYTop = (region.SensorRange.Lesser-0.5) * Data.ExamData.InterpolationScale;
+            var rangeYBottom = (region.SensorRange.Greater+0.5) * Data.ExamData.InterpolationScale;
             var regColor = RegionSelectStep.GetStandardSteps(null).Where(stp => stp.Type == region.Type)
                 .Select(stp => stp.Color).FirstOrDefault(Colors.Black);
 
@@ -228,13 +250,14 @@ namespace SRHWiscMano.Core.ViewModels
             {
                 MinimumX = rangeXStart,
                 MaximumX = rangeXEnd,
-                MinimumY = rangeYTop,
-                MaximumY = rangeYBottom,
+                MinimumY = rangeYBottom,
+                MaximumY = rangeYTop,
                 Fill = OxyColors.Transparent,
                 Stroke = OxyColor.FromArgb(regColor.A, regColor.R, regColor.G, regColor.B),
                 StrokeThickness = 2,
                 Tag = region.Type.ToString(),
             };
+
             FramePlotModel.Annotations.Add(rectangleAnnotation);
             FramePlotModel.InvalidatePlot(false);
         }

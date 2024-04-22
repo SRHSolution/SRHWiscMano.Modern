@@ -330,26 +330,25 @@ namespace SRHWiscMano.App.ViewModels
             logger.LogTrace($"Pick Sample : {(double) posTime.ToUnixTimeMilliseconds() / 1000} msec, {posSensor}");
 
             SamplePoint pickPoint = new SamplePoint(posTime, (int) posSensor);
-            FindRegions(pickPoint);
-            TryAutoFindRegions(pickPoint);
+            FindRegions(CurrentTimeFrameVM, pickPoint);
         }
 
 
-        private void FindRegions(SamplePoint clickPoint)
+        private void FindRegions(TimeFrameViewModel timeFrameVM,  SamplePoint clickPoint)
         {
-            RegionSelectStep step = CurrentTimeFrameVM.RegionSelectSteps.FirstOrDefault(s => !s.IsCompleted);
+            RegionSelectStep step = timeFrameVM.RegionSelectSteps.FirstOrDefault(s => !s.IsCompleted);
 
-            if (step == null && CurrentTimeFrameVM.AllStepsAreCompleted)
+            if (step == null && timeFrameVM.AllStepsAreCompleted)
                 return;
             try
             {
-                var region = regionFinder.Find(step.Type, CurrentTimeFrameHeatmapVM.Data, clickPoint,
+                var region = regionFinder.Find(step.Type, timeFrameVM.Data, clickPoint,
                     RegionFinderConfig.Default,
                     Diagnostics);
 
-                if (region.SensorRange.Greater > CurrentTimeFrameHeatmapVM.Data.SensorRange().Greater)
+                if (region.SensorRange.Greater > timeFrameVM.Data.SensorRange().Greater)
                     throw new RegionFinderException("Selected TopSensor is too low.");
-                if (region.SensorRange.Lesser < CurrentTimeFrameHeatmapVM.Data.SensorRange().Lesser + 1)
+                if (region.SensorRange.Lesser < timeFrameVM.Data.SensorRange().Lesser + 1)
                     throw new RegionFinderException("Selected BottomSensor is too high.");
                 if (!region.SensorRange.IsForward)
                 {
@@ -359,12 +358,12 @@ namespace SRHWiscMano.App.ViewModels
 
                 if (region != null)
                 {
-                    CurrentTimeFrameVM.Data.Regions.Add(region);
+                    timeFrameVM.Data.Regions.Add(region);
                 }
 
                 logger.LogTrace(region.ToString());
 
-                // DrawRegionBox(view, region);
+                TryAutoFindRegions(timeFrameVM);
             }
             catch (Exception ex)
             {
@@ -372,9 +371,9 @@ namespace SRHWiscMano.App.ViewModels
             }
         }
 
-        private void TryAutoFindRegions(SamplePoint pickPoint)
+        private void TryAutoFindRegions(TimeFrameViewModel timeFrameVM)
         {
-            var cpltRegions = CurrentTimeFrameVM.Data.Regions.Items;
+            var cpltRegions = timeFrameVM.Data.Regions.Items;
 
             // 기본 조건으로 VP, PreUES, PostUES를 완료해야한다
             if (cpltRegions.Count() < 3)
@@ -386,54 +385,30 @@ namespace SRHWiscMano.App.ViewModels
             if (!check)
                 return;
 
-            if (!TryAutoAddRegions(RegionType.UES) || !TryAutoAddRegions(RegionType.TB) ||
-                !TryAutoAddRegions(RegionType.HP))
+
+            if (!TryAutoAddRegions(timeFrameVM,RegionType.UES))
+                return;
+            if (!TryAutoAddRegions(timeFrameVM, RegionType.TB))
+                return;
+            if (!TryAutoAddRegions(timeFrameVM, RegionType.HP))
                 return;
         }
 
-        private bool TryAutoAddRegions(RegionType stepType)
+        private bool TryAutoAddRegions(TimeFrameViewModel timeFrameVM, RegionType stepType)
         {
-            var cpltRegions = CurrentTimeFrameVM.Data.Regions.Items;
-            if (!cpltRegions.Any(s => s.Type == stepType))
+            var cpltRegions = timeFrameVM.Data.Regions.Items;
+            if (cpltRegions.All(s => s.Type != stepType))
             {
-                var region = regionFinder.Find(stepType, CurrentTimeFrameHeatmapVM.Data, null, RegionFinderConfig.Default, Diagnostics);
+                var region = regionFinder.Find(stepType, timeFrameVM.Data, null, RegionFinderConfig.Default, Diagnostics);
                 if (region != null)
                 {
-                    CurrentTimeFrameVM.Data.Regions.Add(region);
+                    timeFrameVM.Data.Regions.Add(region);
                     return true;
                 }
 
                 return false;
             }
             return true;
-        }
-
-        private void DrawRegionBox(IPlotView view, Region region)
-        {
-            var rangeXStart = region.TimeRange.Start.Minus(CurrentTimeFrameHeatmapVM.Data.TimeRange().Start)
-                .TotalMilliseconds / 10;
-            var rangeXEnd = region.TimeRange.End.Minus(CurrentTimeFrameHeatmapVM.Data.TimeRange().Start)
-                                .TotalMilliseconds /
-                            10;
-
-            var rangeYTop = region.SensorRange.Greater * CurrentTimeFrameHeatmapVM.Data.ExamData.InterpolationScale;
-
-            var rangeYBottom = region.SensorRange.Lesser * CurrentTimeFrameHeatmapVM.Data.ExamData.InterpolationScale;
-            var regColor = RegionSelectStep.GetStandardSteps(null).Where(stp => stp.Type == region.Type)
-                .Select(stp => stp.Color).FirstOrDefault(Colors.Black);
-
-            var rectangleAnnotation = new RectangleAnnotation
-            {
-                MinimumX = rangeXStart,
-                MaximumX = rangeXEnd,
-                MinimumY = rangeYTop,
-                MaximumY = rangeYBottom,
-                Fill = OxyColors.Transparent,
-                Stroke = OxyColor.FromArgb(regColor.A, regColor.R, regColor.G, regColor.B),
-                StrokeThickness = 2
-            };
-            view.ActualModel.Annotations.Add(rectangleAnnotation);
-            view.ActualModel.InvalidatePlot(false);
         }
 
         private DetectionDiagnostics Diagnostics
@@ -500,7 +475,41 @@ namespace SRHWiscMano.App.ViewModels
         [RelayCommand]
         private void AutoInspectFrame()
         {
-            logger.LogTrace("Clicked");
+            // 현재 TimeFrame에 대한 분석이 완료되었는지 확인한다
+            var firstDone = TimeFrameViewModels.FirstOrDefault(s=> s.AllStepsAreCompleted);
+            if (firstDone == null)
+                return;
+
+            Func<RegionType, SamplePoint> func1 = type => firstDone.Data.Regions.Items.FirstOrDefault(r => r.Type == type).ClickPoint;
+            Func<TimeFrameViewModel, Instant, Instant> convertSampleTime = (ss, t) =>
+            {
+                Interval timeRange = ss.Data.TimeRange();
+                Instant start1 = timeRange.Start;
+                Instant instant = t;
+                timeRange = firstDone.Data.TimeRange();
+                Instant start2 = timeRange.Start;
+                Duration duration = instant - start2;
+                return start1 + duration;
+            };
+
+            Func<TimeFrameViewModel, SamplePoint, SamplePoint> func2 = (ss, c) =>
+                new SamplePoint(convertSampleTime(ss, c.Time), c.Sensor);
+
+            var dataPoint1 = func1(RegionType.VP);
+            var dataPoint2 = func1(RegionType.PreUES);
+            var dataPoint3 = func1(RegionType.PostUES);
+
+            Task.Run(() =>
+            {
+                var selectedTimeFrames = TimeFrameViewModels;
+                foreach (TimeFrameViewModel selectedTimeFrame in selectedTimeFrames)
+                    if (selectedTimeFrame != firstDone && selectedTimeFrame.NoStepsAreCompleted)
+                    {
+                        FindRegions(selectedTimeFrame, func2(selectedTimeFrame, dataPoint1));
+                        FindRegions(selectedTimeFrame, func2(selectedTimeFrame, dataPoint2));
+                        FindRegions(selectedTimeFrame, func2(selectedTimeFrame, dataPoint3));
+                    }
+            });
         }
 
         /// <summary>
@@ -518,8 +527,33 @@ namespace SRHWiscMano.App.ViewModels
         [RelayCommand]
         private void UndoInspect()
         {
-            logger.LogTrace("Clicked");
+            if (CurrentTimeFrameVM.RegionSelectSteps.Single(s => s.Type == RegionType.PostUES).IsCompleted)
+            {
+                var cnt = CurrentTimeFrameVM.Data.Regions.Count;
+                CurrentTimeFrameVM.Data.Regions.RemoveRange(2, cnt-2);
+                return;
+            }
+            if (CurrentTimeFrameVM.RegionSelectSteps.Single(s => s.Type == RegionType.PreUES).IsCompleted)
+            {
+                CurrentTimeFrameVM.Data.Regions.RemoveAt(1);
+                return;
+            }
+            if (CurrentTimeFrameVM.RegionSelectSteps.Single(s => s.Type == RegionType.VP).IsCompleted)
+            {
+                CurrentTimeFrameVM.Data.Regions.Clear();
+                return;
+            }
         }
+        private bool RemoveIfCompleted(RegionType type)
+        {
+            RegionSelectStep step = CurrentTimeFrameVM.RegionSelectSteps.Single(s => s.Type == type);
+            if (!step.IsCompleted)
+                return false;
+            
+            step.IsCompleted = false;
+            return true;
+        }
+
 
         #endregion
     }
