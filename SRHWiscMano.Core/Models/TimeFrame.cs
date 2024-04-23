@@ -86,6 +86,11 @@ namespace SRHWiscMano.Core.Models
             MaxSensorBound = maxBound;
         }
 
+        public IRegion GetRegion(RegionType regionType)
+        {
+            throw new NotImplementedException();
+        }
+
         public object Clone()
         {
             var newObj = new TimeFrame(Text, Time, TimeDuration, ExamData);

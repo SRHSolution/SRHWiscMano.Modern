@@ -16,7 +16,7 @@ using SRHWiscMano.Core.Models;
 namespace SRHWiscMano.Core.ViewModels
 {
     /// <summary>
-    /// 센서 데이터에서 분석을 위한 Snapshot 을 지정하고 이를 Graph View로 표기하기 위한 ViewModel
+    /// 센서 데이터에서 분석을 위한 TimeFrame 을 지정하고 이를 Graph View로 표기하기 위한 ViewModel
     /// </summary>
     public partial class TimeFrameGraphViewModel : ViewModelBase
     {

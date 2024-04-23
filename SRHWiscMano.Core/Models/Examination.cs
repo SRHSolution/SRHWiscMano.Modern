@@ -1,6 +1,7 @@
 ﻿using System.Collections.Immutable;
 using System.Text;
 using DynamicData;
+using NodaTime;
 using SRHWiscMano.Core.Helpers;
 
 namespace SRHWiscMano.Core.Models
@@ -31,7 +32,6 @@ namespace SRHWiscMano.Core.Models
             InterpolatedSamples = Samples.InterpolateSamples(interpolateScale);
             InterpolationScale = interpolateScale;
         }
-        
 
         public override string ToString()
         {

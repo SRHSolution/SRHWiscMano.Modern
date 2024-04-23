@@ -29,5 +29,10 @@ namespace SRHWiscMano.Core.Models
         public IReadOnlyList<double> Values => values;
 
         public int DataSize => Values.Count;
+
+        public List<double> ValuesForSensors(Range<int> regionSensorRange)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

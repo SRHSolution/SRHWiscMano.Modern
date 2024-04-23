@@ -133,6 +133,14 @@ namespace SRHWiscMano.Core.Helpers
                 .Select((Func<TimeSample, Tuple<TimeSample, double>>)(s => Tuple.Create(s, s.Values[sensorIndex])));
         }
 
+
+        public static TimeSample SamplesAtTime(this IEnumerable<TimeSample> samples,
+            Instant time)
+        {
+            var subSamples = samples.FirstOrDefault(s => s.Time == time, null);
+            return subSamples;
+        }
+
         /// <summary>
         /// Time 간격에 대한 데이터를 추출하여 반환한다.
         /// </summary>
