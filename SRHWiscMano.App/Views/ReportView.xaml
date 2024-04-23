@@ -25,6 +25,8 @@
                 </Style>
                 <Style x:Key="RotatedHeaderText" TargetType="{x:Type TextBlock}">
                     <Setter Property="Padding" Value="0,0,0,0" />
+                    <Setter Property="VerticalAlignment" Value="Center"/>
+                    <Setter Property="HorizontalAlignment" Value="Center"/>
                     <Setter Property="LayoutTransform">
                         <Setter.Value>
                             <RotateTransform Angle="270" />
@@ -48,22 +50,27 @@
                                 <oxy:PlotView Width="400" Height="200" Model="{Binding PressureModelAtTB}"
                                               Controller="{Binding PressureModelAtVPController}" />
                             </BlockUIContainer>
+                            <BlockUIContainer>
+                                <oxy:PlotView Width="400" Height="200" Model="{Binding PressureGradientModel}"
+                                              Controller="{Binding PressureGradientController}" />
+                            </BlockUIContainer>
                         </Figure>
                     </Paragraph>
                     <Paragraph Style="{StaticResource ResultsHeading}">Aggregate Results</Paragraph>
                     <Table>
                         <Table.Columns>
-                            <TableColumn Width="1"/>
-                            <TableColumn Width="50*"/>
-                            <TableColumn Width="10*"/>
-                            <TableColumn Width="1"/>
-                            <TableColumn Width="10*"/>
+                            <TableColumn Width="1" />
+                            <TableColumn Width="50*" />
+                            <TableColumn Width="10*" />
+                            <TableColumn Width="1" />
+                            <TableColumn Width="10*" />
                         </Table.Columns>
                         <TableRowGroup>
                             <TableRow>
                                 <TableCell RowSpan="3" Style="{StaticResource VerticalHeading}">
                                     <BlockUIContainer>
-                                        <TextBlock Text="Velopharynx"   Style="{StaticResource RotatedHeaderText}" Margin="0" />
+                                        <TextBlock Text="Velopharynx" Style="{StaticResource RotatedHeaderText}"
+                                                   Margin="0" />
                                     </BlockUIContainer>
                                 </TableCell>
                                 <TableCell>
@@ -75,7 +82,7 @@
                                 </TableCell>
                                 <TableCell>
                                     <BlockUIContainer>
-                                        <TextBlock Text="±" HorizontalAlignment="Center"/>
+                                        <TextBlock Text="±" HorizontalAlignment="Center" />
                                     </BlockUIContainer>
                                 </TableCell>
                                 <TableCell>
@@ -94,7 +101,7 @@
                                 </TableCell>
                                 <TableCell>
                                     <BlockUIContainer>
-                                        <TextBlock Text="±" HorizontalAlignment="Center"/>
+                                        <TextBlock Text="±" HorizontalAlignment="Center" />
                                     </BlockUIContainer>
                                 </TableCell>
                                 <TableCell>
@@ -113,7 +120,428 @@
                                 </TableCell>
                                 <TableCell>
                                     <BlockUIContainer>
-                                        <TextBlock Text="±" HorizontalAlignment="Center"/>
+                                        <TextBlock Text="±" HorizontalAlignment="Center" />
+                                    </BlockUIContainer>
+                                </TableCell>
+                                <TableCell>
+                                    <Paragraph>
+
+                                    </Paragraph>
+                                </TableCell>
+                            </TableRow>
+
+                        </TableRowGroup>
+                        <TableRowGroup>
+                            <TableRow>
+                                <TableCell LineHeight="2" />
+                            </TableRow>
+                        </TableRowGroup>
+                        <TableRowGroup>
+                            <TableRow>
+                                <TableCell RowSpan="3" Style="{StaticResource VerticalHeading}">
+                                    <BlockUIContainer>
+                                        <TextBlock Text="Tongue Base" Style="{StaticResource RotatedHeaderText}"
+                                                   Margin="0" />
+                                    </BlockUIContainer>
+                                </TableCell>
+                                <TableCell>
+                                    <Paragraph Style="{StaticResource RegionHeading}">Max Pressure (mmHg)</Paragraph>
+                                </TableCell>
+                                <TableCell>
+                                    <Paragraph>
+                                    </Paragraph>
+                                </TableCell>
+                                <TableCell>
+                                    <BlockUIContainer>
+                                        <TextBlock Text="±" HorizontalAlignment="Center" />
+                                    </BlockUIContainer>
+                                </TableCell>
+                                <TableCell>
+                                    <Paragraph>
+
+                                    </Paragraph>
+                                </TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell>
+                                    <Paragraph Style="{StaticResource RegionHeading}">Duration (s)</Paragraph>
+                                </TableCell>
+                                <TableCell>
+                                    <Paragraph>
+                                    </Paragraph>
+                                </TableCell>
+                                <TableCell>
+                                    <BlockUIContainer>
+                                        <TextBlock Text="±" HorizontalAlignment="Center" />
+                                    </BlockUIContainer>
+                                </TableCell>
+                                <TableCell>
+                                    <Paragraph>
+
+                                    </Paragraph>
+                                </TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell>
+                                    <Paragraph Style="{StaticResource RegionHeading}">Cummulative Pressure (mmHg⋅s)</Paragraph>
+                                </TableCell>
+                                <TableCell>
+                                    <Paragraph>
+                                    </Paragraph>
+                                </TableCell>
+                                <TableCell>
+                                    <BlockUIContainer>
+                                        <TextBlock Text="±" HorizontalAlignment="Center" />
+                                    </BlockUIContainer>
+                                </TableCell>
+                                <TableCell>
+                                    <Paragraph>
+
+                                    </Paragraph>
+                                </TableCell>
+                            </TableRow>
+                        </TableRowGroup>
+                        <TableRowGroup>
+                            <TableRow>
+                                <TableCell LineHeight="2" />
+                            </TableRow>
+                        </TableRowGroup>
+                        <TableRowGroup>
+                            <TableRow>
+                                <TableCell RowSpan="3" Style="{StaticResource VerticalHeading}">
+                                    <BlockUIContainer>
+                                        <TextBlock Text="Hypopharynx" Style="{StaticResource RotatedHeaderText}"
+                           Margin="0" />
+                                    </BlockUIContainer>
+                                </TableCell>
+                                <TableCell>
+                                    <Paragraph Style="{StaticResource RegionHeading}">Max Pressure (mmHg)</Paragraph>
+                                </TableCell>
+                                <TableCell>
+                                    <Paragraph>
+                                    </Paragraph>
+                                </TableCell>
+                                <TableCell>
+                                    <BlockUIContainer>
+                                        <TextBlock Text="±" HorizontalAlignment="Center" />
+                                    </BlockUIContainer>
+                                </TableCell>
+                                <TableCell>
+                                    <Paragraph>
+
+                                    </Paragraph>
+                                </TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell>
+                                    <Paragraph Style="{StaticResource RegionHeading}">Duration (s)</Paragraph>
+                                </TableCell>
+                                <TableCell>
+                                    <Paragraph>
+                                    </Paragraph>
+                                </TableCell>
+                                <TableCell>
+                                    <BlockUIContainer>
+                                        <TextBlock Text="±" HorizontalAlignment="Center" />
+                                    </BlockUIContainer>
+                                </TableCell>
+                                <TableCell>
+                                    <Paragraph>
+
+                                    </Paragraph>
+                                </TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell>
+                                    <Paragraph Style="{StaticResource RegionHeading}">Cummulative Pressure (mmHg⋅s)</Paragraph>
+                                </TableCell>
+                                <TableCell>
+                                    <Paragraph>
+                                    </Paragraph>
+                                </TableCell>
+                                <TableCell>
+                                    <BlockUIContainer>
+                                        <TextBlock Text="±" HorizontalAlignment="Center" />
+                                    </BlockUIContainer>
+                                </TableCell>
+                                <TableCell>
+                                    <Paragraph>
+
+                                    </Paragraph>
+                                </TableCell>
+                            </TableRow>
+                        </TableRowGroup>
+                        <TableRowGroup>
+                            <TableRow>
+                                <TableCell LineHeight="2" />
+                            </TableRow>
+                        </TableRowGroup>
+                        <TableRowGroup>
+                            <TableRow>
+                                <TableCell RowSpan="3" Style="{StaticResource VerticalHeading}">
+                                    <BlockUIContainer>
+                                        <TextBlock Text="Pre-UES" Style="{StaticResource RotatedHeaderText}"
+                           Margin="0" />
+                                    </BlockUIContainer>
+                                </TableCell>
+                                <TableCell>
+                                    <Paragraph Style="{StaticResource RegionHeading}">Max Pressure (mmHg)</Paragraph>
+                                </TableCell>
+                                <TableCell>
+                                    <Paragraph>
+                                    </Paragraph>
+                                </TableCell>
+                                <TableCell>
+                                    <BlockUIContainer>
+                                        <TextBlock Text="±" HorizontalAlignment="Center" />
+                                    </BlockUIContainer>
+                                </TableCell>
+                                <TableCell>
+                                    <Paragraph>
+
+                                    </Paragraph>
+                                </TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell>
+                                    <Paragraph Style="{StaticResource RegionHeading}">Duration (s)</Paragraph>
+                                </TableCell>
+                                <TableCell>
+                                    <Paragraph>
+                                    </Paragraph>
+                                </TableCell>
+                                <TableCell>
+                                    <BlockUIContainer>
+                                        <TextBlock Text="±" HorizontalAlignment="Center" />
+                                    </BlockUIContainer>
+                                </TableCell>
+                                <TableCell>
+                                    <Paragraph>
+
+                                    </Paragraph>
+                                </TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell>
+                                    <Paragraph Style="{StaticResource RegionHeading}">Cummulative Pressure (mmHg⋅s)</Paragraph>
+                                </TableCell>
+                                <TableCell>
+                                    <Paragraph>
+                                    </Paragraph>
+                                </TableCell>
+                                <TableCell>
+                                    <BlockUIContainer>
+                                        <TextBlock Text="±" HorizontalAlignment="Center" />
+                                    </BlockUIContainer>
+                                </TableCell>
+                                <TableCell>
+                                    <Paragraph>
+
+                                    </Paragraph>
+                                </TableCell>
+                            </TableRow>
+                        </TableRowGroup>
+                        <TableRowGroup>
+                            <TableRow>
+                                <TableCell LineHeight="2" />
+                            </TableRow>
+                        </TableRowGroup>
+                        <TableRowGroup>
+                            <TableRow>
+                                <TableCell RowSpan="3" Style="{StaticResource VerticalHeading}">
+                                    <BlockUIContainer>
+                                        <TextBlock Text="Post-UES" Style="{StaticResource RotatedHeaderText}"
+   Margin="0" />
+                                    </BlockUIContainer>
+                                </TableCell>
+                                <TableCell>
+                                    <Paragraph Style="{StaticResource RegionHeading}">Max Pressure (mmHg)</Paragraph>
+                                </TableCell>
+                                <TableCell>
+                                    <Paragraph>
+                                    </Paragraph>
+                                </TableCell>
+                                <TableCell>
+                                    <BlockUIContainer>
+                                        <TextBlock Text="±" HorizontalAlignment="Center" />
+                                    </BlockUIContainer>
+                                </TableCell>
+                                <TableCell>
+                                    <Paragraph>
+
+                                    </Paragraph>
+                                </TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell>
+                                    <Paragraph Style="{StaticResource RegionHeading}">Duration (s)</Paragraph>
+                                </TableCell>
+                                <TableCell>
+                                    <Paragraph>
+                                    </Paragraph>
+                                </TableCell>
+                                <TableCell>
+                                    <BlockUIContainer>
+                                        <TextBlock Text="±" HorizontalAlignment="Center" />
+                                    </BlockUIContainer>
+                                </TableCell>
+                                <TableCell>
+                                    <Paragraph>
+
+                                    </Paragraph>
+                                </TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell>
+                                    <Paragraph Style="{StaticResource RegionHeading}">Cummulative Pressure (mmHg⋅s)</Paragraph>
+                                </TableCell>
+                                <TableCell>
+                                    <Paragraph>
+                                    </Paragraph>
+                                </TableCell>
+                                <TableCell>
+                                    <BlockUIContainer>
+                                        <TextBlock Text="±" HorizontalAlignment="Center" />
+                                    </BlockUIContainer>
+                                </TableCell>
+                                <TableCell>
+                                    <Paragraph>
+
+                                    </Paragraph>
+                                </TableCell>
+                            </TableRow>
+                        </TableRowGroup>
+                        <TableRowGroup>
+                            <TableRow>
+                                <TableCell LineHeight="2" />
+                            </TableRow>
+                        </TableRowGroup>
+                        <TableRowGroup>
+                            <TableRow>
+                                <TableCell RowSpan="3" Style="{StaticResource VerticalHeading}">
+                                    <BlockUIContainer>
+                                        <TextBlock Text="UES" Style="{StaticResource RotatedHeaderText}"
+   Margin="0" />
+                                    </BlockUIContainer>
+                                </TableCell>
+                                <TableCell>
+                                    <Paragraph Style="{StaticResource RegionHeading}">Max Pressure (mmHg)</Paragraph>
+                                </TableCell>
+                                <TableCell>
+                                    <Paragraph>
+                                    </Paragraph>
+                                </TableCell>
+                                <TableCell>
+                                    <BlockUIContainer>
+                                        <TextBlock Text="±" HorizontalAlignment="Center" />
+                                    </BlockUIContainer>
+                                </TableCell>
+                                <TableCell>
+                                    <Paragraph>
+
+                                    </Paragraph>
+                                </TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell>
+                                    <Paragraph Style="{StaticResource RegionHeading}">Duration (s)</Paragraph>
+                                </TableCell>
+                                <TableCell>
+                                    <Paragraph>
+                                    </Paragraph>
+                                </TableCell>
+                                <TableCell>
+                                    <BlockUIContainer>
+                                        <TextBlock Text="±" HorizontalAlignment="Center" />
+                                    </BlockUIContainer>
+                                </TableCell>
+                                <TableCell>
+                                    <Paragraph>
+
+                                    </Paragraph>
+                                </TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell>
+                                    <Paragraph Style="{StaticResource RegionHeading}">Cummulative Pressure (mmHg⋅s)</Paragraph>
+                                </TableCell>
+                                <TableCell>
+                                    <Paragraph>
+                                    </Paragraph>
+                                </TableCell>
+                                <TableCell>
+                                    <BlockUIContainer>
+                                        <TextBlock Text="±" HorizontalAlignment="Center" />
+                                    </BlockUIContainer>
+                                </TableCell>
+                                <TableCell>
+                                    <Paragraph>
+
+                                    </Paragraph>
+                                </TableCell>
+                            </TableRow>
+                        </TableRowGroup>
+                        <TableRowGroup>
+                            <TableRow>
+                                <TableCell LineHeight="2" />
+                            </TableRow>
+                        </TableRowGroup>
+                        <TableRowGroup>
+                            <TableRow>
+                                <TableCell RowSpan="3" Style="{StaticResource VerticalHeading}">
+                                    <BlockUIContainer>
+                                        <TextBlock Text="Overall" Style="{StaticResource RotatedHeaderText}"
+   Margin="0" />
+                                    </BlockUIContainer>
+                                </TableCell>
+                                <TableCell>
+                                    <Paragraph Style="{StaticResource RegionHeading}">Max Pressure (mmHg)</Paragraph>
+                                </TableCell>
+                                <TableCell>
+                                    <Paragraph>
+                                    </Paragraph>
+                                </TableCell>
+                                <TableCell>
+                                    <BlockUIContainer>
+                                        <TextBlock Text="±" HorizontalAlignment="Center" />
+                                    </BlockUIContainer>
+                                </TableCell>
+                                <TableCell>
+                                    <Paragraph>
+
+                                    </Paragraph>
+                                </TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell>
+                                    <Paragraph Style="{StaticResource RegionHeading}">Duration (s)</Paragraph>
+                                </TableCell>
+                                <TableCell>
+                                    <Paragraph>
+                                    </Paragraph>
+                                </TableCell>
+                                <TableCell>
+                                    <BlockUIContainer>
+                                        <TextBlock Text="±" HorizontalAlignment="Center" />
+                                    </BlockUIContainer>
+                                </TableCell>
+                                <TableCell>
+                                    <Paragraph>
+
+                                    </Paragraph>
+                                </TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell>
+                                    <Paragraph Style="{StaticResource RegionHeading}">Cummulative Pressure (mmHg⋅s)</Paragraph>
+                                </TableCell>
+                                <TableCell>
+                                    <Paragraph>
+                                    </Paragraph>
+                                </TableCell>
+                                <TableCell>
+                                    <BlockUIContainer>
+                                        <TextBlock Text="±" HorizontalAlignment="Center" />
                                     </BlockUIContainer>
                                 </TableCell>
                                 <TableCell>

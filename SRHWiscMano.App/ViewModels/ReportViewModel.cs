@@ -26,6 +26,8 @@ namespace SRHWiscMano.App.ViewModels
         [ObservableProperty] private PlotController pressureModelAtVPController;
         [ObservableProperty] private PlotModel pressureModelAtTB;
         [ObservableProperty] private PlotController pressureModelAtTBController;
+        [ObservableProperty] private PlotModel pressureGradientModel;
+        [ObservableProperty] private PlotController pressureGradientController;
 
         /// <summary>
         /// Designer Datacontext를 위한 생성자
