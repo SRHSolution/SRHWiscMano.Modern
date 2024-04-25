@@ -11,6 +11,9 @@ namespace SRHWiscMano.Core.Models
 
         Range<int> SensorRange { get; }
 
+        IList<double> MaxValues { get; }
+        IList<double> AvgValues { get; }
+
         RegionType Type { get; }
 
         SamplePoint ClickPoint { get; }

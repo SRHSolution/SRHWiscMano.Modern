@@ -68,6 +68,7 @@ namespace SRHWiscMano.Core.ViewModels
         [ObservableProperty] private bool isSelected;
 
         [ObservableProperty] private bool isEditing = false;
+        private readonly IDisposable subscribeDispose;
         public static OxyPalette SelectedPalette { get; private set; }
 
         public TimeFrameViewModel(ITimeFrame data)
@@ -100,11 +101,16 @@ namespace SRHWiscMano.Core.ViewModels
                 DrawRegionAnnotation(oldRegion);
             }
 
-            Data.Regions.Connect().Subscribe(HandleRegionList);
+            subscribeDispose = Data.Regions.Connect().Subscribe(HandleRegionList);
             regionSelectSteps = RegionSelectStep.GetStandardSteps(this).ToList();
 
             // Heatmap의 색상 Pallete가 변경시 업데이트를 위한 handler를 등록한다
             WeakReferenceMessenger.Default.Register<PaletteChangedMessageMessage>(this, OnPaletteChange);
+        }
+
+        public void Dispose()
+        {
+            subscribeDispose?.Dispose();
         }
 
         /// <summary>
@@ -195,7 +201,8 @@ namespace SRHWiscMano.Core.ViewModels
                     {
                         var region = change.Item.Current;
                         var itemToRemove =
-                            FramePlotModel.Annotations.Single(ann => Equals(ann.Tag.ToString(), region.Type.ToString()));
+                            FramePlotModel.Annotations.Single(ann =>
+                                Equals(ann.Tag.ToString(), region.Type.ToString()));
                         FramePlotModel.Annotations.Remove(itemToRemove);
                         FramePlotModel.InvalidatePlot(false);
 
@@ -207,13 +214,21 @@ namespace SRHWiscMano.Core.ViewModels
                         var rangeToRemove = change.Range;
                         foreach (var region in rangeToRemove)
                         {
-                            var itemToRemove =
-                                FramePlotModel.Annotations.Single(ann => Equals(ann.Tag.ToString(), region.Type.ToString()));
-                            FramePlotModel.Annotations.Remove(itemToRemove);
-                            FramePlotModel.InvalidatePlot(false);
+                            try
+                            {
+                                var itemToRemove =
+                                    FramePlotModel.Annotations.Single(ann =>
+                                        Equals(ann.Tag.ToString(), region.Type.ToString()));
+                                FramePlotModel.Annotations.Remove(itemToRemove);
+                            }
+                            catch (Exception)
+                            {
+                            }
 
                             RegionSelectSteps.First(stp => stp.Type == region.Type).IsCompleted = false;
                         }
+
+                        FramePlotModel.InvalidatePlot(false);
 
                         break;
                     }
@@ -241,8 +256,8 @@ namespace SRHWiscMano.Core.ViewModels
                                 .TotalMilliseconds /
                             10;
 
-            var rangeYTop = (region.SensorRange.Lesser-0.5) * Data.ExamData.InterpolationScale;
-            var rangeYBottom = (region.SensorRange.Greater+0.5) * Data.ExamData.InterpolationScale;
+            var rangeYTop = (region.SensorRange.Lesser - 0.5) * Data.ExamData.InterpolationScale;
+            var rangeYBottom = (region.SensorRange.Greater + 0.5) * Data.ExamData.InterpolationScale;
             var regColor = RegionSelectStep.GetStandardSteps(null).Where(stp => stp.Type == region.Type)
                 .Select(stp => stp.Color).FirstOrDefault(Colors.Black);
 

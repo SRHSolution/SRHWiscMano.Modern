@@ -85,6 +85,7 @@ namespace SRHWiscMano.App.ViewModels
 
         public DelegatePlotCommand<OxyMouseDownEventArgs> GraphClicked { get; set; }
 
+        private object lockObj = new object();
         #endregion
 
         public AnalyzerViewModel()
@@ -195,6 +196,7 @@ namespace SRHWiscMano.App.ViewModels
             try
             {
                 CurrentTimeFrameVM = (selectedItem as TimeFrameViewModel);
+                CurrentTimeFrameHeatmapVM?.Dispose();
                 CurrentTimeFrameHeatmapVM = new TimeFrameViewModel(CurrentTimeFrameVM.Data);
                 MainPlotModel = CurrentTimeFrameHeatmapVM.FramePlotModel;
 
@@ -209,6 +211,7 @@ namespace SRHWiscMano.App.ViewModels
                 MainPlotController = BuildMainPlotcontroller();
                 CurrentTimeFrameHeatmapVM.RefreshPlotData();
 
+                CurrentTimeFrameGraphVM?.Dispose();
                 CurrentTimeFrameGraphVM = new TimeFrameGraphViewModel(CurrentTimeFrameVM.Data);
                 GraphPlotModel = CurrentTimeFrameGraphVM.FramePlotModel;
                 GraphPlotController = BuildGraphPlotcontroller();
@@ -334,7 +337,11 @@ namespace SRHWiscMano.App.ViewModels
             FindRegions(CurrentTimeFrameVM, pickPoint);
         }
 
-
+        /// <summary>
+        /// RegionSelectStep에 따라서 Region 을 구한다
+        /// </summary>
+        /// <param name="timeFrameVM"></param>
+        /// <param name="clickPoint"></param>
         private void FindRegions(TimeFrameViewModel timeFrameVM,  SamplePoint clickPoint)
         {
             RegionSelectStep step = timeFrameVM.RegionSelectSteps.FirstOrDefault(s => !s.IsCompleted);
@@ -359,7 +366,8 @@ namespace SRHWiscMano.App.ViewModels
 
                 if (region != null)
                 {
-                    timeFrameVM.Data.Regions.Add(region);
+                    lock(lockObj)
+                        timeFrameVM.Data.Regions.Add(region);
                 }
 
                 logger.LogTrace(region.ToString());
@@ -403,7 +411,8 @@ namespace SRHWiscMano.App.ViewModels
                 var region = regionFinder.Find(stepType, timeFrameVM.Data, null, RegionFinderConfig.Default, Diagnostics);
                 if (region != null)
                 {
-                    timeFrameVM.Data.Regions.Add(region);
+                    lock(lockObj)
+                        timeFrameVM.Data.Regions.Add(region);
                     return true;
                 }
 
@@ -519,7 +528,8 @@ namespace SRHWiscMano.App.ViewModels
         [RelayCommand]
         private void ResetInspect()
         {
-            CurrentTimeFrameVM.Data.Regions.Clear();
+            lock (lockObj)
+                CurrentTimeFrameVM.Data.Regions.Clear();
         }
 
         /// <summary>
@@ -528,21 +538,26 @@ namespace SRHWiscMano.App.ViewModels
         [RelayCommand]
         private void UndoInspect()
         {
-            if (CurrentTimeFrameVM.RegionSelectSteps.Single(s => s.Type == RegionType.PostUES).IsCompleted)
+            lock (lockObj)
             {
-                var cnt = CurrentTimeFrameVM.Data.Regions.Count;
-                CurrentTimeFrameVM.Data.Regions.RemoveRange(2, cnt-2);
-                return;
-            }
-            if (CurrentTimeFrameVM.RegionSelectSteps.Single(s => s.Type == RegionType.PreUES).IsCompleted)
-            {
-                CurrentTimeFrameVM.Data.Regions.RemoveAt(1);
-                return;
-            }
-            if (CurrentTimeFrameVM.RegionSelectSteps.Single(s => s.Type == RegionType.VP).IsCompleted)
-            {
-                CurrentTimeFrameVM.Data.Regions.Clear();
-                return;
+                if (CurrentTimeFrameVM.RegionSelectSteps.Single(s => s.Type == RegionType.PostUES).IsCompleted)
+                {
+                    var cnt = CurrentTimeFrameVM.Data.Regions.Count;
+                    CurrentTimeFrameVM.Data.Regions.RemoveRange(2, cnt - 2);
+                    return;
+                }
+
+                if (CurrentTimeFrameVM.RegionSelectSteps.Single(s => s.Type == RegionType.PreUES).IsCompleted)
+                {
+                    CurrentTimeFrameVM.Data.Regions.RemoveAt(1);
+                    return;
+                }
+
+                if (CurrentTimeFrameVM.RegionSelectSteps.Single(s => s.Type == RegionType.VP).IsCompleted)
+                {
+                    CurrentTimeFrameVM.Data.Regions.Clear();
+                    return;
+                }
             }
         }
         private bool RemoveIfCompleted(RegionType type)

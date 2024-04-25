@@ -115,6 +115,44 @@ namespace SRHWiscMano.Core.Helpers
             return orderedResults;
         }
 
+        /// <summary>
+        /// 입력된 TimeRange 에서 지정된 Sensors 안에서 최대 값을 선택한 데이터를 만든다
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="timeRange"></param>
+        /// <param name="sensorRange"></param>
+        /// <returns></returns>
+        public static IEnumerable<double> MaxValueForSensorInTimeRange(
+            this IExamination data,
+            Interval timeRange,
+            Range<int> sensorRange)
+        {
+            var samples = data.SamplesForSensorInTimeRange(timeRange, sensorRange);
+            var maxValuesInTimeRange = samples.Select(s => s.Values.Max());
+
+            return maxValuesInTimeRange;
+        }
+
+        public static IEnumerable<double> AverageValueForSensorInTimeRange(
+            this IExamination data,
+            Interval timeRange,
+            Range<int> sensorRange)
+        {
+            var samples = data.SamplesForSensorInTimeRange(timeRange, sensorRange);
+            var maxValuesInTimeRange = samples.Select(s => s.Values.Average());
+
+            return maxValuesInTimeRange;
+        }
+
+        public static IReadOnlyList<TimeSample> SamplesForSensorInTimeRange(
+            this IExamination data,
+            Interval timeRange,
+            Range<int> sensorRange)
+        {
+            return data.Samples.SamplesInTimeRange(timeRange).SamplesForSensorRange(sensorRange);
+        }
+
+
         public static IEnumerable<double> ValuesForSensorInTimeRange(
             this IExamination data,
             Interval timeRange,
@@ -163,7 +201,7 @@ namespace SRHWiscMano.Core.Helpers
         public static IReadOnlyList<TimeSample> SamplesInTimeRange(this IEnumerable<TimeSample> samples,
             Instant startTime, Instant endTime)
         {
-            var subSamples = samples.Where(s => s.Time >= startTime && s.Time < endTime);
+            var subSamples = samples.Where(s => s.Time >= startTime && s.Time <= endTime);
             return subSamples.ToList().AsReadOnly();
         }
 
