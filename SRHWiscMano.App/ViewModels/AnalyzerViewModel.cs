@@ -151,6 +151,7 @@ namespace SRHWiscMano.App.ViewModels
                     // Binding 된 TimeFrame의 Time/Sensor Bound를 변경될 시에 각각에 해당하는 viewmodel을 update한다.
                     case ChangeReason.Update:
                         var updItem = TimeFrameViewModels.SingleOrDefault(item => item.Id == change.Current.Id);
+                        updItem.Label = change.Current.Text;
                         updItem.RefreshPlotData();
 
                         if (CurrentTimeFrameHeatmapVM?.Id == change.Current.Id)
