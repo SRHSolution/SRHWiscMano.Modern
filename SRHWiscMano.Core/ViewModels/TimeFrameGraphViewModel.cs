@@ -82,9 +82,10 @@ namespace SRHWiscMano.Core.ViewModels
             // UpdateLineSeries(plotModel, plotData, Data.MinSensorBound, Data.MaxSensorBound);
             FramePlotModel = plotModel;
 
-            
             subscribeDipose = Data.Regions.Connect().Subscribe(HandleRegionList);
         }
+
+
 
         public void Dispose()
         {

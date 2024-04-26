@@ -69,8 +69,10 @@ namespace SRHWiscMano.Core.Services.Report
                     "No sample in time range for {0} region of snapshot {1}", region.Type.ToString(), state.Id));
             for (int i = region.SensorRange.Start; i < region.SensorRange.End; ++i)
             {
+                // 한개의 센서에 대해 window 3에 대한 min, max 을 찾는다
                 double num1 = samples.SmoothMax(i);
                 double num2 = samples.SmoothMin(i);
+                // 한개의 센서에 대해서 앞의 값과 연속된 다음의 값을 시간과 값을 이용하여 적분한다
                 double num3 = samples.TrapezoidalIntegral(s => s.TimeInSeconds, s => s.Values[i]);
                 if (num1 > maximum)
                 {
@@ -83,6 +85,7 @@ namespace SRHWiscMano.Core.Services.Report
                 totalIntegral += num3;
             }
 
+            // Min, Max, Max 값을 갖기 전까지의 적분값, 전체 적분값
             return new MinMaxAndIntegrals(maximum, minimum, integralUnderMaximum, totalIntegral);
         }
 
@@ -91,6 +94,7 @@ namespace SRHWiscMano.Core.Services.Report
             Func<T, double> x,
             Func<T, double> fx)
         {
+            //Pairwise : 연속되는 숫자를 (previous, current)를 Tuple 로 짝을 이뤄서 전달한다
             return values.Pairwise().Select(p => TrapezoidalApprox(x(p.Item1), x(p.Item2), fx(p.Item1), fx(p.Item2)))
                 .Sum();
         }
@@ -98,6 +102,22 @@ namespace SRHWiscMano.Core.Services.Report
         private static double TrapezoidalApprox(double a, double b, double fa, double fb)
         {
             return (b - a) * ((fa + fb) / 2.0);
+        }
+
+        /// <summary>
+        /// 3개의 연속된 값을 이용하여 Trapezoidal 적분보다 더욱 정밀한 적분을 수행한다
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="fa"></param>
+        /// <param name="b"></param>
+        /// <param name="fb"></param>
+        /// <param name="c"></param>
+        /// <param name="fc"></param>
+        /// <returns></returns>
+        public static double SimpsonRule(double a, double fa, double b, double fb, double c, double fc)
+        {
+            double h = (c - a) / 2; // h는 첫 번째 점과 세 번째 점 사이의 거리의 절반
+            return (h / 3) * (fa + 4 * fb + fc);
         }
 
         private static T FillRegionStats<T>(
