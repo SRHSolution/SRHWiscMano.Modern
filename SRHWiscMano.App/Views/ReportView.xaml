@@ -24,9 +24,11 @@
                     <Setter Property="FontSize" Value="13" />
                 </Style>
                 <Style x:Key="RotatedHeaderText" TargetType="{x:Type TextBlock}">
-                    <Setter Property="Padding" Value="0,0,0,0" />
-                    <Setter Property="VerticalAlignment" Value="Center"/>
+                    <Setter Property="Padding" Value="2,0" />
                     <Setter Property="HorizontalAlignment" Value="Center"/>
+                    <Setter Property="VerticalAlignment" Value="Center"/>
+                    <Setter Property="TextAlignment" Value="Center"/>
+                    <!-- <Setter Property="Height" Value="20"/> -->
                     <Setter Property="LayoutTransform">
                         <Setter.Value>
                             <RotateTransform Angle="270" />
@@ -37,33 +39,33 @@
             <FlowDocumentScrollViewer.Document>
                 <FlowDocument>
                     <Paragraph>
-                        <Figure Width="600" Padding="5,0,5,0" HorizontalAnchor="PageRight">
+                        <Figure Width="410" Padding="5,0,5,0" HorizontalAnchor="PageRight">
                             <BlockUIContainer>
-                                <oxy:PlotView Width="400" Height="200" Model="{Binding PressureModel}"
-                                              Controller="{Binding PressureModelController}" />
+                                <oxy:PlotView Width="400" Height="200" Model="{Binding ModelPressureMax}"
+                                              Controller="{Binding CntrPressureMax}" />
                             </BlockUIContainer>
                             <BlockUIContainer>
-                                <oxy:PlotView Width="400" Height="200" Model="{Binding PressureModelAtVP}"
-                                              Controller="{Binding PressureModelAtVPController}" />
+                                <oxy:PlotView Width="400" Height="200" Model="{Binding ModelPressureMaxAtVP}"
+                                              Controller="{Binding CntrPressureMaxAtVP}" />
                             </BlockUIContainer>
                             <BlockUIContainer>
-                                <oxy:PlotView Width="400" Height="200" Model="{Binding PressureModelAtTB}"
-                                              Controller="{Binding PressureModelAtVPController}" />
+                                <oxy:PlotView Width="400" Height="200" Model="{Binding ModelPressureMaxAtTB}"
+                                              Controller="{Binding CntrPressureMaxAtTB}" />
                             </BlockUIContainer>
                             <BlockUIContainer>
-                                <oxy:PlotView Width="400" Height="200" Model="{Binding PressureGradientModel}"
-                                              Controller="{Binding PressureGradientController}" />
+                                <oxy:PlotView Width="400" Height="200" Model="{Binding ModelPressureGradient}"
+                                              Controller="{Binding CntrPressureGradient}" />
                             </BlockUIContainer>
                         </Figure>
                     </Paragraph>
                     <Paragraph Style="{StaticResource ResultsHeading}">Aggregate Results</Paragraph>
                     <Table>
                         <Table.Columns>
-                            <TableColumn Width="1" />
-                            <TableColumn Width="50*" />
-                            <TableColumn Width="10*" />
-                            <TableColumn Width="1" />
-                            <TableColumn Width="10*" />
+                            <TableColumn Width="30" />
+                            <TableColumn Width="320"/>
+                            <TableColumn Width="40" />
+                            <TableColumn Width="20" />
+                            <TableColumn Width="40" />
                         </Table.Columns>
                         <TableRowGroup>
                             <TableRow>
@@ -77,17 +79,18 @@
                                     <Paragraph Style="{StaticResource RegionHeading}">Max Pressure (mmHg)</Paragraph>
                                 </TableCell>
                                 <TableCell>
-                                    <Paragraph>
+                                    <Paragraph TextAlignment="Center">
+                                        0.0
                                     </Paragraph>
                                 </TableCell>
                                 <TableCell>
-                                    <BlockUIContainer>
-                                        <TextBlock Text="±" HorizontalAlignment="Center" />
-                                    </BlockUIContainer>
+                                    <Paragraph TextAlignment="Center">
+                                        ±
+                                    </Paragraph>
                                 </TableCell>
                                 <TableCell>
-                                    <Paragraph>
-
+                                    <Paragraph TextAlignment="Center">
+                                        0.0
                                     </Paragraph>
                                 </TableCell>
                             </TableRow>
@@ -96,17 +99,18 @@
                                     <Paragraph Style="{StaticResource RegionHeading}">Duration (s)</Paragraph>
                                 </TableCell>
                                 <TableCell>
-                                    <Paragraph>
+                                    <Paragraph TextAlignment="Center">
+                                        0.0
                                     </Paragraph>
                                 </TableCell>
                                 <TableCell>
-                                    <BlockUIContainer>
-                                        <TextBlock Text="±" HorizontalAlignment="Center" />
-                                    </BlockUIContainer>
+                                    <Paragraph TextAlignment="Center">
+                                        ±
+                                    </Paragraph>
                                 </TableCell>
                                 <TableCell>
-                                    <Paragraph>
-
+                                    <Paragraph TextAlignment="Center">
+                                        0.0
                                     </Paragraph>
                                 </TableCell>
                             </TableRow>
@@ -115,17 +119,18 @@
                                     <Paragraph Style="{StaticResource RegionHeading}">Cummulative Pressure (mmHg⋅s)</Paragraph>
                                 </TableCell>
                                 <TableCell>
-                                    <Paragraph>
+                                    <Paragraph TextAlignment="Center">
+                                        0.0
                                     </Paragraph>
                                 </TableCell>
                                 <TableCell>
-                                    <BlockUIContainer>
-                                        <TextBlock Text="±" HorizontalAlignment="Center" />
-                                    </BlockUIContainer>
+                                    <Paragraph TextAlignment="Center">
+                                        ±
+                                    </Paragraph>
                                 </TableCell>
                                 <TableCell>
-                                    <Paragraph>
-
+                                    <Paragraph TextAlignment="Center">
+                                        0.0
                                     </Paragraph>
                                 </TableCell>
                             </TableRow>
@@ -148,17 +153,18 @@
                                     <Paragraph Style="{StaticResource RegionHeading}">Max Pressure (mmHg)</Paragraph>
                                 </TableCell>
                                 <TableCell>
-                                    <Paragraph>
+                                    <Paragraph TextAlignment="Center">
+                                        0.0
                                     </Paragraph>
                                 </TableCell>
                                 <TableCell>
-                                    <BlockUIContainer>
-                                        <TextBlock Text="±" HorizontalAlignment="Center" />
-                                    </BlockUIContainer>
+                                    <Paragraph TextAlignment="Center">
+                                        ±
+                                    </Paragraph>
                                 </TableCell>
                                 <TableCell>
-                                    <Paragraph>
-
+                                    <Paragraph TextAlignment="Center">
+                                        0.0
                                     </Paragraph>
                                 </TableCell>
                             </TableRow>
@@ -167,17 +173,18 @@
                                     <Paragraph Style="{StaticResource RegionHeading}">Duration (s)</Paragraph>
                                 </TableCell>
                                 <TableCell>
-                                    <Paragraph>
+                                    <Paragraph TextAlignment="Center">
+                                        0.0
                                     </Paragraph>
                                 </TableCell>
                                 <TableCell>
-                                    <BlockUIContainer>
-                                        <TextBlock Text="±" HorizontalAlignment="Center" />
-                                    </BlockUIContainer>
+                                    <Paragraph TextAlignment="Center">
+                                        ±
+                                    </Paragraph>
                                 </TableCell>
                                 <TableCell>
-                                    <Paragraph>
-
+                                    <Paragraph TextAlignment="Center">
+                                        0.0
                                     </Paragraph>
                                 </TableCell>
                             </TableRow>
@@ -186,17 +193,18 @@
                                     <Paragraph Style="{StaticResource RegionHeading}">Cummulative Pressure (mmHg⋅s)</Paragraph>
                                 </TableCell>
                                 <TableCell>
-                                    <Paragraph>
+                                    <Paragraph TextAlignment="Center">
+                                        0.0
                                     </Paragraph>
                                 </TableCell>
                                 <TableCell>
-                                    <BlockUIContainer>
-                                        <TextBlock Text="±" HorizontalAlignment="Center" />
-                                    </BlockUIContainer>
+                                    <Paragraph TextAlignment="Center">
+                                        ±
+                                    </Paragraph>
                                 </TableCell>
                                 <TableCell>
-                                    <Paragraph>
-
+                                    <Paragraph TextAlignment="Center">
+                                        0.0
                                     </Paragraph>
                                 </TableCell>
                             </TableRow>
@@ -218,17 +226,18 @@
                                     <Paragraph Style="{StaticResource RegionHeading}">Max Pressure (mmHg)</Paragraph>
                                 </TableCell>
                                 <TableCell>
-                                    <Paragraph>
+                                    <Paragraph TextAlignment="Center">
+                                        0.0
                                     </Paragraph>
                                 </TableCell>
                                 <TableCell>
-                                    <BlockUIContainer>
-                                        <TextBlock Text="±" HorizontalAlignment="Center" />
-                                    </BlockUIContainer>
+                                    <Paragraph TextAlignment="Center">
+                                        ±
+                                    </Paragraph>
                                 </TableCell>
                                 <TableCell>
-                                    <Paragraph>
-
+                                    <Paragraph TextAlignment="Center">
+                                        0.0
                                     </Paragraph>
                                 </TableCell>
                             </TableRow>
@@ -237,17 +246,18 @@
                                     <Paragraph Style="{StaticResource RegionHeading}">Duration (s)</Paragraph>
                                 </TableCell>
                                 <TableCell>
-                                    <Paragraph>
+                                    <Paragraph TextAlignment="Center">
+                                        0.0
                                     </Paragraph>
                                 </TableCell>
                                 <TableCell>
-                                    <BlockUIContainer>
-                                        <TextBlock Text="±" HorizontalAlignment="Center" />
-                                    </BlockUIContainer>
+                                    <Paragraph TextAlignment="Center">
+                                        ±
+                                    </Paragraph>
                                 </TableCell>
                                 <TableCell>
-                                    <Paragraph>
-
+                                    <Paragraph TextAlignment="Center">
+                                        0.0
                                     </Paragraph>
                                 </TableCell>
                             </TableRow>
@@ -256,17 +266,18 @@
                                     <Paragraph Style="{StaticResource RegionHeading}">Cummulative Pressure (mmHg⋅s)</Paragraph>
                                 </TableCell>
                                 <TableCell>
-                                    <Paragraph>
+                                    <Paragraph TextAlignment="Center">
+                                        0.0
                                     </Paragraph>
                                 </TableCell>
                                 <TableCell>
-                                    <BlockUIContainer>
-                                        <TextBlock Text="±" HorizontalAlignment="Center" />
-                                    </BlockUIContainer>
+                                    <Paragraph TextAlignment="Center">
+                                        ±
+                                    </Paragraph>
                                 </TableCell>
                                 <TableCell>
-                                    <Paragraph>
-
+                                    <Paragraph TextAlignment="Center">
+                                        0.0
                                     </Paragraph>
                                 </TableCell>
                             </TableRow>
@@ -288,17 +299,18 @@
                                     <Paragraph Style="{StaticResource RegionHeading}">Max Pressure (mmHg)</Paragraph>
                                 </TableCell>
                                 <TableCell>
-                                    <Paragraph>
+                                    <Paragraph TextAlignment="Center">
+                                        0.0
                                     </Paragraph>
                                 </TableCell>
                                 <TableCell>
-                                    <BlockUIContainer>
-                                        <TextBlock Text="±" HorizontalAlignment="Center" />
-                                    </BlockUIContainer>
+                                    <Paragraph TextAlignment="Center">
+                                        ±
+                                    </Paragraph>
                                 </TableCell>
                                 <TableCell>
-                                    <Paragraph>
-
+                                    <Paragraph TextAlignment="Center">
+                                        0.0
                                     </Paragraph>
                                 </TableCell>
                             </TableRow>
@@ -307,17 +319,18 @@
                                     <Paragraph Style="{StaticResource RegionHeading}">Duration (s)</Paragraph>
                                 </TableCell>
                                 <TableCell>
-                                    <Paragraph>
+                                    <Paragraph TextAlignment="Center">
+                                        0.0
                                     </Paragraph>
                                 </TableCell>
                                 <TableCell>
-                                    <BlockUIContainer>
-                                        <TextBlock Text="±" HorizontalAlignment="Center" />
-                                    </BlockUIContainer>
+                                    <Paragraph TextAlignment="Center">
+                                        ±
+                                    </Paragraph>
                                 </TableCell>
                                 <TableCell>
-                                    <Paragraph>
-
+                                    <Paragraph TextAlignment="Center">
+                                        0.0
                                     </Paragraph>
                                 </TableCell>
                             </TableRow>
@@ -326,17 +339,18 @@
                                     <Paragraph Style="{StaticResource RegionHeading}">Cummulative Pressure (mmHg⋅s)</Paragraph>
                                 </TableCell>
                                 <TableCell>
-                                    <Paragraph>
+                                    <Paragraph TextAlignment="Center">
+                                        0.0
                                     </Paragraph>
                                 </TableCell>
                                 <TableCell>
-                                    <BlockUIContainer>
-                                        <TextBlock Text="±" HorizontalAlignment="Center" />
-                                    </BlockUIContainer>
+                                    <Paragraph TextAlignment="Center">
+                                        ±
+                                    </Paragraph>
                                 </TableCell>
                                 <TableCell>
-                                    <Paragraph>
-
+                                    <Paragraph TextAlignment="Center">
+                                        0.0
                                     </Paragraph>
                                 </TableCell>
                             </TableRow>
@@ -358,17 +372,18 @@
                                     <Paragraph Style="{StaticResource RegionHeading}">Max Pressure (mmHg)</Paragraph>
                                 </TableCell>
                                 <TableCell>
-                                    <Paragraph>
+                                    <Paragraph TextAlignment="Center">
+                                        0.0
                                     </Paragraph>
                                 </TableCell>
                                 <TableCell>
-                                    <BlockUIContainer>
-                                        <TextBlock Text="±" HorizontalAlignment="Center" />
-                                    </BlockUIContainer>
+                                    <Paragraph TextAlignment="Center">
+                                        ±
+                                    </Paragraph>
                                 </TableCell>
                                 <TableCell>
-                                    <Paragraph>
-
+                                    <Paragraph TextAlignment="Center">
+                                        0.0
                                     </Paragraph>
                                 </TableCell>
                             </TableRow>
@@ -377,17 +392,18 @@
                                     <Paragraph Style="{StaticResource RegionHeading}">Duration (s)</Paragraph>
                                 </TableCell>
                                 <TableCell>
-                                    <Paragraph>
+                                    <Paragraph TextAlignment="Center">
+                                        0.0
                                     </Paragraph>
                                 </TableCell>
                                 <TableCell>
-                                    <BlockUIContainer>
-                                        <TextBlock Text="±" HorizontalAlignment="Center" />
-                                    </BlockUIContainer>
+                                    <Paragraph TextAlignment="Center">
+                                        ±
+                                    </Paragraph>
                                 </TableCell>
                                 <TableCell>
-                                    <Paragraph>
-
+                                    <Paragraph TextAlignment="Center">
+                                        0.0
                                     </Paragraph>
                                 </TableCell>
                             </TableRow>
@@ -396,17 +412,18 @@
                                     <Paragraph Style="{StaticResource RegionHeading}">Cummulative Pressure (mmHg⋅s)</Paragraph>
                                 </TableCell>
                                 <TableCell>
-                                    <Paragraph>
+                                    <Paragraph TextAlignment="Center">
+                                        0.0
                                     </Paragraph>
                                 </TableCell>
                                 <TableCell>
-                                    <BlockUIContainer>
-                                        <TextBlock Text="±" HorizontalAlignment="Center" />
-                                    </BlockUIContainer>
+                                    <Paragraph TextAlignment="Center">
+                                        ±
+                                    </Paragraph>
                                 </TableCell>
                                 <TableCell>
-                                    <Paragraph>
-
+                                    <Paragraph TextAlignment="Center">
+                                        0.0
                                     </Paragraph>
                                 </TableCell>
                             </TableRow>
@@ -428,17 +445,18 @@
                                     <Paragraph Style="{StaticResource RegionHeading}">Max Pressure (mmHg)</Paragraph>
                                 </TableCell>
                                 <TableCell>
-                                    <Paragraph>
+                                    <Paragraph TextAlignment="Center">
+                                        0.0
                                     </Paragraph>
                                 </TableCell>
                                 <TableCell>
-                                    <BlockUIContainer>
-                                        <TextBlock Text="±" HorizontalAlignment="Center" />
-                                    </BlockUIContainer>
+                                    <Paragraph TextAlignment="Center">
+                                        ±
+                                    </Paragraph>
                                 </TableCell>
                                 <TableCell>
-                                    <Paragraph>
-
+                                    <Paragraph TextAlignment="Center">
+                                        0.0
                                     </Paragraph>
                                 </TableCell>
                             </TableRow>
@@ -447,17 +465,18 @@
                                     <Paragraph Style="{StaticResource RegionHeading}">Duration (s)</Paragraph>
                                 </TableCell>
                                 <TableCell>
-                                    <Paragraph>
+                                    <Paragraph TextAlignment="Center">
+                                        0.0
                                     </Paragraph>
                                 </TableCell>
                                 <TableCell>
-                                    <BlockUIContainer>
-                                        <TextBlock Text="±" HorizontalAlignment="Center" />
-                                    </BlockUIContainer>
+                                    <Paragraph TextAlignment="Center">
+                                        ±
+                                    </Paragraph>
                                 </TableCell>
                                 <TableCell>
-                                    <Paragraph>
-
+                                    <Paragraph TextAlignment="Center">
+                                        0.0
                                     </Paragraph>
                                 </TableCell>
                             </TableRow>
@@ -466,17 +485,18 @@
                                     <Paragraph Style="{StaticResource RegionHeading}">Cummulative Pressure (mmHg⋅s)</Paragraph>
                                 </TableCell>
                                 <TableCell>
-                                    <Paragraph>
+                                    <Paragraph TextAlignment="Center">
+                                        0.0
                                     </Paragraph>
                                 </TableCell>
                                 <TableCell>
-                                    <BlockUIContainer>
-                                        <TextBlock Text="±" HorizontalAlignment="Center" />
-                                    </BlockUIContainer>
+                                    <Paragraph TextAlignment="Center">
+                                        ±
+                                    </Paragraph>
                                 </TableCell>
                                 <TableCell>
-                                    <Paragraph>
-
+                                    <Paragraph TextAlignment="Center">
+                                        0.0
                                     </Paragraph>
                                 </TableCell>
                             </TableRow>
@@ -498,17 +518,18 @@
                                     <Paragraph Style="{StaticResource RegionHeading}">Max Pressure (mmHg)</Paragraph>
                                 </TableCell>
                                 <TableCell>
-                                    <Paragraph>
+                                    <Paragraph TextAlignment="Center">
+                                        0.0
                                     </Paragraph>
                                 </TableCell>
                                 <TableCell>
-                                    <BlockUIContainer>
-                                        <TextBlock Text="±" HorizontalAlignment="Center" />
-                                    </BlockUIContainer>
+                                    <Paragraph TextAlignment="Center">
+                                        ±
+                                    </Paragraph>
                                 </TableCell>
                                 <TableCell>
-                                    <Paragraph>
-
+                                    <Paragraph TextAlignment="Center">
+                                        0.0
                                     </Paragraph>
                                 </TableCell>
                             </TableRow>
@@ -517,17 +538,18 @@
                                     <Paragraph Style="{StaticResource RegionHeading}">Duration (s)</Paragraph>
                                 </TableCell>
                                 <TableCell>
-                                    <Paragraph>
+                                    <Paragraph TextAlignment="Center">
+                                        0.0
                                     </Paragraph>
                                 </TableCell>
                                 <TableCell>
-                                    <BlockUIContainer>
-                                        <TextBlock Text="±" HorizontalAlignment="Center" />
-                                    </BlockUIContainer>
+                                    <Paragraph TextAlignment="Center">
+                                        ±
+                                    </Paragraph>
                                 </TableCell>
                                 <TableCell>
-                                    <Paragraph>
-
+                                    <Paragraph TextAlignment="Center">
+                                        0.0
                                     </Paragraph>
                                 </TableCell>
                             </TableRow>
@@ -536,17 +558,18 @@
                                     <Paragraph Style="{StaticResource RegionHeading}">Cummulative Pressure (mmHg⋅s)</Paragraph>
                                 </TableCell>
                                 <TableCell>
-                                    <Paragraph>
+                                    <Paragraph TextAlignment="Center">
+                                        0.0
                                     </Paragraph>
                                 </TableCell>
                                 <TableCell>
-                                    <BlockUIContainer>
-                                        <TextBlock Text="±" HorizontalAlignment="Center" />
-                                    </BlockUIContainer>
+                                    <Paragraph TextAlignment="Center">
+                                        ±
+                                    </Paragraph>
                                 </TableCell>
                                 <TableCell>
-                                    <Paragraph>
-
+                                    <Paragraph TextAlignment="Center">
+                                        0.0
                                     </Paragraph>
                                 </TableCell>
                             </TableRow>
