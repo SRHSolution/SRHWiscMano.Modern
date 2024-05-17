@@ -10,6 +10,7 @@ using OxyPlot;
 using OxyPlot.Axes;
 using OxyPlot.Series;
 using SRHWiscMano.App.Services;
+using SRHWiscMano.Core.Models.Results;
 using SRHWiscMano.Core.ViewModels;
 
 namespace SRHWiscMano.App.ViewModels
@@ -29,6 +30,8 @@ namespace SRHWiscMano.App.ViewModels
         [ObservableProperty] private PlotModel modelPressureGradient;
         [ObservableProperty] private PlotController cntrPressureGradient;
 
+        [ObservableProperty] private ExamResults<OutlierResult> examResult;
+
         /// <summary>
         /// Designer Datacontext를 위한 생성자
         /// </summary>
@@ -44,6 +47,18 @@ namespace SRHWiscMano.App.ViewModels
             ModelPressureMaxAtVP = CreatePlotForPressureMax("Pressure Maximum at VP");
             ModelPressureMaxAtTB = CreatePlotForPressureMax("Pressure Maximum at TB");
             ModelPressureGradient = CreatePlotForPressureGradient("Pressure Gradient");
+
+            DummyData();
+        }
+
+        private void DummyData()
+        {
+            SwallowResults<MeanAndDeviation> aggregate = new();
+            aggregate.VP.MaximumPressure = new MeanAndDeviation(10, 0.3, 10);
+            aggregate.VP.Duration = new MeanAndDeviation(30, 0.1, 10);
+            aggregate.VP.TotalVolumePressure = new MeanAndDeviation(20, 0.5, 10);
+
+            examResult = new ExamResults<OutlierResult>(null, aggregate);
         }
 
         private PlotModel CreatePlotForPressureMax(string title)
@@ -190,5 +205,13 @@ namespace SRHWiscMano.App.ViewModels
                 Tag = "X"
             };
         }
+
+        // private Task<ExamResults<OutlierResult>> CalculateThisExamResults(
+        //     IReadOnlyCollection<TimeFrameViewModel> snapshots,
+        //     string bolusSize)
+        // {
+        //     // return Task.FromResult(resultsCalc.CalculateSnapshotResults(snapshots.Where(s =>
+        //         // s.IsSelected && s.AllStepsAreCompleted && s.MatchesBolusSize(bolusSize))));
+        // }
     }
 }

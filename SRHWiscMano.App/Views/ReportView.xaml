@@ -80,7 +80,7 @@
                                 </TableCell>
                                 <TableCell>
                                     <Paragraph TextAlignment="Center">
-                                        0.0
+                                        <TextBlock Text="{Binding ExamResult.Aggregate.VP.MaximumPressure.Mean}"/>
                                     </Paragraph>
                                 </TableCell>
                                 <TableCell>
@@ -90,7 +90,7 @@
                                 </TableCell>
                                 <TableCell>
                                     <Paragraph TextAlignment="Center">
-                                        0.0
+                                        <TextBlock Text="{Binding ExamResult.Aggregate.VP.MaximumPressure.StandardDeviation}"/>
                                     </Paragraph>
                                 </TableCell>
                             </TableRow>
@@ -100,7 +100,7 @@
                                 </TableCell>
                                 <TableCell>
                                     <Paragraph TextAlignment="Center">
-                                        0.0
+                                        <TextBlock Text="{Binding ExamResult.Aggregate.VP.Duration.Mean}"/>
                                     </Paragraph>
                                 </TableCell>
                                 <TableCell>
@@ -110,7 +110,7 @@
                                 </TableCell>
                                 <TableCell>
                                     <Paragraph TextAlignment="Center">
-                                        0.0
+                                        <TextBlock Text="{Binding ExamResult.Aggregate.VP.Duration.StandardDeviation}"/>
                                     </Paragraph>
                                 </TableCell>
                             </TableRow>
@@ -120,7 +120,7 @@
                                 </TableCell>
                                 <TableCell>
                                     <Paragraph TextAlignment="Center">
-                                        0.0
+                                        <TextBlock Text="{Binding ExamResult.Aggregate.VP.TotalVolumePressure.Mean}"/>
                                     </Paragraph>
                                 </TableCell>
                                 <TableCell>
@@ -130,11 +130,10 @@
                                 </TableCell>
                                 <TableCell>
                                     <Paragraph TextAlignment="Center">
-                                        0.0
+                                        <TextBlock Text="{Binding ExamResult.Aggregate.VP.TotalVolumePressure.StandardDeviation}"/>
                                     </Paragraph>
                                 </TableCell>
                             </TableRow>
-
                         </TableRowGroup>
                         <TableRowGroup>
                             <TableRow>

@@ -3,6 +3,9 @@ using SRHWiscMano.Core.Models.Results;
 
 namespace SRHWiscMano.Core.Services.Report
 {
+    /// <summary>
+    /// 입력된 TimeFrame을 단독적으로 게산을 수행한다.
+    /// </summary>
     public class ResultsCalculator : IResultsCalculator
     {
         public SwallowResults<double> CalculateIndividual(ITimeFrame snapshot)

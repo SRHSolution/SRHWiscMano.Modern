@@ -10,24 +10,24 @@ namespace SRHWiscMano.Core.Services.Report
     /// </summary>
     public static class RegionCalculator
     {
-        public static SwallowResults<double> CalcResults(ITimeFrame state)
+        public static SwallowResults<double> CalcResults(ITimeFrame tFrame)
         {
             SwallowResults<double> currentResults = new SwallowResults<double>();
-            currentResults.VP = CalcStats(state, RegionType.VP);
+            currentResults.VP = CalcStats(tFrame, RegionType.VP);
 
-            currentResults.TB = CalcStats(state, RegionType.TB);
-            currentResults.HP = CalcStats(state, RegionType.HP);
+            currentResults.TB = CalcStats(tFrame, RegionType.TB);
+            currentResults.HP = CalcStats(tFrame, RegionType.HP);
 
-            currentResults.PreUES = CalcStats(state, RegionType.PreUES);
-            currentResults.PostUES = CalcStats(state, RegionType.PostUES);
-            currentResults.UES = CalcUesStats(state, RegionType.UES);
-            currentResults.MaxPressures = MaxPressuresCalculator.Calc(state).ToList();
-            currentResults.PressureAtVPMax = PressureAtVPMaxCalculator.Calc(state).ToList();
-            currentResults.PressureAtTBMax = PressureAtTBMaxCalculator.Calc(state).ToList();
-            currentResults.PressureGradient = PressureGradientCalculator.CalcDefaultRange(state).ToList();
-            currentResults.TotalSwallowDuration = OverallParamsCalculator.CalcTotalDuration(state).ToTotalSeconds();
+            currentResults.PreUES = CalcStats(tFrame, RegionType.PreUES);
+            currentResults.PostUES = CalcStats(tFrame, RegionType.PostUES);
+            currentResults.UES = CalcUesStats(tFrame, RegionType.UES);
+            currentResults.MaxPressures = MaxPressuresCalculator.Calc(tFrame).ToList();
+            currentResults.PressureAtVPMax = PressureAtVPMaxCalculator.Calc(tFrame).ToList();
+            currentResults.PressureAtTBMax = PressureAtTBMaxCalculator.Calc(tFrame).ToList();
+            currentResults.PressureGradient = PressureGradientCalculator.CalcDefaultRange(tFrame).ToList();
+            currentResults.TotalSwallowDuration = OverallParamsCalculator.CalcTotalDuration(tFrame).ToTotalSeconds();
             currentResults.TotalPharyngealPressure =
-                OverallParamsCalculator.CalcTotalPharyngealPressure(state, currentResults);
+                OverallParamsCalculator.CalcTotalPharyngealPressure(tFrame, currentResults);
             return currentResults;
         }
 
