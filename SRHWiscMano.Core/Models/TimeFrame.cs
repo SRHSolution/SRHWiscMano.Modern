@@ -65,6 +65,21 @@ namespace SRHWiscMano.Core.Models
             UpdateTime(Time);
         }
 
+        public TimeFrame(FrameNote note, double timeDuration, IExamination data)
+        {
+            ExamData = data;
+            Id = Interlocked.Increment(ref GuidId);
+            Text = note.ToString();
+            Time = note.Time;
+            TimeDuration = timeDuration;
+            OwnerSamples = data.Samples;
+            IntpSamples = data.InterpolatedSamples;
+            MinSensorBound = 0;
+            MaxSensorBound = ExamData.SensorCount() - 1;
+
+            UpdateTime(Time);
+        }
+
         /// <summary>
         /// TimeFrame 의 지정된 시간을 변경한다.
         /// 지정된 시간에서 +/- duration 의 간격에 대해 PlotData를 업데이트 한다.
