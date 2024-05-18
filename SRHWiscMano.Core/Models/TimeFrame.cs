@@ -26,6 +26,8 @@ namespace SRHWiscMano.Core.Models
         public IReadOnlyList<TimeSample> FrameSamples { get; private set; }
         public IReadOnlyList<TimeSample> IntpFrameSamples { get; private set; }
 
+        public bool IsSelected { get; set; }
+
         public string Text { get; set; }
 
         public double MinSensorBound { get; private set; }

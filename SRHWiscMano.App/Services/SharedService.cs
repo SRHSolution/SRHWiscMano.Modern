@@ -35,7 +35,7 @@ namespace SRHWiscMano.App.Services
         /// <summary>
         /// Notes 정보를 기준으로 일정 영역을 분리하여 볼 수 있도록 하는 데이터
         /// </summary>
-        public SourceCache<ITimeFrame, int> TimeFrames { get; } = new SourceCache<ITimeFrame, int>(item => item.Id);
+        public SourceCache<ITimeFrame, int> TimeFrames { get; } = new(item => item.Id);
 
         public event EventHandler? ExamDataLoaded;
         public event EventHandler? ExamMetaDataLoaded;

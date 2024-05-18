@@ -128,8 +128,14 @@ namespace SRHWiscMano.App.ViewModels
         [RelayCommand]
         private void SelectAll()
         {
-            TimeFrameViewModels.ForEach(tf => tf.IsSelected = true);
-            TimeFrameViewModels.ToList().ForEach(sn => sn.IsSelected = true);
+            TimeFrameViewModels.ForEach(tf =>
+            {
+                if (tf.IsSelected == false)
+                {
+                    tf.IsSelected = true;
+                    timeFrames.AddOrUpdate(tf.Data);
+                }
+            });
 
             logger.LogTrace($"SelectAll");
         }
@@ -137,10 +143,26 @@ namespace SRHWiscMano.App.ViewModels
         [RelayCommand]
         private void UnselectAll()
         {
-            TimeFrameViewModels.ForEach(tf => tf.IsSelected = false);
-            TimeFrameViewModels.ToList().ForEach(sn => sn.IsSelected = false);
+            TimeFrameViewModels.ForEach(tf =>
+            {
+                if (tf.IsSelected )
+                {
+                    tf.IsSelected = false;
+                    timeFrames.AddOrUpdate(tf.Data);
+                }
+            });
+
 
             logger.LogTrace($"UnselectAll");
+        }
+
+        /// <summary>
+        /// Explorer view가 Loaded 되었을 때 실행된다
+        /// </summary>
+        [RelayCommand]
+        private void NavigatedFrom()
+        {
+            logger.LogDebug("Explorer view is loaded");
         }
 
         [RelayCommand]
@@ -152,9 +174,16 @@ namespace SRHWiscMano.App.ViewModels
         }
 
         [RelayCommand]
-        private void ToggleChecked()
+        private void ToggleChecked(object arg)
         {
-            logger.LogTrace("Explorer ToggleCheckedCommand");
+            var viewmodel = arg as TimeFrameViewModel;
+            if (viewmodel.IsSelected)
+            {
+                var selectTxt = viewmodel.IsSelected == true ? "Selected" : "UnSelected";
+                logger.LogTrace($"{viewmodel.Label} is {selectTxt}");
+            }
+
+            timeFrames.AddOrUpdate(viewmodel.Data);
         }
 
         [RelayCommand]

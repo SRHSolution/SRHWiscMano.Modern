@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
@@ -69,6 +70,8 @@ namespace SRHWiscMano.App.ViewModels
         /// </summary>
         public ObservableCollection<TimeFrameViewModel> TimeFrameViewModels { get; } = new();
 
+        public ObservableCollection<TimeFrameViewModel> SelectedTimeFrameViewModels { get; } = new();
+
         /// <summary>
         /// Heatmap clicked 이벤트에 대한 delegate를 등록하는 변수
         /// </summary>
@@ -77,6 +80,7 @@ namespace SRHWiscMano.App.ViewModels
         public DelegatePlotCommand<OxyMouseDownEventArgs> GraphClicked { get; set; }
 
         private object lockObj = new object();
+
         #endregion
 
         public AnalyzerViewModel()
@@ -98,6 +102,29 @@ namespace SRHWiscMano.App.ViewModels
         }
 
         /// <summary>
+        /// Analyzer view가 Loaded 되었을 때 실행된다
+        /// </summary>
+        [RelayCommand]
+        private void NavigatedFrom()
+        {
+            logger.LogDebug("Analyzer view is loaded");
+            return;
+
+            var selectedTimeFrames = timeFrames.KeyValues.Where(kv => kv.Value.IsSelected).Select(tf =>
+            {
+                var viewmodel = new TimeFrameViewModel(tf.Value);
+                viewmodel.FramePlotController = new PlotController();
+                viewmodel.FramePlotController.UnbindAll();
+                viewmodel.RefreshPlotData();
+                return viewmodel;
+            }).ToList();
+
+            TimeFrameViewModels.Clear();
+            TimeFrameViewModels.AddRange(selectedTimeFrames);
+        }
+
+
+        /// <summary>
         /// SharedService의 TimeFrames에 등록된 데이터를 View에 binding 작업을 수행한다.
         /// </summary>
         /// <param name="changeSet"></param>
@@ -116,19 +143,22 @@ namespace SRHWiscMano.App.ViewModels
                         viewmodel.FramePlotController = new PlotController();
                         viewmodel.FramePlotController.UnbindAll();
 
+                        var tfData = change.Current;
+
                         TimeFrameViewModels.Insert(insertIdx, viewmodel);
 
                         // TimeFrameViewModels에서 Label property 가 변경될 경우 이에 대한 Update 이벤트를 발생하도록 한다.
-                        Observable.FromEvent<PropertyChangedEventHandler, PropertyChangedEventArgs>(
-                                handler => (sender, e) => handler(e),
-                                handler => viewmodel.PropertyChanged += handler,
-                                handler => viewmodel.PropertyChanged -= handler)
-                            .Where(x => x.PropertyName == nameof(viewmodel.Label)).Subscribe(
-                                (arg) =>
-                                {
-                                    change.Current.Text = viewmodel.Label;
-                                    timeFrames.AddOrUpdate(change.Current);
-                                });
+                        // Observable.FromEvent<PropertyChangedEventHandler, PropertyChangedEventArgs>(
+                        //         handler => (sender, e) => handler(e),
+                        //         handler => viewmodel.PropertyChanged += handler,
+                        //         handler => viewmodel.PropertyChanged -= handler)
+                        //     .Where(x => x.PropertyName == nameof(viewmodel.IsSelected)).Subscribe(
+                        //         (arg) =>
+                        //         {
+                        //             // viewmodel.IsSelected
+                        //             // change.Current.Text = viewmodel.Label;
+                        //             // timeFrames.AddOrUpdate(change.Current);
+                        //         });
                         break;
                     }
                     case ChangeReason.Remove:
@@ -144,13 +174,33 @@ namespace SRHWiscMano.App.ViewModels
                     case ChangeReason.Update:
                         var updItem = TimeFrameViewModels.SingleOrDefault(item => item.Id == change.Current.Id);
                         updItem.Label = change.Current.Text;
-                        updItem.RefreshPlotData();
 
-                        if (CurrentTimeFrameHeatmapVM?.Id == change.Current.Id)
+                        // if (CurrentTimeFrameHeatmapVM?.Id == change.Current.Id)
+                        // {
+                        //     CurrentTimeFrameHeatmapVM.RefreshPlotData();
+                        //     CurrentTimeFrameGraphVM.RefreshPlotData();
+                        // }
+
+                        // SelectedTimeFrameViewModels.Clear();
+                        // SelectedTimeFrameViewModels.AddRange(TimeFrameViewModels.Where(tf => tf.Data.IsSelected)); 
+
+                        if (change.Current.IsSelected)
                         {
-                            CurrentTimeFrameHeatmapVM.RefreshPlotData();
-                            CurrentTimeFrameGraphVM.RefreshPlotData();
+                            var insertIdx = SelectedTimeFrameViewModels.LastIndexOf((item) => item.Id <= updItem.Id) +1 ;
+                            SelectedTimeFrameViewModels.Insert(insertIdx ?? 0, updItem);
+                            updItem.RefreshPlotData();
                         }
+                        else
+                        {
+                            if (SelectedTimeFrameViewModels.Contains(updItem))
+                            {
+                                // 데이터는 list에서 삭제하지만, 이전에 추가되었을 때 생성된 PlotView에 계속해서 연결된 정보가 남아 있다.
+                                // PlotModel의 데이터는 그대로 유지하면서 PlotView와의 연결을 끊기 위해서는 DetachView를 수행한다.
+                                SelectedTimeFrameViewModels.Remove(updItem);
+                                updItem.DetachView();
+                            }
+                        }
+
 
                         break;
 
@@ -168,9 +218,15 @@ namespace SRHWiscMano.App.ViewModels
         [RelayCommand]
         private void ListItemsLoaded()
         {
-            if (timeFrames.Count > 0 && SelectedIndexOfTimeFrameViewModel < 0)
+            if (SelectedTimeFrameViewModels.Count > 0 && SelectedIndexOfTimeFrameViewModel < 0)
             {
                 SelectedIndexOfTimeFrameViewModel = 0;
+            }
+
+            if (SelectedTimeFrameViewModels.Count == 0)
+            {
+                MainPlotModel = new PlotModel();
+                GraphPlotModel = new PlotModel();
             }
         }
 
@@ -182,7 +238,12 @@ namespace SRHWiscMano.App.ViewModels
         [RelayCommand]
         private void SelectionChanged(object selectedItem)
         {
-            if (selectedItem == null) return;
+            if (selectedItem == null)
+            {
+                MainPlotModel = new PlotModel();
+                GraphPlotModel = new PlotModel();
+                return;
+            }
 
             try
             {
@@ -289,16 +350,16 @@ namespace SRHWiscMano.App.ViewModels
             var posX = viewXAxis.InverseTransform(datapoint.X);
 
             // 현재의 TimeFrame에서 Pick 한 위치의 실제 Instant time을 계산한다
-            var pickPosX = Duration.FromMilliseconds((long) (datapoint.X * 10 + 0.5));
+            var pickPosX = Duration.FromMilliseconds((long)(datapoint.X * 10 + 0.5));
             var posTime = CurrentTimeFrameHeatmapVM.Data.TimeRange().Start.Plus(pickPosX);
 
             // 현재의 Sensor Range를 기준으로 센서 몇번에서 클릭되었는지를 계산한다
-            var tmpPos = (int) (datapoint.Y / CurrentTimeFrameHeatmapVM.Data.ExamData.InterpolationScale + 0.5);
+            var tmpPos = (int)(datapoint.Y / CurrentTimeFrameHeatmapVM.Data.ExamData.InterpolationScale + 0.5);
             // var posSensor = CurrentTimeFrameHeatmapVM.Data.SensorRange().Lesser + tmpPos;
             var posSensor = tmpPos;
 
             StatusMessage =
-                $"DataPoint: {datapoint.X}, {datapoint.Y} => {(double) posTime.ToMillisecondsFromEpoch() / 1000:F2} sec, sensor : {posSensor}, value : {args.HitResult.Text}";
+                $"DataPoint: {datapoint.X}, {datapoint.Y} => {(double)posTime.ToMillisecondsFromEpoch() / 1000:F2} sec, sensor : {posSensor}, value : {args.HitResult.Text}";
         }
 
 
@@ -311,20 +372,20 @@ namespace SRHWiscMano.App.ViewModels
             var posY = viewYAxis.InverseTransform(args.Position.Y);
 
             // 현재의 TimeFrame에서 Pick 한 위치의 실제 Instant time을 계산한다
-            var pickPosX = Duration.FromMilliseconds((long) (posX * 10));
+            var pickPosX = Duration.FromMilliseconds((long)(posX * 10));
             var posTime = CurrentTimeFrameHeatmapVM.Data.TimeRange().Start.Plus(pickPosX);
 
             // 현재의 Sensor Range를 기준으로 센서 몇번에서 클릭되었는지를 계산한다
-            var tmpPos = (int) (posY / CurrentTimeFrameHeatmapVM.Data.ExamData.InterpolationScale + 0.5);
+            var tmpPos = (int)(posY / CurrentTimeFrameHeatmapVM.Data.ExamData.InterpolationScale + 0.5);
             // var posSensor = CurrentTimeFrameHeatmapVM.Data.SensorRange().Lesser + tmpPos;
             var posSensor = tmpPos;
 
             logger.LogTrace($"Clicked pos {posX:F2}, {posY:F2}");
             logger.LogTrace(
                 $"Frame pos {CurrentTimeFrameHeatmapVM.Time.ToUnixTimeMilliseconds()} {CurrentTimeFrameHeatmapVM.Data.TimeRange().Start.ToUnixTimeMilliseconds():F2}, {CurrentTimeFrameHeatmapVM.Data.TimeRange().End.ToUnixTimeMilliseconds():F2}");
-            logger.LogTrace($"Pick Sample : {(double) posTime.ToUnixTimeMilliseconds() / 1000} msec, {posSensor}");
+            logger.LogTrace($"Pick Sample : {(double)posTime.ToUnixTimeMilliseconds() / 1000} msec, {posSensor}");
 
-            SamplePoint pickPoint = new SamplePoint(posTime, (int) posSensor);
+            SamplePoint pickPoint = new SamplePoint(posTime, (int)posSensor);
             FindRegions(CurrentTimeFrameVM, pickPoint);
         }
 
@@ -333,7 +394,7 @@ namespace SRHWiscMano.App.ViewModels
         /// </summary>
         /// <param name="timeFrameVM"></param>
         /// <param name="clickPoint"></param>
-        private void FindRegions(TimeFrameViewModel timeFrameVM,  SamplePoint clickPoint)
+        private void FindRegions(TimeFrameViewModel timeFrameVM, SamplePoint clickPoint)
         {
             RegionSelectStep step = timeFrameVM.RegionSelectSteps.FirstOrDefault(s => !s.IsCompleted);
 
@@ -357,7 +418,7 @@ namespace SRHWiscMano.App.ViewModels
 
                 if (region != null)
                 {
-                    lock(lockObj)
+                    lock (lockObj)
                         timeFrameVM.Data.Regions.Add(region);
                 }
 
@@ -386,7 +447,7 @@ namespace SRHWiscMano.App.ViewModels
                 return;
 
 
-            if (!TryAutoAddRegions(timeFrameVM,RegionType.UES))
+            if (!TryAutoAddRegions(timeFrameVM, RegionType.UES))
                 return;
             if (!TryAutoAddRegions(timeFrameVM, RegionType.TB))
                 return;
@@ -399,16 +460,18 @@ namespace SRHWiscMano.App.ViewModels
             var cpltRegions = timeFrameVM.Data.Regions.Items;
             if (cpltRegions.All(s => s.Type != stepType))
             {
-                var region = regionFinder.Find(stepType, timeFrameVM.Data, null, RegionFinderConfig.Default, Diagnostics);
+                var region = regionFinder.Find(stepType, timeFrameVM.Data, null, RegionFinderConfig.Default,
+                    Diagnostics);
                 if (region != null)
                 {
-                    lock(lockObj)
+                    lock (lockObj)
                         timeFrameVM.Data.Regions.Add(region);
                     return true;
                 }
 
                 return false;
             }
+
             return true;
         }
 
@@ -477,11 +540,12 @@ namespace SRHWiscMano.App.ViewModels
         private void AutoInspectFrame()
         {
             // 현재 TimeFrame에 대한 분석이 완료되었는지 확인한다
-            var firstDone = TimeFrameViewModels.FirstOrDefault(s=> s.AllStepsAreCompleted);
+            var firstDone = TimeFrameViewModels.FirstOrDefault(s => s.AllStepsAreCompleted);
             if (firstDone == null)
                 return;
 
-            Func<RegionType, SamplePoint> func1 = type => firstDone.Data.Regions.Items.FirstOrDefault(r => r.Type == type).ClickPoint;
+            Func<RegionType, SamplePoint> func1 = type =>
+                firstDone.Data.Regions.Items.FirstOrDefault(r => r.Type == type).ClickPoint;
             Func<TimeFrameViewModel, Instant, Instant> convertSampleTime = (ss, t) =>
             {
                 Interval timeRange = ss.Data.TimeRange();
@@ -551,16 +615,16 @@ namespace SRHWiscMano.App.ViewModels
                 }
             }
         }
+
         private bool RemoveIfCompleted(RegionType type)
         {
             RegionSelectStep step = CurrentTimeFrameVM.RegionSelectSteps.Single(s => s.Type == type);
             if (!step.IsCompleted)
                 return false;
-            
+
             step.IsCompleted = false;
             return true;
         }
-
 
         #endregion
     }

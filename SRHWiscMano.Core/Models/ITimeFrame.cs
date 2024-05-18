@@ -18,6 +18,7 @@ namespace SRHWiscMano.Core.Models
 
         public IReadOnlyList<TimeSample> FrameSamples { get; }
         public IReadOnlyList<TimeSample> IntpFrameSamples { get; }
+        public bool IsSelected { get; set; }
 
         void UpdateTime(Instant newTime);
 

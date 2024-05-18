@@ -65,7 +65,16 @@ namespace SRHWiscMano.Core.ViewModels
         /// </summary>
         [ObservableProperty] private string labelEdit;
 
-        [ObservableProperty] private bool isSelected;
+        private bool isSelected;
+        public bool IsSelected
+        {
+            get => isSelected;
+            set
+            {
+                SetProperty(ref isSelected, value);
+                this.Data.IsSelected = value;
+            }
+        }
 
         [ObservableProperty] private bool isEditing = false;
         private readonly IDisposable subscribeDispose;
@@ -111,6 +120,10 @@ namespace SRHWiscMano.Core.ViewModels
         public void Dispose()
         {
             subscribeDispose?.Dispose();
+            
+            DetachView();
+            FramePlotModel = null;
+            FramePlotController = null;
         }
 
         /// <summary>
@@ -355,6 +368,15 @@ namespace SRHWiscMano.Core.ViewModels
             Label = Volume + "cc" + labelTag;
             Data.Text = Label;
             IsEditing = false;
+        }
+
+        /// <summary>
+        /// PlotModel이 연결되어 있던 PlotView와의 연결을 끊는다.
+        /// PlotModel은 한개의 PlotView에만 연결되어 사용할 수 있기 때문이다.
+        /// </summary>
+        public void DetachView()
+        {
+            ((IPlotModel)this.framePlotModel)?.AttachPlotView(null);
         }
     }
 }

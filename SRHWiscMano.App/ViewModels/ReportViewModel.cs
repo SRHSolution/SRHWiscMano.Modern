@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xaml;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using OxyPlot;
 using OxyPlot.Axes;
@@ -49,6 +50,16 @@ namespace SRHWiscMano.App.ViewModels
             ModelPressureGradient = CreatePlotForPressureGradient("Pressure Gradient");
 
             DummyData();
+        }
+
+        /// <summary>
+        /// Report view가 Loaded 되었을 때 실행된다
+        /// </summary>
+        [RelayCommand]
+        private void NavigatedFrom()
+        {
+            logger.LogDebug("Report view is loaded");
+
         }
 
         private void DummyData()
