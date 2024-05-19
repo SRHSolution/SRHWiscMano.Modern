@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -68,7 +69,9 @@ namespace SRHWiscMano.App.ViewModels
 
             foreach (var tFrame in selectedTimeFrames)
             {
-                calculator.CalculateIndividual(tFrame.Value);
+                var resIndiv = calculator.CalculateIndividual(tFrame.Value);
+                logger.LogDebug($"Individual Result : {tFrame.Value.Text}");
+                logger.LogDebug(resIndiv.PrintSwallowResult());
             }
 
         }
