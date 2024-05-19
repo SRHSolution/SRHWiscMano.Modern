@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Controls;
 using System.Xaml;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -11,7 +12,9 @@ using OxyPlot;
 using OxyPlot.Axes;
 using OxyPlot.Series;
 using SRHWiscMano.App.Services;
+using SRHWiscMano.Core.Helpers;
 using SRHWiscMano.Core.Models.Results;
+using SRHWiscMano.Core.Services.Report;
 using SRHWiscMano.Core.ViewModels;
 
 namespace SRHWiscMano.App.ViewModels
@@ -20,6 +23,7 @@ namespace SRHWiscMano.App.ViewModels
     {
         private readonly ILogger<ReportViewModel> logger;
         private readonly SharedService sharedService;
+        private readonly IResultsCalculator calculator;
 
         [ObservableProperty] private PlotModel modelPressureMax;
         [ObservableProperty] private PlotController cntrPressureMax;
@@ -40,10 +44,11 @@ namespace SRHWiscMano.App.ViewModels
         {
         }
 
-        public ReportViewModel(ILogger<ReportViewModel> logger, SharedService sharedService)
+        public ReportViewModel(ILogger<ReportViewModel> logger, SharedService sharedService, IResultsCalculator calculator)
         {
             this.logger = logger;
             this.sharedService = sharedService;
+            this.calculator = calculator;
             ModelPressureMax = CreatePlotForPressureMax("Pressure Maximum");
             ModelPressureMaxAtVP = CreatePlotForPressureMax("Pressure Maximum at VP");
             ModelPressureMaxAtTB = CreatePlotForPressureMax("Pressure Maximum at TB");
@@ -59,6 +64,12 @@ namespace SRHWiscMano.App.ViewModels
         private void NavigatedFrom()
         {
             logger.LogDebug("Report view is loaded");
+            var selectedTimeFrames = sharedService.TimeFrames.KeyValues.Where(kv => kv.Value.IsSelected && kv.Value.AllRegionsAreDefined()).ToList();
+
+            foreach (var tFrame in selectedTimeFrames)
+            {
+                calculator.CalculateIndividual(tFrame.Value);
+            }
 
         }
 

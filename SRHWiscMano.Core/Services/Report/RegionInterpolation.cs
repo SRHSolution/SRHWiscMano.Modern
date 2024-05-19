@@ -1,4 +1,5 @@
 ﻿using MathNet.Numerics.Interpolation;
+using SRHWiscMano.Core.Helpers;
 using SRHWiscMano.Core.Models;
 
 namespace SRHWiscMano.Core.Services.Report
@@ -56,12 +57,12 @@ namespace SRHWiscMano.Core.Services.Report
         }
 
         private static IEnumerable<double> InterpolatedValuesAtTimeForRegion(
-            ITimeFrame snapshot,
+            ITimeFrame tFrame,
             TimeSample sample,
             RegionType regionType,
             int targetSize)
         {
-            IRegion region = snapshot.GetRegion(regionType);
+            IRegion region = tFrame.GetRegion(regionType);
             return sample.ValuesForSensors(region.SensorRange).ToArray().InterpolateTo(targetSize);
         }
     }

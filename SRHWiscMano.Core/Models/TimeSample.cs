@@ -32,7 +32,7 @@ namespace SRHWiscMano.Core.Models
 
         public List<double> ValuesForSensors(Range<int> regionSensorRange)
         {
-            throw new NotImplementedException();
+            return regionSensorRange.AsEnumerable().Select(i => values[i]).ToList();
         }
     }
 }

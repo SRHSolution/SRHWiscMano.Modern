@@ -270,7 +270,7 @@ namespace SRHWiscMano.Core.ViewModels
                             10;
 
             var rangeYTop = (region.SensorRange.Lesser - 0.5) * Data.ExamData.InterpolationScale;
-            var rangeYBottom = (region.SensorRange.Greater + 0.5) * Data.ExamData.InterpolationScale;
+            var rangeYBottom = (region.SensorRange.Greater - 0.5) * Data.ExamData.InterpolationScale;
             var regColor = RegionSelectStep.GetStandardSteps(null).Where(stp => stp.Type == region.Type)
                 .Select(stp => stp.Color).FirstOrDefault(Colors.Black);
 

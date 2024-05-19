@@ -223,6 +223,7 @@ namespace SRHWiscMano.App.ViewModels
                 SelectedIndexOfTimeFrameViewModel = 0;
             }
 
+            // 선택된 TimeFrame이 없으면 PlotModel을 모두 삭제한다
             if (SelectedTimeFrameViewModels.Count == 0)
             {
                 MainPlotModel = new PlotModel();

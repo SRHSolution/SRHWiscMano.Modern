@@ -2,6 +2,7 @@
 using SRHWiscMano.Core.Models;
 using SRHWiscMano.Core.Services;
 using SRHWiscMano.Core.Services.Detection;
+using SRHWiscMano.Core.Services.Report;
 using SRHWiscMano.Core.ViewModels;
 
 namespace SRHWiscMano.Core
@@ -15,6 +16,7 @@ namespace SRHWiscMano.Core
             services.AddTransient<IImportService<IExamination>, ExamDataTextReader>();
             services.AddTransient<NoteXmlReader>();
             services.AddTransient<IRegionFinder, RegionFinder>();
+            services.AddTransient<IResultsCalculator, ResultsCalculator>();
             // services.AddTransient<ISnapshotViewModel, SnapshotViewModel>();
             // services.AddTransient<ISnapshotLabelsParser, SnapshotLabelsParser>();
             // services.AddTransient<IExaminationDataSerializer, ExaminationDataSerializer>();

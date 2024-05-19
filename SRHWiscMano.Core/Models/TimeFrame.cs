@@ -103,10 +103,11 @@ namespace SRHWiscMano.Core.Models
             MaxSensorBound = maxBound;
         }
 
-        public IRegion GetRegion(RegionType regionType)
-        {
-            throw new NotImplementedException();
-        }
+        // public IRegion GetRegion(RegionType regionType)
+        // {
+        //     return this.Regions.Items.ToList().FirstOrDefault(r => r.Type == regionType) ??
+        //            throw new ArgumentException(string.Format("RegionType not found {0}", regionType), nameof(regionType));
+        // }
 
         public object Clone()
         {

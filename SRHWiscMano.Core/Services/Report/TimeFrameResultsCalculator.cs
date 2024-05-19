@@ -9,15 +9,15 @@ namespace SRHWiscMano.Core.Services.Report
         /// 
         /// </summary>
         /// <param name="resultsCalc"></param>
-        /// <param name="snapshots"></param>
+        /// <param name="tFrames"></param>
         /// <returns></returns>
         public static ExamResults<OutlierResult> CalculateSnapshotResults(
             this IResultsCalculator resultsCalc,
-            IEnumerable<ITimeFrame> snapshots)
+            IEnumerable<ITimeFrame> tFrames)
         {
             // snapshopt의 region 에 대한 계산을수행한다. 실제로 RegionCalculator를 사용함
             List<Tuple<ITimeFrame, SwallowResults<double>>> list =
-                snapshots.Select(s => Tuple.Create(s, resultsCalc.CalculateIndividual(s))).ToList();
+                tFrames.Select(s => Tuple.Create(s, resultsCalc.CalculateIndividual(s))).ToList();
             IEnumerable<SwallowResults<double>> individualResults = list.Select(ir => ir.Item2);
             SwallowResults<MeanAndDeviation> aggregate = resultsCalc.CalculateAggregate(individualResults);
             return new ExamResults<OutlierResult>(

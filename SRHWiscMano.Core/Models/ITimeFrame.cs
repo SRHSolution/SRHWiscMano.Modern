@@ -23,6 +23,7 @@ namespace SRHWiscMano.Core.Models
         void UpdateTime(Instant newTime);
 
         void UpdateSensorBounds(double minBound, double maxBound);
-        IRegion GetRegion(RegionType regionType);
+
+        // IRegion GetRegion(RegionType regionType);
     }
 }

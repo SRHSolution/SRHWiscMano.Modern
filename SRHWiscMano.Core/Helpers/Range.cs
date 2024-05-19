@@ -5,6 +5,10 @@
         public static Range<T> Create<T>(T value1, T value2) where T : IEquatable<T>, IComparable<T> => new(value1, value2);
     }
 
+    /// <summary>
+    /// Range는 [,) 범위를 갖는다. 영역은 start를 포함, end는 포함하지 않는다.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class Range<T> : IEquatable<Range<T>> where T : IEquatable<T>, IComparable<T>
     {
         private readonly T start;
@@ -26,10 +30,19 @@
 
         public T End => this.end;
 
+        /// <summary>
+        /// start, end 중에 작은 숫자를 찾는다.
+        /// </summary>
         public T Lesser => !this.IsForward ? this.end : this.start;
 
+        /// <summary>
+        /// start, end 중에 큰 숫자를 찾는다
+        /// </summary>
         public T Greater => !this.IsForward ? this.start : this.end;
 
+        /// <summary>
+        /// start가 end보다 작으면, 정방향인지 확인
+        /// </summary>
         public bool IsForward => this.start.CompareTo(this.end) <= 0;
 
         public static bool operator ==(Range<T> range1, Range<T> range2) => Range<T>.CheckEquals(range1, range2);

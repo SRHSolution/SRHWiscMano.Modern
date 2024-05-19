@@ -2,6 +2,11 @@
 {
     public static class RangeExtensions
     {
+        /// <summary>
+        /// Range의 갯수를 찾는다
+        /// </summary>
+        /// <param name="range"></param>
+        /// <returns></returns>
         public static Decimal Span(this Range<Decimal> range) => range.Greater - range.Lesser;
 
         public static double Span(this Range<double> range) => range.Greater - range.Lesser;
@@ -24,7 +29,12 @@
 
         public static double PercentOf(this Range<long> range, long value) => (double)(value - range.Lesser) / (double)range.Span();
 
-        public static IEnumerable<int> AsEnumerable(this Range<int> range) => Enumerable.Range(range.Lesser, range.Span()+1);
+        /// <summary>
+        /// Start부터 End 를 포함하는 Enumerable 을 만든다
+        /// </summary>
+        /// <param name="range"></param>
+        /// <returns></returns>
+        public static IEnumerable<int> AsEnumerable(this Range<int> range) => Enumerable.Range(range.Lesser, range.Span());
 
         public static int ValueAt(this Range<int> range, double percent)
         {

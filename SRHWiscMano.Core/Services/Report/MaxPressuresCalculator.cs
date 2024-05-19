@@ -13,16 +13,16 @@ namespace SRHWiscMano.Core.Services.Report
         }
 
         private static IEnumerable<double> InterpolatedMaxesForRegion(
-            ITimeFrame snapshot,
+            ITimeFrame tFrame,
             RegionType regionType,
             int targetSize)
         {
-            return snapshot.GetRegion(regionType).SensorRange.AsEnumerable().Select(i => new
+            return tFrame.GetRegion(regionType).SensorRange.AsEnumerable().Select(i => new
                 {
                     i,
-                    tr = TimeRangeForRegionsOnSensor(snapshot, i)
+                    tr = TimeRangeForRegionsOnSensor(tFrame, i)
                 }).Where(_param1 => _param1.tr.HasValue)
-                .Select(_param1 => snapshot.ExamData.Samples.SamplesInTimeRange(_param1.tr.Value).SmoothMax(_param1.i)).ToArray()
+                .Select(_param1 => tFrame.ExamData.Samples.SamplesInTimeRange(_param1.tr.Value).SmoothMax(_param1.i)).ToArray()
                 .InterpolateTo(targetSize);
         }
 
