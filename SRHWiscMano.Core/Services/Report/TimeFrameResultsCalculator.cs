@@ -11,7 +11,7 @@ namespace SRHWiscMano.Core.Services.Report
         /// <param name="resultsCalc"></param>
         /// <param name="tFrames"></param>
         /// <returns></returns>
-        public static ExamResults<OutlierResult> CalculateSnapshotResults(
+        public static ExamResults<OutlierResult> CalculateTimeframeResults(
             this IResultsCalculator resultsCalc,
             IEnumerable<ITimeFrame> tFrames)
         {

@@ -67,13 +67,16 @@ namespace SRHWiscMano.App.ViewModels
             logger.LogDebug("Report view is loaded");
             var selectedTimeFrames = sharedService.TimeFrames.KeyValues.Where(kv => kv.Value.IsSelected && kv.Value.AllRegionsAreDefined()).ToList();
 
-            foreach (var tFrame in selectedTimeFrames)
-            {
-                var resIndiv = calculator.CalculateIndividual(tFrame.Value);
-                logger.LogDebug($"Individual Result : {tFrame.Value.Text}");
-                logger.LogDebug(resIndiv.PrintSwallowResult());
-            }
-
+            ExamResult = calculator.CalculateTimeframeResults(selectedTimeFrames.Select(kv => kv.Value));
+            // var calcIndivList = selectedTimeFrames.Select(kv=> calculator.CalculateIndividual(kv.Value)).ToList();
+            // var calcAggregate = calculator.CalculateAggregate(calcIndivList);
+            // foreach (var tFrame in selectedTimeFrames)
+            // {
+            //     var resIndiv = calculator.CalculateIndividual(tFrame.Value);
+            //     logger.LogDebug($"Individual Result : {tFrame.Value.Text}");
+            //     logger.LogDebug(resIndiv.PrintSwallowResult());
+            // }
+            // examResult = new ExamResults<OutlierResult>()
         }
 
         private void DummyData()
@@ -235,7 +238,7 @@ namespace SRHWiscMano.App.ViewModels
         //     IReadOnlyCollection<TimeFrameViewModel> snapshots,
         //     string bolusSize)
         // {
-        //     // return Task.FromResult(resultsCalc.CalculateSnapshotResults(snapshots.Where(s =>
+        //     // return Task.FromResult(resultsCalc.CalculateTimeframeResults(snapshots.Where(s =>
         //         // s.IsSelected && s.AllStepsAreCompleted && s.MatchesBolusSize(bolusSize))));
         // }
     }

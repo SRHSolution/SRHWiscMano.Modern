@@ -31,9 +31,9 @@
                 </Style>
                 <Style x:Key="RotatedHeaderText" TargetType="{x:Type TextBlock}">
                     <Setter Property="Padding" Value="2,0" />
-                    <Setter Property="HorizontalAlignment" Value="Center"/>
-                    <Setter Property="VerticalAlignment" Value="Center"/>
-                    <Setter Property="TextAlignment" Value="Center"/>
+                    <Setter Property="HorizontalAlignment" Value="Center" />
+                    <Setter Property="VerticalAlignment" Value="Center" />
+                    <Setter Property="TextAlignment" Value="Center" />
                     <!-- <Setter Property="Height" Value="20"/> -->
                     <Setter Property="LayoutTransform">
                         <Setter.Value>
@@ -68,10 +68,10 @@
                     <Table>
                         <Table.Columns>
                             <TableColumn Width="30" />
-                            <TableColumn Width="320"/>
-                            <TableColumn Width="40" />
+                            <TableColumn Width="320" />
+                            <TableColumn Width="80" />
                             <TableColumn Width="20" />
-                            <TableColumn Width="40" />
+                            <TableColumn Width="80" />
                         </Table.Columns>
                         <TableRowGroup>
                             <TableRow>
@@ -86,7 +86,8 @@
                                 </TableCell>
                                 <TableCell>
                                     <Paragraph TextAlignment="Center">
-                                        <TextBlock Text="{Binding ExamResult.Aggregate.VP.MaximumPressure.Mean}"/>
+                                        <TextBlock
+                                            Text="{Binding ExamResult.Aggregate.VP.MaximumPressure.Mean, StringFormat={}{0:F2}}" />
                                     </Paragraph>
                                 </TableCell>
                                 <TableCell>
@@ -96,7 +97,8 @@
                                 </TableCell>
                                 <TableCell>
                                     <Paragraph TextAlignment="Center">
-                                        <TextBlock Text="{Binding ExamResult.Aggregate.VP.MaximumPressure.StandardDeviation}"/>
+                                        <TextBlock
+                                            Text="{Binding ExamResult.Aggregate.VP.MaximumPressure.StandardDeviation, StringFormat={}{0:F2}}" />
                                     </Paragraph>
                                 </TableCell>
                             </TableRow>
@@ -106,7 +108,8 @@
                                 </TableCell>
                                 <TableCell>
                                     <Paragraph TextAlignment="Center">
-                                        <TextBlock Text="{Binding ExamResult.Aggregate.VP.Duration.Mean}"/>
+                                        <TextBlock
+                                            Text="{Binding ExamResult.Aggregate.VP.Duration.Mean, StringFormat={}{0:F2}}" />
                                     </Paragraph>
                                 </TableCell>
                                 <TableCell>
@@ -116,7 +119,8 @@
                                 </TableCell>
                                 <TableCell>
                                     <Paragraph TextAlignment="Center">
-                                        <TextBlock Text="{Binding ExamResult.Aggregate.VP.Duration.StandardDeviation}"/>
+                                        <TextBlock
+                                            Text="{Binding ExamResult.Aggregate.VP.Duration.StandardDeviation, StringFormat={}{0:F2}}" />
                                     </Paragraph>
                                 </TableCell>
                             </TableRow>
@@ -126,7 +130,8 @@
                                 </TableCell>
                                 <TableCell>
                                     <Paragraph TextAlignment="Center">
-                                        <TextBlock Text="{Binding ExamResult.Aggregate.VP.TotalVolumePressure.Mean}"/>
+                                        <TextBlock
+                                            Text="{Binding ExamResult.Aggregate.VP.TotalVolumePressure.Mean, StringFormat={}{0:F2}}" />
                                     </Paragraph>
                                 </TableCell>
                                 <TableCell>
@@ -136,7 +141,8 @@
                                 </TableCell>
                                 <TableCell>
                                     <Paragraph TextAlignment="Center">
-                                        <TextBlock Text="{Binding ExamResult.Aggregate.VP.TotalVolumePressure.StandardDeviation}"/>
+                                        <TextBlock
+                                            Text="{Binding ExamResult.Aggregate.VP.TotalVolumePressure.StandardDeviation, StringFormat={}{0:F2}}" />
                                     </Paragraph>
                                 </TableCell>
                             </TableRow>
@@ -159,7 +165,8 @@
                                 </TableCell>
                                 <TableCell>
                                     <Paragraph TextAlignment="Center">
-                                        0.0
+                                        <TextBlock
+                                            Text="{Binding ExamResult.Aggregate.TB.MaximumPressure.Mean, StringFormat={}{0:F2}}" />
                                     </Paragraph>
                                 </TableCell>
                                 <TableCell>
@@ -169,7 +176,8 @@
                                 </TableCell>
                                 <TableCell>
                                     <Paragraph TextAlignment="Center">
-                                        0.0
+                                        <TextBlock
+                                            Text="{Binding ExamResult.Aggregate.TB.MaximumPressure.StandardDeviation, StringFormat={}{0:F2}}" />
                                     </Paragraph>
                                 </TableCell>
                             </TableRow>
@@ -179,7 +187,8 @@
                                 </TableCell>
                                 <TableCell>
                                     <Paragraph TextAlignment="Center">
-                                        0.0
+                                        <TextBlock
+                                            Text="{Binding ExamResult.Aggregate.TB.Duration.Mean, StringFormat={}{0:F2}}" />
                                     </Paragraph>
                                 </TableCell>
                                 <TableCell>
@@ -189,7 +198,8 @@
                                 </TableCell>
                                 <TableCell>
                                     <Paragraph TextAlignment="Center">
-                                        0.0
+                                        <TextBlock
+                                            Text="{Binding ExamResult.Aggregate.TB.Duration.StandardDeviation, StringFormat={}{0:F2}}" />
                                     </Paragraph>
                                 </TableCell>
                             </TableRow>
@@ -199,7 +209,8 @@
                                 </TableCell>
                                 <TableCell>
                                     <Paragraph TextAlignment="Center">
-                                        0.0
+                                        <TextBlock
+                                            Text="{Binding ExamResult.Aggregate.TB.TotalVolumePressure.Mean, StringFormat={}{0:F2}}" />
                                     </Paragraph>
                                 </TableCell>
                                 <TableCell>
@@ -209,7 +220,8 @@
                                 </TableCell>
                                 <TableCell>
                                     <Paragraph TextAlignment="Center">
-                                        0.0
+                                        <TextBlock
+                                            Text="{Binding ExamResult.Aggregate.TB.TotalVolumePressure.StandardDeviation, StringFormat={}{0:F2}}" />
                                     </Paragraph>
                                 </TableCell>
                             </TableRow>
@@ -224,7 +236,7 @@
                                 <TableCell RowSpan="3" Style="{StaticResource VerticalHeading}">
                                     <BlockUIContainer>
                                         <TextBlock Text="Hypopharynx" Style="{StaticResource RotatedHeaderText}"
-                           Margin="0" />
+                                                   Margin="0" />
                                     </BlockUIContainer>
                                 </TableCell>
                                 <TableCell>
@@ -232,7 +244,8 @@
                                 </TableCell>
                                 <TableCell>
                                     <Paragraph TextAlignment="Center">
-                                        0.0
+                                        <TextBlock
+                                            Text="{Binding ExamResult.Aggregate.HP.MaximumPressure.Mean, StringFormat={}{0:F2}}" />
                                     </Paragraph>
                                 </TableCell>
                                 <TableCell>
@@ -242,7 +255,7 @@
                                 </TableCell>
                                 <TableCell>
                                     <Paragraph TextAlignment="Center">
-                                        0.0
+                                        <TextBlock Text="{Binding ExamResult.Aggregate.HP.MaximumPressure.StandardDeviation, StringFormat={}{0:F2}}" />
                                     </Paragraph>
                                 </TableCell>
                             </TableRow>
@@ -252,7 +265,7 @@
                                 </TableCell>
                                 <TableCell>
                                     <Paragraph TextAlignment="Center">
-                                        0.0
+                                        <TextBlock Text="{Binding ExamResult.Aggregate.HP.Duration.Mean, StringFormat={}{0:F2}}" />
                                     </Paragraph>
                                 </TableCell>
                                 <TableCell>
@@ -262,7 +275,7 @@
                                 </TableCell>
                                 <TableCell>
                                     <Paragraph TextAlignment="Center">
-                                        0.0
+                                        <TextBlock Text="{Binding ExamResult.Aggregate.HP.Duration.StandardDeviation, StringFormat={}{0:F2}}" />
                                     </Paragraph>
                                 </TableCell>
                             </TableRow>
@@ -272,7 +285,7 @@
                                 </TableCell>
                                 <TableCell>
                                     <Paragraph TextAlignment="Center">
-                                        0.0
+                                        <TextBlock Text="{Binding ExamResult.Aggregate.HP.TotalVolumePressure.Mean, StringFormat={}{0:F2}}" />
                                     </Paragraph>
                                 </TableCell>
                                 <TableCell>
@@ -282,7 +295,7 @@
                                 </TableCell>
                                 <TableCell>
                                     <Paragraph TextAlignment="Center">
-                                        0.0
+                                        <TextBlock Text="{Binding ExamResult.Aggregate.HP.TotalVolumePressure.StandardDeviation, StringFormat={}{0:F2}}" />
                                     </Paragraph>
                                 </TableCell>
                             </TableRow>
@@ -297,7 +310,7 @@
                                 <TableCell RowSpan="3" Style="{StaticResource VerticalHeading}">
                                     <BlockUIContainer>
                                         <TextBlock Text="Pre-UES" Style="{StaticResource RotatedHeaderText}"
-                           Margin="0" />
+                                                   Margin="0" />
                                     </BlockUIContainer>
                                 </TableCell>
                                 <TableCell>
@@ -305,7 +318,7 @@
                                 </TableCell>
                                 <TableCell>
                                     <Paragraph TextAlignment="Center">
-                                        0.0
+                                        <TextBlock Text="{Binding ExamResult.Aggregate.PreUES.MaximumPressure.Mean, StringFormat={}{0:F2}}" />
                                     </Paragraph>
                                 </TableCell>
                                 <TableCell>
@@ -315,47 +328,7 @@
                                 </TableCell>
                                 <TableCell>
                                     <Paragraph TextAlignment="Center">
-                                        0.0
-                                    </Paragraph>
-                                </TableCell>
-                            </TableRow>
-                            <TableRow>
-                                <TableCell>
-                                    <Paragraph Style="{StaticResource RegionHeading}">Duration (s)</Paragraph>
-                                </TableCell>
-                                <TableCell>
-                                    <Paragraph TextAlignment="Center">
-                                        0.0
-                                    </Paragraph>
-                                </TableCell>
-                                <TableCell>
-                                    <Paragraph TextAlignment="Center">
-                                        ±
-                                    </Paragraph>
-                                </TableCell>
-                                <TableCell>
-                                    <Paragraph TextAlignment="Center">
-                                        0.0
-                                    </Paragraph>
-                                </TableCell>
-                            </TableRow>
-                            <TableRow>
-                                <TableCell>
-                                    <Paragraph Style="{StaticResource RegionHeading}">Cummulative Pressure (mmHg⋅s)</Paragraph>
-                                </TableCell>
-                                <TableCell>
-                                    <Paragraph TextAlignment="Center">
-                                        0.0
-                                    </Paragraph>
-                                </TableCell>
-                                <TableCell>
-                                    <Paragraph TextAlignment="Center">
-                                        ±
-                                    </Paragraph>
-                                </TableCell>
-                                <TableCell>
-                                    <Paragraph TextAlignment="Center">
-                                        0.0
+                                        <TextBlock Text="{Binding ExamResult.Aggregate.PreUES.MaximumPressure.StandardDeviation, StringFormat={}{0:F2}}" />
                                     </Paragraph>
                                 </TableCell>
                             </TableRow>
@@ -370,7 +343,7 @@
                                 <TableCell RowSpan="3" Style="{StaticResource VerticalHeading}">
                                     <BlockUIContainer>
                                         <TextBlock Text="Post-UES" Style="{StaticResource RotatedHeaderText}"
-   Margin="0" />
+                                                   Margin="0" />
                                     </BlockUIContainer>
                                 </TableCell>
                                 <TableCell>
@@ -378,7 +351,7 @@
                                 </TableCell>
                                 <TableCell>
                                     <Paragraph TextAlignment="Center">
-                                        0.0
+                                        <TextBlock Text="{Binding ExamResult.Aggregate.PostUES.MaximumPressure.Mean, StringFormat={}{0:F2}}" />
                                     </Paragraph>
                                 </TableCell>
                                 <TableCell>
@@ -388,47 +361,7 @@
                                 </TableCell>
                                 <TableCell>
                                     <Paragraph TextAlignment="Center">
-                                        0.0
-                                    </Paragraph>
-                                </TableCell>
-                            </TableRow>
-                            <TableRow>
-                                <TableCell>
-                                    <Paragraph Style="{StaticResource RegionHeading}">Duration (s)</Paragraph>
-                                </TableCell>
-                                <TableCell>
-                                    <Paragraph TextAlignment="Center">
-                                        0.0
-                                    </Paragraph>
-                                </TableCell>
-                                <TableCell>
-                                    <Paragraph TextAlignment="Center">
-                                        ±
-                                    </Paragraph>
-                                </TableCell>
-                                <TableCell>
-                                    <Paragraph TextAlignment="Center">
-                                        0.0
-                                    </Paragraph>
-                                </TableCell>
-                            </TableRow>
-                            <TableRow>
-                                <TableCell>
-                                    <Paragraph Style="{StaticResource RegionHeading}">Cummulative Pressure (mmHg⋅s)</Paragraph>
-                                </TableCell>
-                                <TableCell>
-                                    <Paragraph TextAlignment="Center">
-                                        0.0
-                                    </Paragraph>
-                                </TableCell>
-                                <TableCell>
-                                    <Paragraph TextAlignment="Center">
-                                        ±
-                                    </Paragraph>
-                                </TableCell>
-                                <TableCell>
-                                    <Paragraph TextAlignment="Center">
-                                        0.0
+                                        <TextBlock Text="{Binding ExamResult.Aggregate.PostUES.MaximumPressure.StandardDeviation, StringFormat={}{0:F2}}" />
                                     </Paragraph>
                                 </TableCell>
                             </TableRow>
@@ -443,7 +376,7 @@
                                 <TableCell RowSpan="3" Style="{StaticResource VerticalHeading}">
                                     <BlockUIContainer>
                                         <TextBlock Text="UES" Style="{StaticResource RotatedHeaderText}"
-   Margin="0" />
+                                                   Margin="0" />
                                     </BlockUIContainer>
                                 </TableCell>
                                 <TableCell>
@@ -451,7 +384,7 @@
                                 </TableCell>
                                 <TableCell>
                                     <Paragraph TextAlignment="Center">
-                                        0.0
+                                        <TextBlock Text="{Binding ExamResult.Aggregate.UES.MaximumPressure.Mean, StringFormat={}{0:F2}}" />
                                     </Paragraph>
                                 </TableCell>
                                 <TableCell>
@@ -461,7 +394,7 @@
                                 </TableCell>
                                 <TableCell>
                                     <Paragraph TextAlignment="Center">
-                                        0.0
+                                        <TextBlock Text="{Binding ExamResult.Aggregate.UES.MaximumPressure.StandardDeviation, StringFormat={}{0:F2}}" />
                                     </Paragraph>
                                 </TableCell>
                             </TableRow>
@@ -471,7 +404,7 @@
                                 </TableCell>
                                 <TableCell>
                                     <Paragraph TextAlignment="Center">
-                                        0.0
+                                        <TextBlock Text="{Binding ExamResult.Aggregate.UES.Duration.Mean, StringFormat={}{0:F2}}" />
                                     </Paragraph>
                                 </TableCell>
                                 <TableCell>
@@ -481,27 +414,7 @@
                                 </TableCell>
                                 <TableCell>
                                     <Paragraph TextAlignment="Center">
-                                        0.0
-                                    </Paragraph>
-                                </TableCell>
-                            </TableRow>
-                            <TableRow>
-                                <TableCell>
-                                    <Paragraph Style="{StaticResource RegionHeading}">Cummulative Pressure (mmHg⋅s)</Paragraph>
-                                </TableCell>
-                                <TableCell>
-                                    <Paragraph TextAlignment="Center">
-                                        0.0
-                                    </Paragraph>
-                                </TableCell>
-                                <TableCell>
-                                    <Paragraph TextAlignment="Center">
-                                        ±
-                                    </Paragraph>
-                                </TableCell>
-                                <TableCell>
-                                    <Paragraph TextAlignment="Center">
-                                        0.0
+                                        <TextBlock Text="{Binding ExamResult.Aggregate.UES.Duration.StandardDeviation, StringFormat={}{0:F2}}" />
                                     </Paragraph>
                                 </TableCell>
                             </TableRow>
@@ -516,15 +429,15 @@
                                 <TableCell RowSpan="3" Style="{StaticResource VerticalHeading}">
                                     <BlockUIContainer>
                                         <TextBlock Text="Overall" Style="{StaticResource RotatedHeaderText}"
-   Margin="0" />
+                                                   Margin="0" />
                                     </BlockUIContainer>
                                 </TableCell>
                                 <TableCell>
-                                    <Paragraph Style="{StaticResource RegionHeading}">Max Pressure (mmHg)</Paragraph>
+                                    <Paragraph Style="{StaticResource RegionHeading}">Swallow Duration (s)</Paragraph>
                                 </TableCell>
                                 <TableCell>
                                     <Paragraph TextAlignment="Center">
-                                        0.0
+                                        <TextBlock Text="{Binding ExamResult.Aggregate.TotalSwallowDuration.Mean, StringFormat={}{0:F2}}" />
                                     </Paragraph>
                                 </TableCell>
                                 <TableCell>
@@ -534,17 +447,17 @@
                                 </TableCell>
                                 <TableCell>
                                     <Paragraph TextAlignment="Center">
-                                        0.0
+                                        <TextBlock Text="{Binding ExamResult.Aggregate.TotalSwallowDuration.StandardDeviation, StringFormat={}{0:F2}}" />
                                     </Paragraph>
                                 </TableCell>
                             </TableRow>
                             <TableRow>
                                 <TableCell>
-                                    <Paragraph Style="{StaticResource RegionHeading}">Duration (s)</Paragraph>
+                                    <Paragraph Style="{StaticResource RegionHeading}">Pharyngeal Pressure (mmHg⋅s)</Paragraph>
                                 </TableCell>
                                 <TableCell>
                                     <Paragraph TextAlignment="Center">
-                                        0.0
+                                        <TextBlock Text="{Binding ExamResult.Aggregate.TotalPharyngealPressure.Mean, StringFormat={}{0:F2}}" />
                                     </Paragraph>
                                 </TableCell>
                                 <TableCell>
@@ -554,27 +467,7 @@
                                 </TableCell>
                                 <TableCell>
                                     <Paragraph TextAlignment="Center">
-                                        0.0
-                                    </Paragraph>
-                                </TableCell>
-                            </TableRow>
-                            <TableRow>
-                                <TableCell>
-                                    <Paragraph Style="{StaticResource RegionHeading}">Cummulative Pressure (mmHg⋅s)</Paragraph>
-                                </TableCell>
-                                <TableCell>
-                                    <Paragraph TextAlignment="Center">
-                                        0.0
-                                    </Paragraph>
-                                </TableCell>
-                                <TableCell>
-                                    <Paragraph TextAlignment="Center">
-                                        ±
-                                    </Paragraph>
-                                </TableCell>
-                                <TableCell>
-                                    <Paragraph TextAlignment="Center">
-                                        0.0
+                                        <TextBlock Text="{Binding ExamResult.Aggregate.TotalPharyngealPressure.StandardDeviation, StringFormat={}{0:F2}}" />
                                     </Paragraph>
                                 </TableCell>
                             </TableRow>
