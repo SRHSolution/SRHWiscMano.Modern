@@ -19,6 +19,7 @@
     <PackageReference Include="NLog.Extensions.Logging" Version="5.3.8" />
     <PackageReference Include="OxyPlot.SkiaSharp.Wpf" Version="2.1.2" />
     <PackageReference Include="OxyPlot.Wpf" Version="2.1.2" />
+    <PackageReference Include="PropertyTools.Wpf" Version="3.1.0" />
     <PackageReference Include="ReactiveUI" Version="19.5.1" />
     <PackageReference Include="System.Reactive" Version="6.0.0" />
   </ItemGroup>

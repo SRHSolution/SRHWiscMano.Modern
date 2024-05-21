@@ -39,6 +39,23 @@ namespace SRHWiscMano.Core.Models
 
         public Range<int> SensorRange { get; set; }
 
+        public IList<double> MaxValues => CalcMaxValues();
+
+        public IList<double> AverageValues => CalcAverageValues();
+
+        private IList<double> CalcMaxValues()
+        {
+            return Window.ExamData.MaxValueForSensorInTimeRange(TimeRange, SensorRange).ToList();
+        }
+
+        private IList<double> CalcAverageValues()
+        {
+            return Window.ExamData.AverageValueForSensorInTimeRange(TimeRange, SensorRange).ToList();
+        }
+
+
+        public IList<double> AvgValues { get; }
+
         public RegionType Type { get; set; }
 
         public SamplePoint ClickPoint { get; set; }

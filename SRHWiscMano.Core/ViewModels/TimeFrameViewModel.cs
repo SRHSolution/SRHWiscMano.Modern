@@ -24,7 +24,7 @@ using Range = SRHWiscMano.Core.Helpers.Range;
 namespace SRHWiscMano.Core.ViewModels
 {
     /// <summary>
-    /// 센서 데이터에서 분석을 위한 Snapshot 을 지정하고 이를 Heatmap View 표기하기 위한 ViewModel
+    /// 센서 데이터에서 분석을 위한 TimeFrame 을 지정하고 이를 Heatmap View 표기하기 위한 ViewModel
     /// </summary>
     public partial class TimeFrameViewModel : ViewModelBase
     {
@@ -65,9 +65,19 @@ namespace SRHWiscMano.Core.ViewModels
         /// </summary>
         [ObservableProperty] private string labelEdit;
 
-        [ObservableProperty] private bool isSelected;
+        private bool isSelected;
+        public bool IsSelected
+        {
+            get => isSelected;
+            set
+            {
+                SetProperty(ref isSelected, value);
+                this.Data.IsSelected = value;
+            }
+        }
 
         [ObservableProperty] private bool isEditing = false;
+        private readonly IDisposable subscribeDispose;
         public static OxyPalette SelectedPalette { get; private set; }
 
         public TimeFrameViewModel(ITimeFrame data)
@@ -100,11 +110,20 @@ namespace SRHWiscMano.Core.ViewModels
                 DrawRegionAnnotation(oldRegion);
             }
 
-            Data.Regions.Connect().Subscribe(HandleRegionList);
+            subscribeDispose = Data.Regions.Connect().Subscribe(HandleRegionList);
             regionSelectSteps = RegionSelectStep.GetStandardSteps(this).ToList();
 
             // Heatmap의 색상 Pallete가 변경시 업데이트를 위한 handler를 등록한다
             WeakReferenceMessenger.Default.Register<PaletteChangedMessageMessage>(this, OnPaletteChange);
+        }
+
+        public void Dispose()
+        {
+            subscribeDispose?.Dispose();
+            
+            DetachView();
+            FramePlotModel = null;
+            FramePlotController = null;
         }
 
         /// <summary>
@@ -180,18 +199,50 @@ namespace SRHWiscMano.Core.ViewModels
                         var region = change.Item.Current;
                         DrawRegionAnnotation(region);
 
-                        RegionSelectSteps.First(stp => stp.Type == region.Type).IsCompleted = true;
+                        try
+                        {
+                            RegionSelectSteps.FirstOrDefault(stp => stp.Type == region.Type).IsCompleted = true;
+                        }
+                        catch (Exception)
+                        {
+                            logger.Log(LogLevel.Error, $"{region.Type} is not valid type");
+                        }
+
                         break;
                     }
                     case ListChangeReason.Remove:
                     {
                         var region = change.Item.Current;
                         var itemToRemove =
-                            FramePlotModel.Annotations.First(ann => string.Equals(ann.Tag, region.Type));
+                            FramePlotModel.Annotations.Single(ann =>
+                                Equals(ann.Tag.ToString(), region.Type.ToString()));
                         FramePlotModel.Annotations.Remove(itemToRemove);
                         FramePlotModel.InvalidatePlot(false);
 
                         RegionSelectSteps.First(stp => stp.Type == region.Type).IsCompleted = false;
+                        break;
+                    }
+                    case ListChangeReason.RemoveRange:
+                    {
+                        var rangeToRemove = change.Range;
+                        foreach (var region in rangeToRemove)
+                        {
+                            try
+                            {
+                                var itemToRemove =
+                                    FramePlotModel.Annotations.Single(ann =>
+                                        Equals(ann.Tag.ToString(), region.Type.ToString()));
+                                FramePlotModel.Annotations.Remove(itemToRemove);
+                            }
+                            catch (Exception)
+                            {
+                            }
+
+                            RegionSelectSteps.First(stp => stp.Type == region.Type).IsCompleted = false;
+                        }
+
+                        FramePlotModel.InvalidatePlot(false);
+
                         break;
                     }
 
@@ -199,7 +250,7 @@ namespace SRHWiscMano.Core.ViewModels
                     {
                         FramePlotModel.Annotations.Clear();
                         FramePlotModel.InvalidatePlot(false);
-                        RegionSelectSteps.ForEach(stp =>stp.IsCompleted = false);
+                        RegionSelectSteps.ForEach(stp => stp.IsCompleted = false);
                         break;
                     }
                 }
@@ -218,9 +269,8 @@ namespace SRHWiscMano.Core.ViewModels
                                 .TotalMilliseconds /
                             10;
 
-            var rangeYTop = region.SensorRange.Greater * Data.ExamData.InterpolationScale;
-
-            var rangeYBottom = region.SensorRange.Lesser * Data.ExamData.InterpolationScale;
+            var rangeYTop = (region.SensorRange.Lesser - 0.5) * Data.ExamData.InterpolationScale;
+            var rangeYBottom = (region.SensorRange.Greater - 0.5) * Data.ExamData.InterpolationScale;
             var regColor = RegionSelectStep.GetStandardSteps(null).Where(stp => stp.Type == region.Type)
                 .Select(stp => stp.Color).FirstOrDefault(Colors.Black);
 
@@ -228,13 +278,14 @@ namespace SRHWiscMano.Core.ViewModels
             {
                 MinimumX = rangeXStart,
                 MaximumX = rangeXEnd,
-                MinimumY = rangeYTop,
-                MaximumY = rangeYBottom,
+                MinimumY = rangeYBottom,
+                MaximumY = rangeYTop,
                 Fill = OxyColors.Transparent,
                 Stroke = OxyColor.FromArgb(regColor.A, regColor.R, regColor.G, regColor.B),
                 StrokeThickness = 2,
                 Tag = region.Type.ToString(),
             };
+
             FramePlotModel.Annotations.Add(rectangleAnnotation);
             FramePlotModel.InvalidatePlot(false);
         }
@@ -317,6 +368,15 @@ namespace SRHWiscMano.Core.ViewModels
             Label = Volume + "cc" + labelTag;
             Data.Text = Label;
             IsEditing = false;
+        }
+
+        /// <summary>
+        /// PlotModel이 연결되어 있던 PlotView와의 연결을 끊는다.
+        /// PlotModel은 한개의 PlotView에만 연결되어 사용할 수 있기 때문이다.
+        /// </summary>
+        public void DetachView()
+        {
+            ((IPlotModel)this.framePlotModel)?.AttachPlotView(null);
         }
     }
 }

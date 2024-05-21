@@ -35,7 +35,7 @@ namespace SRHWiscMano.App.Services
         /// <summary>
         /// Notes 정보를 기준으로 일정 영역을 분리하여 볼 수 있도록 하는 데이터
         /// </summary>
-        public SourceCache<ITimeFrame, int> TimeFrames { get; } = new SourceCache<ITimeFrame, int>(item => item.Id);
+        public SourceCache<ITimeFrame, int> TimeFrames { get; } = new(item => item.Id);
 
         public event EventHandler? ExamDataLoaded;
         public event EventHandler? ExamMetaDataLoaded;
@@ -62,7 +62,8 @@ namespace SRHWiscMano.App.Services
             //ExamData 에서 로드한 Note를 정보를 FrameNote sourcelist에 입력한다.
             foreach (var note in ExamData.Notes)
             {
-                TimeFrames.AddOrUpdate(CreateTimeFrame(note.Text, note.Time));
+                // TimeFrames.AddOrUpdate(CreateTimeFrame(note.Text, note.Time));
+                TimeFrames.AddOrUpdate(CreateTimeFrame(note));
             }
             
             ExamDataLoaded?.Invoke(this, EventArgs.Empty);
@@ -72,6 +73,12 @@ namespace SRHWiscMano.App.Services
         {
             ExamData.ShouldNotBeNull("Examdata should be loaded first");
             return new TimeFrame(text, time, settings.TimeFrameDurationInMillisecond, ExamData);
+        }
+
+        public TimeFrame CreateTimeFrame(FrameNote note)
+        {
+            ExamData.ShouldNotBeNull("Examdata should be loaded first");
+            return new TimeFrame(note, settings.TimeFrameDurationInMillisecond, ExamData);
         }
 
         /// <summary>

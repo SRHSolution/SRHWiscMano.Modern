@@ -11,7 +11,6 @@ namespace SRHWiscMano.Core.Helpers
     public static class TimeFrameExtensions
     {
         
-
         public static int SensorCount(this ITimeFrame data)
         {
             return data.FrameSamples.Count <= 0 ? 0 : data.FrameSamples[0].Values.Count;
@@ -47,6 +46,19 @@ namespace SRHWiscMano.Core.Helpers
         public static Duration TotalDuration(this ITimeFrame data)
         {
             return data.EndTime() - data.StartTime();
+        }
+
+
+        public static IRegion GetRegion(this ITimeFrame tFrame, RegionType type)
+        {
+            return tFrame.Regions.Items.FirstOrDefault(r => r.Type == type) ??
+                   throw new ArgumentException($"RegionType not found {type}", nameof(type));
+        }
+
+        public static bool AllRegionsAreDefined(this ITimeFrame tFrame)
+        {
+            RegionType[] second = Regions.All(RegionsVersionType.UsesTBAndHP);
+            return tFrame.Regions.Items.Select(r => r.Type).Intersect(second).Count() == second.Length;
         }
     }
 }

@@ -61,9 +61,6 @@ namespace SRHWiscMano.Core.Services.Detection
             RegionFinderConfig config,
             IDetectionDiagnostics diagnostics)
         {
-            // Region region = state.VPUpperBound.HasValue
-            //     ? CreateRegionWithSensorsFromVPLine(state, click, state.VPUpperBound.Value, 2, RegionType.VP)
-            //     : CreateRegionWithRelativeSensors(state, click, 1, 1, RegionType.VP);
             Region region = CreateRegionWithRelativeSensors(state, click, 1, 1, RegionType.VP);
             RegionFinderRegionConfig configForRegion = config.GetConfigForRegion(RegionType.VP);
             Duration initialWidth = configForRegion.InitialWidth;
@@ -96,15 +93,17 @@ namespace SRHWiscMano.Core.Services.Detection
 
         private static Region FindUES(ITimeFrame state, SamplePoint click)
         {
-            IRegion regionOrThrow1 =
+            IRegion regionPreUES =
                 FindRegionOrThrow(state, RegionType.PreUES, "PreUES must be determined before UES");
-            IRegion regionOrThrow2 =
+            IRegion regionPostUES =
                 FindRegionOrThrow(state, RegionType.PostUES, "PostUES must be determined before UES");
-            if (regionOrThrow1.FocalPoint.Time >= regionOrThrow2.FocalPoint.Time)
+            if (regionPreUES.FocalPoint.Time >= regionPostUES.FocalPoint.Time)
                 throw new RegionFinderException("The PreUES region should be earlier than the PostUES region");
-            int sensorTop = Math.Min(regionOrThrow1.SensorRange.Start, regionOrThrow2.SensorRange.Start);
-            int sensorBottom = Math.Max(regionOrThrow1.SensorRange.End, regionOrThrow2.SensorRange.End);
-            Interval timeRange = new Interval(regionOrThrow1.FocalPoint.Time, regionOrThrow2.FocalPoint.Time);
+
+            // UES는 PreUES와 PostUES를 모두포함하는 최대 영역으로 잡는다
+            int sensorTop = Math.Min(regionPreUES.SensorRange.Start, regionPostUES.SensorRange.Start);
+            int sensorBottom = Math.Max(regionPreUES.SensorRange.End, regionPostUES.SensorRange.End);
+            Interval timeRange = new Interval(regionPreUES.FocalPoint.Time, regionPostUES.FocalPoint.Time);
             return CreateRegionWithSensors(state, click, sensorTop, sensorBottom, RegionType.UES).ChangeTime(timeRange);
         }
 
@@ -123,21 +122,24 @@ namespace SRHWiscMano.Core.Services.Detection
             RegionFinderConfig config,
             IDetectionDiagnostics diagnostics)
         {
-            IRegion regionOrThrow1 = FindRegionOrThrow(state, RegionType.VP, "VP must be determined before TB");
-            IRegion regionOrThrow2 =
+            IRegion regionVP = FindRegionOrThrow(state, RegionType.VP, "VP must be determined before TB");
+            IRegion regionPostUES =
                 FindRegionOrThrow(state, RegionType.PostUES, "PostUES must be determined before TB");
-            int end = regionOrThrow1.SensorRange.End;
-            int start = regionOrThrow2.SensorRange.Start;
-            int num1 = end < start
-                ? Range.Create(end, start).Span()
+            int gapTop = regionVP.SensorRange.End;
+            int gapBottom = regionPostUES.SensorRange.Start;
+            
+            // VP ~ PostUES 사이의 Sensor의 크기 값 + 1을 구한다, 이는 TB가 HP 보다 최소 같거나 더 절반이상의 크기를 갖게 하기 위함이다.
+            int num1 = gapTop < gapBottom
+                ? gapBottom - gapTop + 1
                 : throw new RegionFinderException("VP must be above PostUES");
+
             if (num1 < 2)
                 throw new RegionFinderException("There must be at least 2 sensors between the VP and UES");
-            int num2 = num1 - num1 / 2;
+            var num2 = num1 - num1/2;
             RegionFinderRegionConfig configForRegion = config.GetConfigForRegion(RegionType.TB);
 
-            return CreateRegionWithSensors(state, click, end, end + num2, RegionType.TB)
-            .SetTimeCenteredOnPoint(regionOrThrow1.FocalPoint.Time, configForRegion.InitialWidth)
+            return CreateRegionWithSensors(state, click, gapTop, gapTop + num2, RegionType.TB)
+            .SetTimeCenteredOnPoint(regionVP.FocalPoint.Time, configForRegion.InitialWidth)
             .AdjustToTimeRangeAtEdges(configForRegion.Algorithm,
             new DiagnosticsContext(diagnostics, RegionType.TB));
         }
@@ -158,18 +160,18 @@ namespace SRHWiscMano.Core.Services.Detection
             IDetectionDiagnostics diagnostics)
         {
             FindRegionOrThrow(state, RegionType.VP, "VP must be determined before HP");
-            IRegion regionOrThrow1 =
+            IRegion regionPostUES =
                 FindRegionOrThrow(state, RegionType.PostUES, "PostUES must be determined before HP");
-            IRegion regionOrThrow2 = FindRegionOrThrow(state, RegionType.TB, "TB must be determined before HP");
-            int end = regionOrThrow2.SensorRange.End;
-            int start = regionOrThrow1.SensorRange.Start;
-            if (end >= start)
+            IRegion regionTB = FindRegionOrThrow(state, RegionType.TB, "TB must be determined before HP");
+            int tbEnd = regionTB.SensorRange.End;
+            int uesStart = regionPostUES.SensorRange.Start;
+            if (tbEnd > uesStart)
                 throw new RegionFinderException("TB must be above PostUES");
-            RegionFinderRegionConfig configForRegion = config.GetConfigForRegion(RegionType.HP);
 
+            RegionFinderRegionConfig configForRegion = config.GetConfigForRegion(RegionType.HP);
            
-            return CreateRegionWithSensors(state, click, end, start, RegionType.HP)
-                .SetTimeStartingAtPoint(regionOrThrow2.TimeRange.Start, configForRegion.InitialWidth)
+            return CreateRegionWithSensors(state, click, tbEnd, uesStart, RegionType.HP)
+                .SetTimeStartingAtPoint(regionTB.TimeRange.Start, configForRegion.InitialWidth)
                 .AdjustToTimeRangeAtEdges(configForRegion.Algorithm,
                     new DiagnosticsContext(diagnostics, RegionType.HP));
         }
@@ -189,6 +191,16 @@ namespace SRHWiscMano.Core.Services.Detection
                 .AdjustToTimeRangeAboveBaseline(InitialWidthMP, new DiagnosticsContext(null, RegionType.MP));
         }
 
+
+        /// <summary>
+        /// 클릭한 Point를 기준으로 above, below 크기만큼의 Region 센서 영역을 지정한다.
+        /// </summary>
+        /// <param name="window"></param>
+        /// <param name="click"></param>
+        /// <param name="sensorsAbove"></param>
+        /// <param name="sensorsBelow"></param>
+        /// <param name="type"></param>
+        /// <returns></returns>
         private static Region CreateRegionWithRelativeSensors(
             ITimeFrame window,
             SamplePoint click,
@@ -196,9 +208,9 @@ namespace SRHWiscMano.Core.Services.Detection
             int sensorsBelow,
             RegionType type)
         {
-            
             int sensorTop = Math.Max(click.Sensor - sensorsAbove, window.SensorRange().Lesser);
-            int sensorBottom = Math.Min(click.Sensor + sensorsBelow, window.SensorRange().Greater);
+            // Range의 end는 포함하지 않는 크기이므로 +1 더해서 지정한다
+            int sensorBottom = Math.Min(click.Sensor + sensorsBelow+1, window.SensorRange().Greater);
             return CreateRegionWithSensors(window, click, sensorTop, sensorBottom, type);
 
         }

@@ -26,6 +26,8 @@ namespace SRHWiscMano.Core.Models
         public IReadOnlyList<TimeSample> FrameSamples { get; private set; }
         public IReadOnlyList<TimeSample> IntpFrameSamples { get; private set; }
 
+        public bool IsSelected { get; set; }
+
         public string Text { get; set; }
 
         public double MinSensorBound { get; private set; }
@@ -65,6 +67,21 @@ namespace SRHWiscMano.Core.Models
             UpdateTime(Time);
         }
 
+        public TimeFrame(FrameNote note, double timeDuration, IExamination data)
+        {
+            ExamData = data;
+            Id = Interlocked.Increment(ref GuidId);
+            Text = note.ToString();
+            Time = note.Time;
+            TimeDuration = timeDuration;
+            OwnerSamples = data.Samples;
+            IntpSamples = data.InterpolatedSamples;
+            MinSensorBound = 0;
+            MaxSensorBound = ExamData.SensorCount() - 1;
+
+            UpdateTime(Time);
+        }
+
         /// <summary>
         /// TimeFrame 의 지정된 시간을 변경한다.
         /// 지정된 시간에서 +/- duration 의 간격에 대해 PlotData를 업데이트 한다.
@@ -85,6 +102,12 @@ namespace SRHWiscMano.Core.Models
             MinSensorBound = minBound;
             MaxSensorBound = maxBound;
         }
+
+        // public IRegion GetRegion(RegionType regionType)
+        // {
+        //     return this.Regions.Items.ToList().FirstOrDefault(r => r.Type == regionType) ??
+        //            throw new ArgumentException(string.Format("RegionType not found {0}", regionType), nameof(regionType));
+        // }
 
         public object Clone()
         {

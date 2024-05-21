@@ -7,14 +7,28 @@ namespace SRHWiscMano.Core.Models
     /// </summary>
     public class FrameNote
     {
+        private readonly string bolus;
         public string Text { get; set; }
-        
+        public string Bolus { get; set; }
+        public string Unit { get; set; } = "cc";
         public Instant Time { get; set; }
 
         public FrameNote(Instant time, string text)
         {
             this.Time = time;
             this.Text = text;
+        }
+
+        public FrameNote(Instant time, string bolus, string text)
+        {
+            this.Time = time;
+            this.bolus = bolus;
+            this.Text = text;
+        }
+
+        public override string ToString()
+        {
+            return $"{bolus}{Unit} {Text}";
         }
     }
 }
