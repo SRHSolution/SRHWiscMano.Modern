@@ -152,6 +152,14 @@ namespace SRHWiscMano.Core.Helpers
             return data.Samples.SamplesInTimeRange(timeRange).SamplesForSensorRange(sensorRange);
         }
 
+        public static IReadOnlyList<TimeSample> SamplesForSensorInTimeRange(
+            this IEnumerable<TimeSample> samples,
+            Interval timeRange,
+            Range<int> sensorRange)
+        {
+            return samples.SamplesInTimeRange(timeRange).SamplesForSensorRange(sensorRange);
+        }
+
 
         public static IEnumerable<double> ValuesForSensorInTimeRange(
             this IExamination data,

@@ -21,10 +21,10 @@ namespace SRHWiscMano.Core.Services.Report
         /// </summary>
         private static readonly Tuple<RegionType, int>[] SectionsUsingTBAndHP = new Tuple<RegionType, int>[4]
         {
-            Tuple.Create(RegionType.VP, 6),
-            Tuple.Create(RegionType.TB, 4),
-            Tuple.Create(RegionType.HP, 4),
-            Tuple.Create(RegionType.UES, 10)
+            Tuple.Create(RegionType.VP, 1),//6),
+            Tuple.Create(RegionType.TB, 1),//4),
+            Tuple.Create(RegionType.HP, 1),//4),
+            Tuple.Create(RegionType.UES, 1),//10)
         };
 
         public static Tuple<RegionType, int>[] Sections()
@@ -63,7 +63,8 @@ namespace SRHWiscMano.Core.Services.Report
             int targetSize)
         {
             IRegion region = tFrame.GetRegion(regionType);
-            return sample.ValuesForSensors(region.SensorRange).ToArray().InterpolateTo(targetSize);
+            return sample.ValuesForSensors(region.SensorRange).ToArray();//
+            // return sample.ValuesForSensors(region.SensorRange).ToArray().InterpolateTo(targetSize);
         }
     }
 }

@@ -45,29 +45,29 @@
             <FlowDocumentScrollViewer.Document>
                 <FlowDocument>
                     <Paragraph>
-                        <Figure Width="410" Padding="5,0,5,0" HorizontalAnchor="PageRight">
+                        <Figure Width="500" Padding="5,0,5,0" HorizontalAnchor="PageRight">
                             <BlockUIContainer>
-                                <oxy:PlotView Width="400" Height="200" Model="{Binding ModelPressureMax}"
+                                <oxy:PlotView Width="450" Height="200" Model="{Binding ModelPressureMax}"
                                               Controller="{Binding CntrPressureMax}" />
                             </BlockUIContainer>
                             <BlockUIContainer>
-                                <oxy:PlotView Width="400" Height="200" Model="{Binding ModelPressureMaxAtVP}"
+                                <oxy:PlotView Width="450" Height="200" Model="{Binding ModelPressureMaxAtVP}"
                                               Controller="{Binding CntrPressureMaxAtVP}" />
                             </BlockUIContainer>
                             <BlockUIContainer>
-                                <oxy:PlotView Width="400" Height="200" Model="{Binding ModelPressureMaxAtTB}"
+                                <oxy:PlotView Width="450" Height="200" Model="{Binding ModelPressureMaxAtTB}"
                                               Controller="{Binding CntrPressureMaxAtTB}" />
                             </BlockUIContainer>
-                            <BlockUIContainer>
-                                <oxy:PlotView Width="400" Height="200" Model="{Binding ModelPressureGradient}"
-                                              Controller="{Binding CntrPressureGradient}" />
-                            </BlockUIContainer>
+                            <!-- <BlockUIContainer> -->
+                            <!--     <oxy:PlotView Width="450" Height="200" Model="{Binding ModelPressureGradient}" -->
+                            <!--                   Controller="{Binding CntrPressureGradient}" /> -->
+                            <!-- </BlockUIContainer> -->
                         </Figure>
                     </Paragraph>
                     <Paragraph Style="{StaticResource ResultsHeading}">Aggregate Results</Paragraph>
                     <Table>
                         <Table.Columns>
-                            <TableColumn Width="30" />
+                            <TableColumn Width="40" />
                             <TableColumn Width="320" />
                             <TableColumn Width="80" />
                             <TableColumn Width="20" />
