@@ -175,20 +175,18 @@ namespace SRHWiscMano.App.ViewModels
                         var updItem = TimeFrameViewModels.SingleOrDefault(item => item.Id == change.Current.Id);
                         updItem.Label = change.Current.Text;
 
-                        // if (CurrentTimeFrameHeatmapVM?.Id == change.Current.Id)
-                        // {
-                        //     CurrentTimeFrameHeatmapVM.RefreshPlotData();
-                        //     CurrentTimeFrameGraphVM.RefreshPlotData();
-                        // }
-
-                        // SelectedTimeFrameViewModels.Clear();
-                        // SelectedTimeFrameViewModels.AddRange(TimeFrameViewModels.Where(tf => tf.Data.IsSelected)); 
-
                         if (change.Current.IsSelected)
                         {
-                            var insertIdx = SelectedTimeFrameViewModels.LastIndexOf((item) => item.Id <= updItem.Id) +1 ;
-                            SelectedTimeFrameViewModels.Insert(insertIdx ?? 0, updItem);
-                            updItem.RefreshPlotData();
+                            if (!SelectedTimeFrameViewModels.Contains(updItem))
+                            {
+                                // Find the appropriate index to insert the item
+                                int insertIdx = SelectedTimeFrameViewModels
+                                    .Select((item, index) => new { item, index })
+                                    .LastOrDefault(x => x.item.Id <= updItem.Id)?.index + 1 ?? 0;
+
+                                SelectedTimeFrameViewModels.Insert(insertIdx, updItem);
+                                updItem.RefreshPlotData();
+                            }
                         }
                         else
                         {
@@ -200,6 +198,8 @@ namespace SRHWiscMano.App.ViewModels
                                 updItem.DetachView();
                             }
                         }
+
+
 
 
                         break;
@@ -567,7 +567,7 @@ namespace SRHWiscMano.App.ViewModels
 
             Task.Run(() =>
             {
-                var selectedTimeFrames = TimeFrameViewModels;
+                var selectedTimeFrames = SelectedTimeFrameViewModels;
                 foreach (TimeFrameViewModel selectedTimeFrame in selectedTimeFrames)
                     if (selectedTimeFrame != firstDone && selectedTimeFrame.NoStepsAreCompleted)
                     {

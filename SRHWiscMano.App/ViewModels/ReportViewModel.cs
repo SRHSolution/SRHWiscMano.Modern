@@ -9,6 +9,7 @@ using System.Xaml;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
+using MoreLinq;
 using OxyPlot;
 using OxyPlot.Axes;
 using OxyPlot.Series;
@@ -55,7 +56,7 @@ namespace SRHWiscMano.App.ViewModels
             ModelPressureMaxAtTB = CreatePlotForPressureMax("Pressure Maximum at TB");
             ModelPressureGradient = CreatePlotForPressureGradient("Pressure Gradient");
 
-            DummyData();
+            // DummyData();
         }
 
         /// <summary>
@@ -67,6 +68,9 @@ namespace SRHWiscMano.App.ViewModels
             logger.LogDebug("Report view is loaded");
             var selectedTimeFrames = sharedService.TimeFrames.KeyValues.Where(kv => kv.Value.IsSelected && kv.Value.AllRegionsAreDefined()).ToList();
 
+            if (selectedTimeFrames.Count == 0)
+                return;
+
             ExamResult = calculator.CalculateTimeframeResults(selectedTimeFrames.Select(kv => kv.Value));
             // var calcIndivList = selectedTimeFrames.Select(kv=> calculator.CalculateIndividual(kv.Value)).ToList();
             // var calcAggregate = calculator.CalculateAggregate(calcIndivList);
@@ -77,7 +81,47 @@ namespace SRHWiscMano.App.ViewModels
             //     logger.LogDebug(resIndiv.PrintSwallowResult());
             // }
             // examResult = new ExamResults<OutlierResult>()
+            UpdateExamResultOnPlotModels();
         }
+
+        private void UpdateExamResultOnPlotModels()
+        {
+            if (ExamResult.Individuals.Count == 0)
+                return;
+
+            AddResultDataToPlotModel(ModelPressureMax, ExamResult.Aggregate.MaxPressures);
+            AddResultDataToPlotModel(ModelPressureMaxAtVP, ExamResult.Aggregate.PressureAtVPMax);
+            AddResultDataToPlotModel(ModelPressureMaxAtTB, ExamResult.Aggregate.PressureAtTBMax);
+        }
+
+        private void AddResultDataToPlotModel(PlotModel model, IEnumerable<MeanAndDeviation> result)
+        {
+            var lineMean = new LineSeries();
+            lineMean.LineStyle = LineStyle.Solid;
+            lineMean.Color = OxyColors.DarkGray;
+            lineMean.StrokeThickness = 2;
+            var lineStdUpper = new LineSeries();
+            lineStdUpper.Color = OxyColors.LightBlue;
+            lineStdUpper.StrokeThickness = 1;
+            var lineStdLower = new LineSeries();
+            lineStdUpper.Color = OxyColors.LightBlue;
+            lineStdUpper.StrokeThickness = 1;
+
+            result.SelectWithIndex().ForEach(si =>
+            {
+                lineMean.Points.Add(new DataPoint(si.Item2, si.Item1.Mean));
+                lineStdUpper.Points.Add(new DataPoint(si.Item2, si.Item1.Mean + si.Item1.StandardDeviation));
+                lineStdLower.Points.Add(new DataPoint(si.Item2, si.Item1.Mean - si.Item1.StandardDeviation));
+            });
+
+            model.Series.Clear();
+            model.Series.Add(lineMean);
+            model.Series.Add(lineStdUpper);
+            model.Series.Add(lineStdLower);
+            model.InvalidatePlot(true);
+        }
+        
+
 
         private void DummyData()
         {
@@ -93,10 +137,6 @@ namespace SRHWiscMano.App.ViewModels
         {
             var plotModel = new PlotModel();
             plotModel.Title = title;
-            plotModel.Series.Add(new LineSeries()
-            {
-
-            });
 
             AddAxesForPressureMax(plotModel);
             plotModel.InvalidatePlot(true);
@@ -118,6 +158,7 @@ namespace SRHWiscMano.App.ViewModels
                 Position = AxisPosition.Left,
                 MaximumPadding = 0,
                 MinimumPadding = 0,
+                MajorStep = 50,
                 
                 // Minimum = 0, // 초기 시작값
                 // Maximum = ((ySize + 1)), // 초기 최대값
@@ -128,52 +169,92 @@ namespace SRHWiscMano.App.ViewModels
             });
 
             // X-Axis
-            var xAxis = new CategoryAxis()
+            // var xAxis = new CategoryAxis()
+            // {
+            //     IsZoomEnabled = false,
+            //     IsPanEnabled = false,
+            //     // LabelFormatter = value => $"{value / 100}",
+            //     Position = AxisPosition.Bottom,
+            //     MinimumPadding = 0,
+            //     // Minimum = 0,
+            //     // Maximum = xSize - 1,
+            //     // MajorStep = xSize,
+            //     // MinorStep = xSize, // 최대 범위를 입력하여 MinorStep 이 표시되지 않도록 한다
+            //     // AbsoluteMinimum = 0,
+            //     // AbsoluteMaximum = xSize - 1,
+            //     IsAxisVisible = true,
+            //     Tag = "X"
+            // };
+            // xAxis.ActualLabels.Add("VP");
+            // xAxis.ActualLabels.Add("VP");
+            // xAxis.ActualLabels.Add("VP");
+            // xAxis.ActualLabels.Add("TB");
+            // xAxis.ActualLabels.Add("TB");
+            // xAxis.ActualLabels.Add("TB");
+            // xAxis.ActualLabels.Add("HP");
+            // xAxis.ActualLabels.Add("HP");
+            // xAxis.ActualLabels.Add("UES");
+            // xAxis.ActualLabels.Add("UES");
+            // xAxis.ActualLabels.Add("UES");
+            // xAxis.ActualLabels.Add("UES");
+            // xAxis.ActualLabels.Add("UES");
+            //
+            // xAxis.Labels.Add("VP");
+            // xAxis.Labels.Add("VP");
+            // xAxis.Labels.Add("VP");
+            // xAxis.Labels.Add("TB");
+            // xAxis.Labels.Add("TB");
+            // xAxis.Labels.Add("TB");
+            // xAxis.Labels.Add("HP");
+            // xAxis.Labels.Add("HP");
+            // xAxis.Labels.Add("UES");
+            // xAxis.Labels.Add("UES");
+            // xAxis.Labels.Add("UES");
+            // xAxis.Labels.Add("UES");
+            // xAxis.Labels.Add("UES");
+
+            // model.Axes.Add(xAxis);
+
+
+            // LinearAxis 생성 및 설정 (X 축)
+            var linearXAxis = new LinearAxis
             {
-                IsZoomEnabled = false,
-                IsPanEnabled = false,
-                // LabelFormatter = value => $"{value / 100}",
                 Position = AxisPosition.Bottom,
-                MinimumPadding = 0,
-                // Minimum = 0,
-                // Maximum = xSize - 1,
-                // MajorStep = xSize,
-                // MinorStep = xSize, // 최대 범위를 입력하여 MinorStep 이 표시되지 않도록 한다
-                // AbsoluteMinimum = 0,
-                // AbsoluteMaximum = xSize - 1,
-                IsAxisVisible = true,
-                Tag = "X"
+                Title = "X Axis",
+                MajorStep = 1,
+                MinorStep = 10,
+                Minimum = 0,
+                Maximum = 9,
+                AbsoluteMinimum = 0,
+                AbsoluteMaximum = 9,
             };
-            xAxis.ActualLabels.Add("VP");
-            xAxis.ActualLabels.Add("VP");
-            xAxis.ActualLabels.Add("VP");
-            xAxis.ActualLabels.Add("TB");
-            xAxis.ActualLabels.Add("TB");
-            xAxis.ActualLabels.Add("TB");
-            xAxis.ActualLabels.Add("HP");
-            xAxis.ActualLabels.Add("HP");
-            xAxis.ActualLabels.Add("UES");
-            xAxis.ActualLabels.Add("UES");
-            xAxis.ActualLabels.Add("UES");
-            xAxis.ActualLabels.Add("UES");
-            xAxis.ActualLabels.Add("UES");
 
-            xAxis.Labels.Add("VP");
-            xAxis.Labels.Add("VP");
-            xAxis.Labels.Add("VP");
-            xAxis.Labels.Add("TB");
-            xAxis.Labels.Add("TB");
-            xAxis.Labels.Add("TB");
-            xAxis.Labels.Add("HP");
-            xAxis.Labels.Add("HP");
-            xAxis.Labels.Add("UES");
-            xAxis.Labels.Add("UES");
-            xAxis.Labels.Add("UES");
-            xAxis.Labels.Add("UES");
-            xAxis.Labels.Add("UES");
+            var customLabels = new Dictionary<double, string>
+            {
+                { 0, "VP" },
+                { 1, "VP" },
+                { 2, "VP" },
+                // { 3, "TB" },
+                { 3, "TB" },
+                { 4, "HP" },
+                // { 6, "HP" },
+                { 5, "UES" },
+                { 6, "UES" },
+                { 7, "UES" },
+                { 8, "UES" },
+                { 9, "UES" },
+            };
 
-            model.Axes.Add(xAxis);
+            foreach (var label in customLabels)
+            {
+                linearXAxis.AxisTickToLabelDistance = 10;
+                linearXAxis.LabelFormatter = d =>
+                {
+                    return customLabels.ContainsKey(d) ? customLabels[d] : string.Empty;
+                };
+            }
 
+            model.Axes.Add(linearXAxis);
 
         }
 
