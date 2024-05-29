@@ -15,6 +15,7 @@ using OxyPlot.Series;
 using SRHWiscMano.App.Services;
 using SRHWiscMano.Core.Helpers;
 using SRHWiscMano.Core.Models.Results;
+using SRHWiscMano.Core.Services;
 using SRHWiscMano.Core.Services.Report;
 using SRHWiscMano.Core.ViewModels;
 
@@ -25,6 +26,7 @@ namespace SRHWiscMano.App.ViewModels
         private readonly ILogger<ReportViewModel> logger;
         private readonly SharedService sharedService;
         private readonly IResultsCalculator calculator;
+        private readonly IExportService<ExamResults<OutlierResult>> exportService;
 
         [ObservableProperty] private PlotModel modelPressureMax;
         [ObservableProperty] private PlotController cntrPressureMax;
@@ -45,11 +47,12 @@ namespace SRHWiscMano.App.ViewModels
         {
         }
 
-        public ReportViewModel(ILogger<ReportViewModel> logger, SharedService sharedService, IResultsCalculator calculator)
+        public ReportViewModel(ILogger<ReportViewModel> logger, SharedService sharedService, IResultsCalculator calculator, IExportService<ExamResults<OutlierResult>> exportService)
         {
             this.logger = logger;
             this.sharedService = sharedService;
             this.calculator = calculator;
+            this.exportService = exportService;
             ModelPressureMax = CreatePlotForPressureMax("Pressure Maximum");
             ModelPressureMaxAtVP = CreatePlotForPressureMax("Pressure Maximum at VP");
             ModelPressureMaxAtTB = CreatePlotForPressureMax("Pressure Maximum at TB");
@@ -67,7 +70,11 @@ namespace SRHWiscMano.App.ViewModels
             logger.LogDebug("Report view is loaded");
             var selectedTimeFrames = sharedService.TimeFrames.KeyValues.Where(kv => kv.Value.IsSelected && kv.Value.AllRegionsAreDefined()).ToList();
 
+            if (selectedTimeFrames.Count == 0)
+                return;
+
             ExamResult = calculator.CalculateTimeframeResults(selectedTimeFrames.Select(kv => kv.Value));
+            exportService.WriteToFile(ExamResult, "TestResult.csv");
             // var calcIndivList = selectedTimeFrames.Select(kv=> calculator.CalculateIndividual(kv.Value)).ToList();
             // var calcAggregate = calculator.CalculateAggregate(calcIndivList);
             // foreach (var tFrame in selectedTimeFrames)
