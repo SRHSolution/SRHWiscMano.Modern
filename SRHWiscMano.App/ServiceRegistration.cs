@@ -11,6 +11,7 @@ using Microsoft.Extensions.Options;
 using SRHWiscMano.Core.Services;
 using System;
 using System.IO;
+using SRHWiscMano.Core.Models.Results;
 
 namespace SRHWiscMano.App
 {
@@ -25,6 +26,7 @@ namespace SRHWiscMano.App
             services.AddSingleton<IReportViewModel, ReportViewModel>(); // For AnalyzerView
             services.AddSingleton<IAnalyzerViewModel, AnalyzerViewModel>(); // For AnalyzerView
             services.AddSingleton<ISettingViewModel, SettingViewModel>();   // For SettingView
+            services.AddSingleton(typeof(IExportService<ExamResults<OutlierResult>>), typeof(ExamResultsOutlierExporter));   // For SettingView
             
             // services.AddTransient<ColorRangeSliderViewModel>();
             services.AddSingleton<LoggerWindow>();

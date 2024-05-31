@@ -1,8 +1,7 @@
 ﻿namespace SRHWiscMano.Core.Services
 {
-    interface IExportService
+    public interface IExportService<T>
     {
-        void WriteToFile();
-
+        void WriteToFile(T resultData, string filePath);
     }
 }
