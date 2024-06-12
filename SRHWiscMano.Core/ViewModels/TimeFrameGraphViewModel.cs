@@ -106,6 +106,7 @@ namespace SRHWiscMano.Core.ViewModels
                             DrawRegionAnnotation(region);
                             DrawStatisticsLine(region);
                         }
+
                         FramePlotModel.InvalidatePlot(true);
                         break;
                     }
@@ -259,8 +260,6 @@ namespace SRHWiscMano.Core.ViewModels
         /// <param name="maxBound"></param>
         private void UpdateLineSeries(PlotModel model, double[,] plotData, double minBound, double maxBound)
         {
-            
-
             var frameCount = plotData.GetLength(0);
             var sensorCount = plotData.GetLength(1);
 
@@ -329,7 +328,7 @@ namespace SRHWiscMano.Core.ViewModels
         public void RefreshPlotData()
         {
             Data.UpdateTime(Data.Time);
-            
+
             // 기존 데이터를 지운다
             FramePlotModel.Series.Clear();
 

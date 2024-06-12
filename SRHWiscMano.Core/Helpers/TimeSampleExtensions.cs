@@ -133,6 +133,17 @@ namespace SRHWiscMano.Core.Helpers
             return maxValuesInTimeRange;
         }
 
+        public static IEnumerable<double> MinValueForSensorInTimeRange(
+            this IExamination data,
+            Interval timeRange,
+            Range<int> sensorRange)
+        {
+            var samples = data.SamplesForSensorInTimeRange(timeRange, sensorRange);
+            var minValuesInTimeRange = samples.Select(s => s.Values.Min());
+
+            return minValuesInTimeRange;
+        }
+
         public static IEnumerable<double> AverageValueForSensorInTimeRange(
             this IExamination data,
             Interval timeRange,
