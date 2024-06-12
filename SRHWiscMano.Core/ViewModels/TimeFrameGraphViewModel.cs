@@ -73,6 +73,7 @@ namespace SRHWiscMano.Core.ViewModels
             {
                 this.Volume = Label;
             }
+
             var plotModel = new PlotModel();
             //TimeFrame의 원본 데이터 값을 Plot을 위한 Double Array 로 저장한다
             plotData = Data.FrameSamples.ConvertToDoubleArray();
@@ -84,7 +85,6 @@ namespace SRHWiscMano.Core.ViewModels
 
             subscribeDipose = Data.Regions.Connect().Subscribe(HandleRegionList);
         }
-
 
 
         public void Dispose()
@@ -106,7 +106,7 @@ namespace SRHWiscMano.Core.ViewModels
                             DrawRegionAnnotation(region);
                             DrawStatisticsLine(region);
                         }
-
+                        FramePlotModel.InvalidatePlot(true);
                         break;
                     }
                     case ListChangeReason.Add:
@@ -114,7 +114,7 @@ namespace SRHWiscMano.Core.ViewModels
                         var region = change.Item.Current;
                         DrawRegionAnnotation(region);
                         DrawStatisticsLine(region);
-
+                        FramePlotModel.InvalidatePlot(true);
                         break;
                     }
                     case ListChangeReason.Remove:
@@ -188,7 +188,6 @@ namespace SRHWiscMano.Core.ViewModels
             }
 
             FramePlotModel.Series.Add(lineSeries);
-            FramePlotModel.InvalidatePlot(true);
         }
 
         /// <summary>
@@ -260,7 +259,7 @@ namespace SRHWiscMano.Core.ViewModels
         /// <param name="maxBound"></param>
         private void UpdateLineSeries(PlotModel model, double[,] plotData, double minBound, double maxBound)
         {
-            model.Series.Clear();
+            
 
             var frameCount = plotData.GetLength(0);
             var sensorCount = plotData.GetLength(1);
@@ -330,10 +329,21 @@ namespace SRHWiscMano.Core.ViewModels
         public void RefreshPlotData()
         {
             Data.UpdateTime(Data.Time);
+            
+            // 기존 데이터를 지운다
+            FramePlotModel.Series.Clear();
 
+            // PlotData를 그린다
             plotData = Data.FrameSamples.ConvertToDoubleArray();
             UpdateLineSeries(FramePlotModel, plotData, Data.MinSensorBound, Data.MaxSensorBound);
 
+            // Region 영역에 대한 분석 최대값 line을 그린다
+            foreach (var rgn in Data.Regions.Items)
+            {
+                DrawStatisticsLine(rgn);
+            }
+
+            // GDI 를 다시 그린다
             framePlotModel.InvalidatePlot(true);
             this.Time = Data.Time;
         }
