@@ -17,13 +17,24 @@ namespace SRHWiscMano.Core.Helpers
         public static TimeSample? SampleWithMaximumOnClickedSensor(this IRegion region)
         {
             var samples = region.SamplesInRegion();
-            var sensorValues = samples.Select(s => s.Values.Where((v, i) => i == region.ClickPoint.Sensor).Max()).ToList();
             List<double> myVals = new List<double>();
             foreach (var ss in samples)
             {
                 myVals.Add(ss.Values[region.ClickPoint.Sensor]);
             }
             return region.SamplesInRegion().MaxBy(s => s.Values.Where((v, i) => i == region.ClickPoint.Sensor).Max());
+        }
+
+
+        public static TimeSample? SampleWithMinimumOnClickedSensor(this IRegion region)
+        {
+            var samples = region.SamplesInRegion();
+            List<double> myVals = new List<double>();
+            foreach (var ss in samples)
+            {
+                myVals.Add(ss.Values[region.ClickPoint.Sensor]);
+            }
+            return region.SamplesInRegion().MinBy(s => s.Values.Where((v, i) => i == region.ClickPoint.Sensor).Min());
         }
     }
 }
