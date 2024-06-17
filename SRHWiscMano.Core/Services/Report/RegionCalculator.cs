@@ -51,7 +51,12 @@ namespace SRHWiscMano.Core.Services.Report
             regionStats.NadirDuration = UesNadirCalculator.CalcDuration(state, region).ToTotalSeconds();
             regionStats.Duration = region.TimeRange.Duration.ToTotalSeconds();
             CalculateMinMaxAndIntegrals(state, region).FillUesRegionStats(regionStats);
-            regionStats.MinimumPressure = UesNadirCalculator.CalcMinimum(state, region);
+            
+            // 최소값 pressure를 찾는다
+            var minCalc = UesNadirCalculator.CalcMinimum(state, region);
+            regionStats.MinimumPressure = minCalc.Mean;
+            regionStats.MinimumSample = minCalc.sensorSample;
+
             return regionStats;
         }
 

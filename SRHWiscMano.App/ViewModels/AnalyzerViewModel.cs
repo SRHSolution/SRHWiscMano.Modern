@@ -450,6 +450,8 @@ namespace SRHWiscMano.App.ViewModels
 
             if (!TryAutoAddRegions(timeFrameVM, RegionType.UES))
                 return;
+            if (!TryAutoAddRegions(timeFrameVM, RegionType.UESNdir))
+                return;
             if (!TryAutoAddRegions(timeFrameVM, RegionType.TB))
                 return;
             if (!TryAutoAddRegions(timeFrameVM, RegionType.HP))

@@ -8,7 +8,9 @@ using DynamicData;
 using NLog;
 using Range = SRHWiscMano.Core.Helpers.Range;
 using Microsoft.Extensions.Logging;
+using SRHWiscMano.Core.Services.Report;
 using SRHWiscMano.Core.ViewModels;
+using SkiaSharp;
 
 namespace SRHWiscMano.Core.Services.Detection
 {
@@ -42,6 +44,8 @@ namespace SRHWiscMano.Core.Services.Detection
                     return FindHP(state, click, config, diagnostics);
                 case RegionType.UES:
                     return FindUES(state, click);
+                case RegionType.UESNdir:
+                    return FindUESNdir(state, click);
                 default:
                     throw new ArgumentException("Invalid region type", nameof(type));
             }
@@ -106,6 +110,26 @@ namespace SRHWiscMano.Core.Services.Detection
             Interval timeRange = new Interval(regionPreUES.FocalPoint.Time, regionPostUES.FocalPoint.Time);
             return CreateRegionWithSensors(state, click, sensorTop, sensorBottom, RegionType.UES).ChangeTime(timeRange);
         }
+
+        private static Region FindUESNdir(ITimeFrame state, SamplePoint click)
+        {
+
+            IRegion regionUES = FindRegionOrThrow(state, RegionType.UES, "UES must be determined before UES");
+
+            var minUes = UesNadirCalculator.CalcMinimum2(state, regionUES);
+            var nadirDuration = UesNadirCalculator.CalcDuration(state, regionUES);
+
+            var frameStartIdx = state.ExamData.SampleIndexFromTime(state.TimeRange().Start);
+            var minUesIndex = state.ExamData.SampleIndexFromTime(minUes.sensorSample.Sample.Time);
+            var offsetIdx = minUesIndex - frameStartIdx;
+            Duration duration = Duration.FromMilliseconds(250L);
+            var minUesTimeRange = minUes.sensorSample.Sample.Time.AtCenterOfDuration(duration, regionUES.TimeRange);
+
+            var minUesSensor = minUes.sensorSample.Sensor;
+            // UES는 PreUES와 PostUES를 모두포함하는 최대 영역으로 잡는다
+            return CreateRegionWithSensors(state, click, minUesSensor, minUesSensor+1, RegionType.UESNdir).ChangeTime(minUesTimeRange);
+        }
+
 
         /// <summary>
         /// 센서의 크기는 VP - PostUES 간격의 센서 크기에서 상위 절반은 TB, 하위 절반은 HP로 한다. 갯수가 홀수일 경우엔 TB가 한개더 적다

@@ -38,6 +38,7 @@ namespace SRHWiscMano.Core.Models
             yield return new RegionSelectStep(owner, RegionType.TB, Colors.Orange);
             yield return new RegionSelectStep(owner, RegionType.HP, Colors.Green);
             yield return new RegionSelectStep(owner, RegionType.UES, Colors.Purple);
+            yield return new RegionSelectStep(owner, RegionType.UESNdir, Colors.Brown);
         }
     }
 }

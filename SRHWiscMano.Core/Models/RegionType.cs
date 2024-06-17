@@ -8,6 +8,7 @@
         MP,
         TB,
         HP,
-        UES
+        UES,
+        UESNdir,
     }
 }

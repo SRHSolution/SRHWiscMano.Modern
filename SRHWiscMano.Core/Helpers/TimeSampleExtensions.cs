@@ -133,6 +133,7 @@ namespace SRHWiscMano.Core.Helpers
             return maxValuesInTimeRange;
         }
 
+
         public static IEnumerable<double> MinValueForSensorInTimeRange(
             this IExamination data,
             Interval timeRange,
