@@ -108,23 +108,23 @@
 		</note>
 		<note>
 			<time>1470354</time>
-			<bolus>self</bolus>
-			<text>1</text>
+			<bolus></bolus>
+			<text>self1</text>
 		</note>
 		<note>
 			<time>1487569</time>
-			<bolus>self</bolus>
-			<text>2</text>
+			<bolus></bolus>
+			<text>self2</text>
 		</note>
 		<note>
 			<time>1506658</time>
-			<bolus>self</bolus>
-			<text>3</text>
+			<bolus></bolus>
+			<text>self3</text>
 		</note>
 		<note>
 			<time>1524253</time>
-			<bolus>self</bolus>
-			<text>4</text>
+			<bolus></bolus>
+			<text>self4</text>
 		</note>
 	</notes>
 	<guid>{668CA5E3-999B-4D25-9353-9720DD0B8A79}</guid>

@@ -412,7 +412,7 @@
                             </TableRowGroup>
                             <TableRowGroup>
                                 <TableRow>
-                                    <TableCell RowSpan="3" Style="{StaticResource VerticalHeading}">
+                                    <TableCell RowSpan="4" Style="{StaticResource VerticalHeading}">
                                         <BlockUIContainer>
                                             <TextBlock Text="UES" Style="{StaticResource RotatedHeaderText}"
                                                        Margin="0" />
@@ -464,6 +464,28 @@
                                 <TableRow>
                                     <TableCell>
                                         <Paragraph Style="{StaticResource RegionHeading}">Nadir Peak Duration (s)</Paragraph>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Paragraph TextAlignment="Center">
+                                            <TextBlock
+                                                Text="{Binding ExamResult.Aggregate.UES.NadirDuration.Mean, StringFormat={}{0:F2}}" />
+                                        </Paragraph>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Paragraph TextAlignment="Center">
+                                            ±
+                                        </Paragraph>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Paragraph TextAlignment="Center">
+                                            <TextBlock
+                                                Text="{Binding ExamResult.Aggregate.UES.NadirDuration.StandardDeviation, StringFormat={}{0:F2}}" />
+                                        </Paragraph>
+                                    </TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell>
+                                        <Paragraph Style="{StaticResource RegionHeading}">Duration (s)</Paragraph>
                                     </TableCell>
                                     <TableCell>
                                         <Paragraph TextAlignment="Center">

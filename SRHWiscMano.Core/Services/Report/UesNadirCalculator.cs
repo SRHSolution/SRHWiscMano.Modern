@@ -65,7 +65,7 @@ namespace SRHWiscMano.Core.Services.Report
             var peakDuration = samples[peakIdxRight].Sample.Time - data.Sample.Time;
 
             var leftMid = (sampleAndIndexOfMin.Index + peakIdxLeft) / 2;
-            var rightMid = (peakIdxRight + sampleAndIndexOfMin.Index) / 2;
+            var rightMid = (sampleAndIndexOfMin.Index + peakIdxRight) / 2;
             var midDuration = samples[rightMid].Sample.Time - samples[leftMid].Sample.Time;
 
             return (peakDuration, midDuration);
@@ -108,10 +108,6 @@ namespace SRHWiscMano.Core.Services.Report
 
         public static (SensorSample sensorSample, double Mean) CalcMinimum2(ITimeFrame tFrame, IRegion region)
         {
-            // 센서 range에서의 최대 값데이터를 만든다
-            var maxValues = region.Window.ExamData
-                .MaxValueForSensorInTimeRange(region.Window.TimeRange(), region.SensorRange).ToList();
-
             var samples = tFrame.ExamData.Samples.SamplesInTimeRange(region.TimeRange);
             // UES 센서 영역내의 각 sample 에서 가장 큰 값을 갖는 데이터를 선택된 sensor의 index와 함께 Enumerable로 저장한다
             var maxSource= samples.Select((si, id) => new ElementIndex<SensorSample>()
