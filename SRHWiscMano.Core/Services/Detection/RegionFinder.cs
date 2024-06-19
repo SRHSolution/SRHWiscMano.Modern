@@ -45,7 +45,7 @@ namespace SRHWiscMano.Core.Services.Detection
                 case RegionType.UES:
                     return FindUES(state, click);
                 case RegionType.UESNdir:
-                    return FindUESNdir(state, click);
+                    return FindUESNadir(state, click);
                 default:
                     throw new ArgumentException("Invalid region type", nameof(type));
             }
@@ -111,7 +111,7 @@ namespace SRHWiscMano.Core.Services.Detection
             return CreateRegionWithSensors(state, click, sensorTop, sensorBottom, RegionType.UES).ChangeTime(timeRange);
         }
 
-        private static Region FindUESNdir(ITimeFrame state, SamplePoint click)
+        private static Region FindUESNadir(ITimeFrame state, SamplePoint click)
         {
 
             IRegion regionUES = FindRegionOrThrow(state, RegionType.UES, "UES must be determined before UES");
