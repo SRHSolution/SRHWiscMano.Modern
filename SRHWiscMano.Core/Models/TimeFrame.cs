@@ -29,6 +29,7 @@ namespace SRHWiscMano.Core.Models
         public bool IsSelected { get; set; }
 
         public string Text { get; set; }
+        public FrameNote Note { get; set; }
 
         public double MinSensorBound { get; private set; }
         public double MaxSensorBound { get; private set; }
@@ -72,6 +73,7 @@ namespace SRHWiscMano.Core.Models
             ExamData = data;
             Id = Interlocked.Increment(ref GuidId);
             Text = note.ToString();
+            Note = note;
             Time = note.Time;
             TimeDuration = timeDuration;
             OwnerSamples = data.Samples;
