@@ -55,9 +55,9 @@ namespace SRHWiscMano.Core.Services.Report
             // return resArr.InterpolateTo(targetSize);
         }
 
-        private static Interval? TimeRangeForRegionsOnSensor(ITimeFrame snapshot, int sensor)
+        private static Interval? TimeRangeForRegionsOnSensor(ITimeFrame tFrame, int sensor)
         {
-            IEnumerable<Interval> source = snapshot.Regions.Items.Where(r => r.SensorRange.Contains(sensor))
+            IEnumerable<Interval> source = tFrame.Regions.Items.Where(r => r.SensorRange.Contains(sensor))
                 .Select(r => r.TimeRange);
             return !source.Any() ? new Interval?() : source.Aggregate((p, c) => p.Union(c));
         }

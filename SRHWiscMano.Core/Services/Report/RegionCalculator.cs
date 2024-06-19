@@ -71,7 +71,7 @@ namespace SRHWiscMano.Core.Services.Report
             IEnumerable<TimeSample> samples = state.ExamData.Samples.SamplesInTimeRange(region.TimeRange);
             if (!samples.Any())
                 throw new ResultsCalculationException(string.Format(
-                    "No sample in time range for {0} region of snapshot {1}", region.Type.ToString(), state.Id));
+                    "No sample in time range for {0} region of timeframe {1}", region.Type.ToString(), state.Id));
             for (int i = region.SensorRange.Start; i < region.SensorRange.End; ++i)
             {
                 // 한개의 센서에 대해 window 3에 대한 min, max 을 찾는다

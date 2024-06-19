@@ -318,13 +318,5 @@ namespace SRHWiscMano.App.ViewModels
                 Tag = "X"
             };
         }
-
-        // private Task<ExamResults<OutlierResult>> CalculateThisExamResults(
-        //     IReadOnlyCollection<TimeFrameViewModel> snapshots,
-        //     string bolusSize)
-        // {
-        //     // return Task.FromResult(resultsCalc.CalculateTimeframeResults(snapshots.Where(s =>
-        //         // s.IsSelected && s.AllStepsAreCompleted && s.MatchesBolusSize(bolusSize))));
-        // }
     }
 }

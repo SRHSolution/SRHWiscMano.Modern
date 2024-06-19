@@ -7,14 +7,14 @@ namespace SRHWiscMano.Core.Services.Report
 {
     internal static class OverallParamsCalculator
     {
-        public static Duration CalcTotalDuration(ITimeFrame snapshot)
+        public static Duration CalcTotalDuration(ITimeFrame tFrame)
         {
-            IRegion region = snapshot.GetRegion(RegionType.VP);
-            return snapshot.GetRegion(RegionType.PostUES).FocalPoint.Time - region.TimeRange.Start;
+            IRegion region = tFrame.GetRegion(RegionType.VP);
+            return tFrame.GetRegion(RegionType.PostUES).FocalPoint.Time - region.TimeRange.Start;
         }
 
         public static double CalcTotalPharyngealPressure(
-            ITimeFrame snapshot,
+            ITimeFrame tFrame,
             SwallowResults<double> currentResults)
         {
             return PharyngealRegions(currentResults).Sum(r => r.TotalVolumePressure);

@@ -6,11 +6,11 @@ namespace SRHWiscMano.Core.Services.Report
 {
     internal static class PressureAtVPMaxCalculator
     {
-        public static IEnumerable<double> Calc(ITimeFrame snapshot)
+        public static IEnumerable<double> Calc(ITimeFrame tFrame)
         {
-            Instant time = snapshot.GetRegion(RegionType.VP).FocalPoint.Time;
-            TimeSample sample = snapshot.ExamData.Samples.SamplesAtTime(time);
-            return snapshot.InterpolatedValuesAtSample(sample);
+            Instant time = tFrame.GetRegion(RegionType.VP).FocalPoint.Time;
+            TimeSample sample = tFrame.ExamData.Samples.SamplesAtTime(time);
+            return tFrame.InterpolatedValuesAtSample(sample);
         }
     }
 }

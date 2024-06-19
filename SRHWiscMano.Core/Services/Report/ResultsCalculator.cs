@@ -8,9 +8,9 @@ namespace SRHWiscMano.Core.Services.Report
     /// </summary>
     public class ResultsCalculator : IResultsCalculator
     {
-        public SwallowResults<double> CalculateIndividual(ITimeFrame snapshot)
+        public SwallowResults<double> CalculateIndividual(ITimeFrame tFrame)
         {
-            return RegionCalculator.CalcResults(snapshot);
+            return RegionCalculator.CalcResults(tFrame);
         }
 
         public SwallowResults<MeanAndDeviation> CalculateAggregate(
