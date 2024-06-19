@@ -380,11 +380,11 @@
                                     </BlockUIContainer>
                                 </TableCell>
                                 <TableCell>
-                                    <Paragraph Style="{StaticResource RegionHeading}">Max Pressure (mmHg)</Paragraph>
+                                    <Paragraph Style="{StaticResource RegionHeading}">Nadir Pressure 1/4 sec (mmHg)</Paragraph>
                                 </TableCell>
                                 <TableCell>
                                     <Paragraph TextAlignment="Center">
-                                        <TextBlock Text="{Binding ExamResult.Aggregate.UES.MaximumPressure.Mean, StringFormat={}{0:F2}}" />
+                                        <TextBlock Text="{Binding ExamResult.Aggregate.UES.MinimumPressure.Mean, StringFormat={}{0:F2}}" />
                                     </Paragraph>
                                 </TableCell>
                                 <TableCell>
@@ -394,13 +394,33 @@
                                 </TableCell>
                                 <TableCell>
                                     <Paragraph TextAlignment="Center">
-                                        <TextBlock Text="{Binding ExamResult.Aggregate.UES.MaximumPressure.StandardDeviation, StringFormat={}{0:F2}}" />
+                                        <TextBlock Text="{Binding ExamResult.Aggregate.UES.MinimumPressure.StandardDeviation, StringFormat={}{0:F2}}" />
                                     </Paragraph>
                                 </TableCell>
                             </TableRow>
                             <TableRow>
                                 <TableCell>
-                                    <Paragraph Style="{StaticResource RegionHeading}">Duration (s)</Paragraph>
+                                    <Paragraph Style="{StaticResource RegionHeading}">Nadir Mid Duration (s)</Paragraph>
+                                </TableCell>
+                                <TableCell>
+                                    <Paragraph TextAlignment="Center">
+                                        <TextBlock Text="{Binding ExamResult.Aggregate.UES.NadirDurationMid.Mean, StringFormat={}{0:F2}}" />
+                                    </Paragraph>
+                                </TableCell>
+                                <TableCell>
+                                    <Paragraph TextAlignment="Center">
+                                        ±
+                                    </Paragraph>
+                                </TableCell>
+                                <TableCell>
+                                    <Paragraph TextAlignment="Center">
+                                        <TextBlock Text="{Binding ExamResult.Aggregate.UES.NadirDurationMid.StandardDeviation, StringFormat={}{0:F2}}" />
+                                    </Paragraph>
+                                </TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell>
+                                    <Paragraph Style="{StaticResource RegionHeading}">Nadir Peak Duration (s)</Paragraph>
                                 </TableCell>
                                 <TableCell>
                                     <Paragraph TextAlignment="Center">
@@ -418,6 +438,7 @@
                                     </Paragraph>
                                 </TableCell>
                             </TableRow>
+                            
                         </TableRowGroup>
                         <TableRowGroup>
                             <TableRow>

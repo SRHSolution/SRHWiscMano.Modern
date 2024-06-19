@@ -76,6 +76,7 @@ namespace SRHWiscMano.Core.Services.Report
         {
             FillRegion(region, regionSelector, handler);
             region.NadirDuration = handler(region.NadirDuration, r => regionSelector(r).NadirDuration);
+            region.NadirDurationMid = handler(region.NadirDurationMid, r => regionSelector(r).NadirDurationMid);
             region.MinimumPressure = handler(region.MinimumPressure, r => regionSelector(r).MinimumPressure);
             return region;
         }

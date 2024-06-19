@@ -22,7 +22,7 @@ namespace SRHWiscMano.Core.Services.Report
         /// <param name="region"></param>
         /// <returns></returns>
         /// 
-        public static Duration CalcDuration(ITimeFrame tFrame, IRegion region)
+        public static (Duration peakDuration, Duration midDuration) CalcDuration(ITimeFrame tFrame, IRegion region)
         {
             // tFrame 의 timerange와 sensor range에 대한 값에 대해서 Mean, std, variance등을 MathNet로 계산한 결과값을 만든다
             // 즉 Sample에서 Sensor의 전체 평균을 구한다.
@@ -36,7 +36,7 @@ namespace SRHWiscMano.Core.Services.Report
                 .ToList();
 
             if (samples.Count < 3)
-                return Duration.Zero;
+                return (Duration.Zero, Duration.Zero);
 
             // Mean 값이 가작 작은 찾는다
             ElementIndex<SampleStats> sampleAndIndexOfMin = samples
@@ -62,7 +62,13 @@ namespace SRHWiscMano.Core.Services.Report
             }
 
             var data = samples[peakIdxLeft];
-            return samples[peakIdxRight].Sample.Time - data.Sample.Time;
+            var peakDuration = samples[peakIdxRight].Sample.Time - data.Sample.Time;
+
+            var leftMid = (sampleAndIndexOfMin.Index + peakIdxLeft) / 2;
+            var rightMid = (peakIdxRight + sampleAndIndexOfMin.Index) / 2;
+            var midDuration = samples[rightMid].Sample.Time - samples[leftMid].Sample.Time;
+
+            return (peakDuration, midDuration);
         }
 
         public static (SensorSample sensorSample, double Mean) CalcMinimum(ITimeFrame tFrame, IRegion region)

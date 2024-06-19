@@ -48,7 +48,9 @@ namespace SRHWiscMano.Core.Services.Report
         {
             IRegion region = state.GetRegion(type);
             UesResultParameters<double> regionStats = new UesResultParameters<double>();
-            regionStats.NadirDuration = UesNadirCalculator.CalcDuration(state, region).ToTotalSeconds();
+            var (peakDuration, midDuration) = UesNadirCalculator.CalcDuration(state, region);
+            regionStats.NadirDuration = peakDuration.ToTotalSeconds();
+            regionStats.NadirDurationMid = midDuration.ToTotalSeconds();
             regionStats.Duration = region.TimeRange.Duration.ToTotalSeconds();
             CalculateMinMaxAndIntegrals(state, region).FillUesRegionStats(regionStats);
             
@@ -60,6 +62,13 @@ namespace SRHWiscMano.Core.Services.Report
             return regionStats;
         }
 
+        /// <summary>
+        /// Window filter 3 을 적용한 데이터에 대해서 Min, Max, Integral를 계산한다
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="region"></param>
+        /// <returns></returns>
+        /// <exception cref="ResultsCalculationException"></exception>
         private static MinMaxAndIntegrals CalculateMinMaxAndIntegrals(
             ITimeFrame state,
             IRegion region)
