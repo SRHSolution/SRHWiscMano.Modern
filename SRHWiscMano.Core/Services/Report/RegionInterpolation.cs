@@ -33,11 +33,11 @@ namespace SRHWiscMano.Core.Services.Report
         }
 
         public static IEnumerable<double> InterpolatedValuesAtSample(
-            this ITimeFrame snapshot,
+            this ITimeFrame tFrame,
             TimeSample sample)
         {
             return Sections()
-                .Select(p => InterpolatedValuesAtTimeForRegion(snapshot, sample, p.Item1, p.Item2)).SelectMany(m => m);
+                .Select(p => InterpolatedValuesAtTimeForRegion(tFrame, sample, p.Item1, p.Item2)).SelectMany(m => m);
         }
 
         public static IEnumerable<double> InterpolateTo(this double[] source, int targetSize)

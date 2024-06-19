@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:RxUIStudyApp"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance local:AppViewModel}"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="750" Width="1120">
     <Grid Margin="12">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />

@@ -4,11 +4,13 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Controls;
 using System.Xaml;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
+using Microsoft.Win32;
 using MoreLinq;
 using OxyPlot;
 using OxyPlot.Axes;
@@ -75,16 +77,7 @@ namespace SRHWiscMano.App.ViewModels
                 return;
 
             ExamResult = calculator.CalculateTimeframeResults(selectedTimeFrames.Select(kv => kv.Value));
-            exportService.WriteToFile(ExamResult, "TestResult.csv");
-            // var calcIndivList = selectedTimeFrames.Select(kv=> calculator.CalculateIndividual(kv.Value)).ToList();
-            // var calcAggregate = calculator.CalculateAggregate(calcIndivList);
-            // foreach (var tFrame in selectedTimeFrames)
-            // {
-            //     var resIndiv = calculator.CalculateIndividual(tFrame.Value);
-            //     logger.LogDebug($"Individual Result : {tFrame.Value.Text}");
-            //     logger.LogDebug(resIndiv.PrintSwallowResult());
-            // }
-            // examResult = new ExamResults<OutlierResult>()
+            
             UpdateExamResultOnPlotModels();
         }
 
@@ -126,17 +119,6 @@ namespace SRHWiscMano.App.ViewModels
         }
         
 
-
-        private void DummyData()
-        {
-            SwallowResults<MeanAndDeviation> aggregate = new();
-            aggregate.VP.MaximumPressure = new MeanAndDeviation(10, 0.3, 10);
-            aggregate.VP.Duration = new MeanAndDeviation(30, 0.1, 10);
-            aggregate.VP.TotalVolumePressure = new MeanAndDeviation(20, 0.5, 10);
-
-            examResult = new ExamResults<OutlierResult>(null, aggregate);
-        }
-
         private PlotModel CreatePlotForPressureMax(string title)
         {
             var plotModel = new PlotModel();
@@ -171,55 +153,6 @@ namespace SRHWiscMano.App.ViewModels
                 IsAxisVisible = true,
                 Tag = "Y"
             });
-
-            // X-Axis
-            // var xAxis = new CategoryAxis()
-            // {
-            //     IsZoomEnabled = false,
-            //     IsPanEnabled = false,
-            //     // LabelFormatter = value => $"{value / 100}",
-            //     Position = AxisPosition.Bottom,
-            //     MinimumPadding = 0,
-            //     // Minimum = 0,
-            //     // Maximum = xSize - 1,
-            //     // MajorStep = xSize,
-            //     // MinorStep = xSize, // 최대 범위를 입력하여 MinorStep 이 표시되지 않도록 한다
-            //     // AbsoluteMinimum = 0,
-            //     // AbsoluteMaximum = xSize - 1,
-            //     IsAxisVisible = true,
-            //     Tag = "X"
-            // };
-            // xAxis.ActualLabels.Add("VP");
-            // xAxis.ActualLabels.Add("VP");
-            // xAxis.ActualLabels.Add("VP");
-            // xAxis.ActualLabels.Add("TB");
-            // xAxis.ActualLabels.Add("TB");
-            // xAxis.ActualLabels.Add("TB");
-            // xAxis.ActualLabels.Add("HP");
-            // xAxis.ActualLabels.Add("HP");
-            // xAxis.ActualLabels.Add("UES");
-            // xAxis.ActualLabels.Add("UES");
-            // xAxis.ActualLabels.Add("UES");
-            // xAxis.ActualLabels.Add("UES");
-            // xAxis.ActualLabels.Add("UES");
-            //
-            // xAxis.Labels.Add("VP");
-            // xAxis.Labels.Add("VP");
-            // xAxis.Labels.Add("VP");
-            // xAxis.Labels.Add("TB");
-            // xAxis.Labels.Add("TB");
-            // xAxis.Labels.Add("TB");
-            // xAxis.Labels.Add("HP");
-            // xAxis.Labels.Add("HP");
-            // xAxis.Labels.Add("UES");
-            // xAxis.Labels.Add("UES");
-            // xAxis.Labels.Add("UES");
-            // xAxis.Labels.Add("UES");
-            // xAxis.Labels.Add("UES");
-
-            // model.Axes.Add(xAxis);
-
-
             // LinearAxis 생성 및 설정 (X 축)
             var linearXAxis = new LinearAxis
             {
@@ -318,13 +251,30 @@ namespace SRHWiscMano.App.ViewModels
                 Tag = "X"
             };
         }
+        
+        [RelayCommand]
+        private void ExportToCSV()
+        {
+            SaveFileDialog sfd = new SaveFileDialog();
+            // 파일 필터를 설정합니다.
+            sfd.Filter = "CSV files (*.csv)|*.csv";
+            sfd.Title = "Save a Text File";
+            sfd.FileName = $"Report_{DateTime.Now:dd-MM-yy}";
+            sfd.DefaultExt = "csv";
+            sfd.AddExtension = true;
 
-        // private Task<ExamResults<OutlierResult>> CalculateThisExamResults(
-        //     IReadOnlyCollection<TimeFrameViewModel> snapshots,
-        //     string bolusSize)
-        // {
-        //     // return Task.FromResult(resultsCalc.CalculateTimeframeResults(snapshots.Where(s =>
-        //         // s.IsSelected && s.AllStepsAreCompleted && s.MatchesBolusSize(bolusSize))));
-        // }
+            // 다이얼로그를 표시하고, 사용자가 파일을 선택했는지 확인합니다.
+            if (sfd.ShowDialog() == true)
+            {
+                // 선택한 파일 경로를 가져옵니다.
+                string filePath = sfd.FileName;
+
+                // 파일에 데이터를 씁니다.
+                exportService.WriteToFile(ExamResult, filePath);
+
+                // 사용자에게 저장 완료 메시지를 표시합니다.
+                MessageBox.Show("File saved successfully.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
     }
 }

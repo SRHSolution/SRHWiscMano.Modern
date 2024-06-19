@@ -18,16 +18,16 @@ namespace SRHWiscMano.Core.Services.Report
         /// 즉, UES의 경우에는 Pre-UES 와 Post-UES의 사이에서는 압력이 거의 없기 때문에, mean 이 제일 작은 시점을 기준으로 Pre-UES, Post-UES
         /// 두개의 구간으로 나눌수 있다. 그리고 각 구간에서 압력의 가속도가 가장 높은 두지점을 찾고, 이 간격을 UES 구간이라고 계산하는 것이다.
         /// </summary>
-        /// <param name="snapshot"></param>
+        /// <param name="tFrame"></param>
         /// <param name="region"></param>
         /// <returns></returns>
         /// 
-        public static Duration CalcDuration(ITimeFrame timeFrame, IRegion region)
+        public static (Duration peakDuration, Duration midDuration) CalcDuration(ITimeFrame tFrame, IRegion region)
         {
-            // snapshot 의 timerange와 sensor range에 대한 값에 대해서 Mean, std, variance등을 MathNet로 계산한 결과값을 만든다
+            // tFrame 의 timerange와 sensor range에 대한 값에 대해서 Mean, std, variance등을 MathNet로 계산한 결과값을 만든다
             // 즉 Sample에서 Sensor의 전체 평균을 구한다.
             List<SampleStats> samples = TimeSampleExtensions
-                .SamplesInTimeRange(timeFrame.ExamData.Samples, region.TimeRange)
+                .SamplesInTimeRange(tFrame.ExamData.Samples, region.TimeRange)
                 .Select(s => new SampleStats
                 {
                     Sample = s,
@@ -36,7 +36,7 @@ namespace SRHWiscMano.Core.Services.Report
                 .ToList();
 
             if (samples.Count < 3)
-                return Duration.Zero;
+                return (Duration.Zero, Duration.Zero);
 
             // Mean 값이 가작 작은 찾는다
             ElementIndex<SampleStats> sampleAndIndexOfMin = samples
@@ -62,10 +62,16 @@ namespace SRHWiscMano.Core.Services.Report
             }
 
             var data = samples[peakIdxLeft];
-            return samples[peakIdxRight].Sample.Time - data.Sample.Time;
+            var peakDuration = samples[peakIdxRight].Sample.Time - data.Sample.Time;
+
+            var leftMid = (sampleAndIndexOfMin.Index + peakIdxLeft) / 2;
+            var rightMid = (peakIdxRight + sampleAndIndexOfMin.Index) / 2;
+            var midDuration = samples[rightMid].Sample.Time - samples[leftMid].Sample.Time;
+
+            return (peakDuration, midDuration);
         }
 
-        public static (SensorSample sensorSample, double Mean) CalcMinimum(ITimeFrame snapshot, IRegion region)
+        public static (SensorSample sensorSample, double Mean) CalcMinimum(ITimeFrame tFrame, IRegion region)
         {
             Range<int> range = region.SensorRange.Span() < 2
                 ? region.SensorRange
@@ -76,7 +82,7 @@ namespace SRHWiscMano.Core.Services.Report
                 .Select(si => new SensorSample
                 {
                     Sensor = si,
-                    Sample = snapshot.ExamData.Samples.SamplesInTimeRange(region.TimeRange).MinBy(s => s.Values[si])
+                    Sample = tFrame.ExamData.Samples.SamplesInTimeRange(region.TimeRange).MinBy(s => s.Values[si])
                 });
 
 
@@ -90,7 +96,7 @@ namespace SRHWiscMano.Core.Services.Report
                 {
                     x,
                     // 0.25초의 중심 영역에서의 모든 센서값을 분석한다
-                    stats = new DescriptiveStatistics(snapshot.ExamData.Samples.SamplesInTimeRange(x.timeRange)
+                    stats = new DescriptiveStatistics(tFrame.ExamData.Samples.SamplesInTimeRange(x.timeRange)
                         .Select(s => s.Values[x.ss.Sensor]))
                 })
                 .MinBy(x => x.stats.Mean);
@@ -100,13 +106,13 @@ namespace SRHWiscMano.Core.Services.Report
             // .Min();
         }
 
-        public static (SensorSample sensorSample, double Mean) CalcMinimum2(ITimeFrame snapshot, IRegion region)
+        public static (SensorSample sensorSample, double Mean) CalcMinimum2(ITimeFrame tFrame, IRegion region)
         {
             // 센서 range에서의 최대 값데이터를 만든다
             var maxValues = region.Window.ExamData
                 .MaxValueForSensorInTimeRange(region.Window.TimeRange(), region.SensorRange).ToList();
 
-            var samples = snapshot.ExamData.Samples.SamplesInTimeRange(region.TimeRange);
+            var samples = tFrame.ExamData.Samples.SamplesInTimeRange(region.TimeRange);
             // UES 센서 영역내의 각 sample 에서 가장 큰 값을 갖는 데이터를 선택된 sensor의 index와 함께 Enumerable로 저장한다
             var maxSource= samples.Select((si, id) => new ElementIndex<SensorSample>()
             {
@@ -126,22 +132,8 @@ namespace SRHWiscMano.Core.Services.Report
                     new {Element = ss, Avg = ss.Average(ei => ei.Element.Sample.Values[ei.Element.Sensor]), Index = ii })
                 .MinBy(mm => mm.Avg);
 
-            // var minSource = maxSource
-            //     // 최소값을 갖고 있는 샘플의 시간을 중심으로 0.25초 앞뒤의 duration 을 갖도록 range를 설정한다.
-            //     .Select(ss => new { ss, timeRange = ss.Sample.Time.AtCenterOfDuration(duration, region.TimeRange) })
-            //     //
-            //     .Select(x => new
-            //     {
-            //         x,
-            //         // 0.25초의 중심 영역에서의 모든 센서값을 분석한다
-            //         stats = new DescriptiveStatistics(snapshot.ExamData.Samples.SamplesInTimeRange(x.timeRange)
-            //             .Select(s => s.Values[x.ss.Sensor]))
-            //     })
-            //     .MinBy(x => x.stats.Mean);
 
             return (minSource.Element[0].Element, minSource.Avg);
-            // .Select(x => x.stats.Mean)
-            // .Min();
         }
 
 

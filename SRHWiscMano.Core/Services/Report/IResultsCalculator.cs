@@ -5,7 +5,7 @@ namespace SRHWiscMano.Core.Services.Report
 {
     public interface IResultsCalculator
     {
-        SwallowResults<double> CalculateIndividual(ITimeFrame snapshot);
+        SwallowResults<double> CalculateIndividual(ITimeFrame tFrame);
 
         SwallowResults<MeanAndDeviation> CalculateAggregate(
             IEnumerable<SwallowResults<double>> individualResults);
