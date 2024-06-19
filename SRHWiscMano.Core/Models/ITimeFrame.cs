@@ -10,6 +10,7 @@ namespace SRHWiscMano.Core.Models
         int Id { get; }
         string Text { get; set; }
         Instant Time { get; }
+        FrameNote Note { get; }
         double TimeDuration { get; }
 
         double MinSensorBound { get; }
