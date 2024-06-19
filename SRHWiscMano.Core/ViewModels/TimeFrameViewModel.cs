@@ -92,7 +92,7 @@ namespace SRHWiscMano.Core.ViewModels
             }
             else
             {
-                this.Volume = Label;
+                this.Volume = "NaN ";
             }
 
             var plotModel = new PlotModel();
@@ -354,7 +354,8 @@ namespace SRHWiscMano.Core.ViewModels
         private void EditLabel()
         {
             IsEditing = true;
-            LabelEdit = Volume;
+            LabelEdit = Data.Note.Bolus;
+            // LabelEdit = Volume;
         }
 
         /// <summary>
@@ -364,9 +365,8 @@ namespace SRHWiscMano.Core.ViewModels
         private void CommitEditLabel()
         {
             Volume = LabelEdit;
-            var labelTag = Label.Split("cc")[1].Trim();
-            Label = Volume + "cc" + labelTag;
-            Data.Text = Label;
+            Data.Note.Bolus = Volume;
+            Label = Data.Note.ToString();
             IsEditing = false;
         }
 
