@@ -28,8 +28,8 @@ namespace SRHWiscMano.Core.Services
 
             try
             {
-                // DoExportToCSV(resultData, filePath);
-                DoExportToCSVByRow(resultData, filePath);
+                DoExportToCSV(resultData, filePath);
+                // DoExportToCSVByRow(resultData, filePath);
             }
             catch (IOException ex)
             {
